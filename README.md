@@ -1,6 +1,13 @@
-# Tauri + Yew
+# EmbedElite Chat (based on Tauri + Angular)
 
-This template should help get you started developing with Tauri and Angular.
+## Prerequisites
+- Node 16.x+
+- NPM
+- Rust installation
+
+## Getting started
+Clone the code and run:
+``` npm run tauri dev```
 
 ## Recommended IDE Setup
 
