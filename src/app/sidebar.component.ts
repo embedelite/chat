@@ -7,7 +7,10 @@ import { Chat, ChatService } from "./chat.service";
     <div
       class="flex flex-col h-full p-4 overflow-y-auto bg-gray-200 dark:bg-gray-700"
     >
-      <button class="mb-4 bg-primary-500 text-white rounded-md px-4 py-2">
+      <button
+        class="mb-4 bg-primary-500 text-white rounded-md px-4 py-2"
+        (click)="createNewChat()"
+      >
         + New chat
       </button>
       <ng-container *ngFor="let group of chatGroups">
@@ -104,5 +107,11 @@ export class ChatSidebarComponent {
     const pastDate = new Date(currentDate);
     pastDate.setDate(pastDate.getDate() - pastDays);
     return targetDate <= currentDate && targetDate >= pastDate;
+  }
+
+  createNewChat() {
+    let newChat = this.chatService.addChat("New Chat");
+    this.chatGroups = this.groupChatsByDate(this.chats);
+    this.selectChat(newChat);
   }
 }

@@ -5,6 +5,7 @@ export interface Message {
   from: "user" | "bot";
   text: string;
   links?: Array<{ title: string; url: string }>;
+  complete?: boolean;
 }
 
 export interface Chat {
@@ -16,6 +17,11 @@ export interface Chat {
 
 @Injectable({ providedIn: "root" })
 export class ChatService {
+  private readonly OPENAI_API_URL =
+    "https://api.openai.com/v1/chat/completions";
+  private readonly API_KEY = "";
+  private readonly MODEL = "gpt-3.5-turbo";
+
   private chats: Chat[] = [
     {
       id: "1",
@@ -75,11 +81,127 @@ export class ChatService {
     return of(this.chats);
   }
 
-  addChat(chat: Chat) {
-    this.chats.push(chat);
-  }
-
   switchChat(chat: Chat) {
     this.currentChatSubject.next(chat);
+  }
+
+  addChat(title: string): Chat {
+    let newChat: Chat = {
+      id: this.generateId(), // Implement a method for generating unique id
+      title: title,
+      date: new Date(),
+      messages: [],
+    };
+    this.chats.unshift(newChat);
+    return newChat;
+  }
+
+  // Implementation for generating unique id
+  private generateId(): string {
+    return (this.chats.length + 1).toString();
+  }
+
+  sendMessage(chatId: string, message: string): void {
+    const headers = {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${this.API_KEY}`,
+    };
+
+    const chatIndex = this.chats.findIndex((chat) => chat.id === chatId);
+
+    if (chatIndex < 0) {
+      console.error(`No chat found with id: ${chatId}`);
+      return;
+    }
+
+    const userMessage: Message = {
+      from: "user",
+      text: message,
+    };
+    this.chats[chatIndex].messages.push(userMessage);
+
+    let history = this.chats[chatIndex].messages.map((msg) => ({
+      role: msg.from === "user" ? "user" : "assistant",
+      content: msg.text,
+    }));
+
+    const body = {
+      model: this.MODEL,
+      messages: [...history, { role: "user", content: message }],
+      stream: true,
+    };
+
+    fetch(this.OPENAI_API_URL, {
+      method: "POST",
+      headers: headers,
+      body: JSON.stringify(body),
+    })
+      .then((response) => {
+        if (!response.body) {
+          throw new Error("No ReadableStream available");
+        }
+
+        const reader = response.body.getReader();
+        const decoder = new TextDecoder("utf-8");
+
+        let receivedString = "";
+        let isNewMessage = true;
+        let newMessage: Message;
+
+        const push = async () => {
+          while (true) {
+            const { done, value } = await reader.read();
+            if (done) {
+              break;
+            }
+
+            const chunk = decoder.decode(value);
+            receivedString += chunk;
+
+            while (receivedString.includes("\n")) {
+              const newLineIndex = receivedString.indexOf("\n");
+              const line = receivedString.slice(0, newLineIndex);
+              receivedString = receivedString.slice(newLineIndex + 1);
+
+              const data = line.replace(/^data: /, "").trim();
+
+              if (data !== "" && data !== "[DONE]") {
+                let parsed;
+                try {
+                  parsed = JSON.parse(data);
+                  console.log("Parsed line", parsed);
+                } catch (e) {}
+
+                if (!parsed) continue; // Skip this iteration if parsedLine is undefined
+                const { choices } = parsed;
+
+                if (choices && choices[0] && choices[0].delta) {
+                  if (isNewMessage) {
+                    newMessage = {
+                      from:
+                        choices[0].delta.role === "assistant" ? "bot" : "user",
+                      text: choices[0].delta.content,
+                      complete: choices[0].finish_reason === "stop",
+                    };
+                    this.chats[chatIndex].messages.push(newMessage);
+                    isNewMessage = false;
+                  } else {
+                    newMessage.text += choices[0].delta.content;
+                    newMessage.complete = choices[0].finish_reason === "stop";
+                  }
+
+                  // Inform subscribers about the new message
+                  this.currentChatSubject.next(this.chats[chatIndex]);
+                }
+              }
+            }
+          }
+        };
+
+        push();
+      })
+      .catch((error) => {
+        console.error(error);
+      });
   }
 }

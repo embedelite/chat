@@ -4,24 +4,26 @@ import { Chat, ChatService } from "./chat.service";
 @Component({
   selector: "app-root",
   template: `
-    <div class="flex h-screen bg-white dark:bg-gray-800 shadow-md">
-      <app-chat-sidebar class="h-full w-64"></app-chat-sidebar>
-      <div class="flex flex-col flex-grow">
-        <app-chat-area
-          class="flex-grow"
-          [chat]="currentChat"
-          (openViewer)="openViewer($event)"
-        ></app-chat-area>
-        <app-chat-input
-          class="flex-shrink-0"
-          (newMessage)="updateMessages($event)"
-        ></app-chat-input>
+    <div class="flex h-screen flex-col bg-white dark:bg-gray-800 shadow-md">
+      <div class="flex-grow flex overflow-hidden">
+        <app-chat-sidebar class="h-full w-64"></app-chat-sidebar>
+        <div class="flex flex-col flex-grow">
+          <app-chat-area
+            class="overflow-y-auto p-4 bg-white dark:bg-gray-800 flex-grow"
+            [chat]="currentChat"
+            (openViewer)="openViewer($event)"
+          ></app-chat-area>
+          <app-chat-input
+            class="flex-shrink-0"
+            (newMessage)="updateMessages($event)"
+          ></app-chat-input>
+        </div>
+        <app-doc-viewer
+          class="h-full w-1/2"
+          *ngIf="isViewerVisible"
+          [url]="docUrl"
+        ></app-doc-viewer>
       </div>
-      <app-doc-viewer
-        class="h-full w-1/2"
-        *ngIf="isViewerVisible"
-        [url]="docUrl"
-      ></app-doc-viewer>
     </div>
   `,
   styles: [],
@@ -41,7 +43,9 @@ export class AppComponent {
     this.chatService.currentChat.subscribe((chat) => (this.currentChat = chat));
   }
 
-  updateMessages(message: string) {}
+  updateMessages(message: string) {
+    this.chatService.sendMessage(this.currentChat.id, message);
+  }
 
   openViewer(url: string) {
     this.docUrl = url;

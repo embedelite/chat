@@ -1,13 +1,17 @@
-import { Component, EventEmitter, Input, Output } from "@angular/core";
+import {
+  Component,
+  ElementRef,
+  EventEmitter,
+  Input,
+  Output,
+  ViewChild,
+} from "@angular/core";
 import { Chat } from "./chat.service";
 
 @Component({
   selector: "app-chat-area",
   template: `
-    <div
-      class="flex flex-col p-4 overflow-y-auto bg-white dark:bg-gray-800"
-      style="height: 100%;"
-    >
+    <div class="flex flex-col">
       <div *ngFor="let message of chat?.messages">
         <ng-container *ngIf="message.from === 'user'">
           <app-user-message [message]="message.text"></app-user-message>
@@ -28,6 +32,7 @@ export class ChatAreaComponent {
   @Input() chat: Chat;
   @Output() openViewer = new EventEmitter<string>();
 
+  @ViewChild("chatArea") private chatArea!: ElementRef;
   constructor() {
     this.chat = {
       id: "",
@@ -35,5 +40,18 @@ export class ChatAreaComponent {
       date: new Date(),
       messages: [],
     };
+  }
+
+  ngAfterViewInit() {
+    this.autoScrollToBottom();
+  }
+
+  autoScrollToBottom() {
+    const config = { attributes: true, childList: true, subtree: true };
+    const observer = new MutationObserver(() => {
+      this.chatArea.nativeElement.scrollTop =
+        this.chatArea.nativeElement.scrollHeight;
+    });
+    observer.observe(this.chatArea.nativeElement, config);
   }
 }
