@@ -1,5 +1,6 @@
 import { Injectable } from "@angular/core";
 import { BehaviorSubject, Observable, of } from "rxjs";
+import { StorageService } from "./storage.service";
 
 export interface Message {
   from: "user" | "bot";
@@ -19,7 +20,7 @@ export interface Chat {
 export class ChatService {
   private readonly OPENAI_API_URL =
     "https://api.openai.com/v1/chat/completions";
-  private readonly API_KEY = "";
+  private readonly API_KEY = "fillme";
   private readonly MODEL = "gpt-3.5-turbo";
 
   private chats: Chat[] = [
@@ -77,6 +78,14 @@ export class ChatService {
   private currentChatSubject = new BehaviorSubject<Chat>(this.chats[0]);
   currentChat = this.currentChatSubject.asObservable();
 
+  constructor(private storageService: StorageService) {
+    // Try to load chats from local storage during service initialization
+    const storedChats = this.storageService.getItem<Chat[]>("chats");
+    if (storedChats) {
+      this.chats = storedChats;
+    }
+  }
+
   getChats(): Observable<Chat[]> {
     return of(this.chats);
   }
@@ -93,7 +102,28 @@ export class ChatService {
       messages: [],
     };
     this.chats.unshift(newChat);
+    this.storageService.setItem("chats", this.chats);
+
     return newChat;
+  }
+
+  deleteChat(chatId: string): void {
+    const index = this.chats.findIndex((c) => c.id === chatId);
+
+    if (index !== -1) {
+      this.chats.splice(index, 1);
+
+      // Update the BehaviorSubject with currentChat data
+      if (
+        this.currentChatSubject.getValue().id === chatId &&
+        this.chats.length
+      ) {
+        this.currentChatSubject.next(this.chats[0]);
+      }
+
+      // Update the storage
+      this.storageService.setItem("chats", this.chats);
+    }
   }
 
   // Implementation for generating unique id
@@ -192,6 +222,8 @@ export class ChatService {
 
                   // Inform subscribers about the new message
                   this.currentChatSubject.next(this.chats[chatIndex]);
+
+                  this.storageService.setItem("chats", this.chats);
                 }
               }
             }

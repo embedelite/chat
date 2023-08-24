@@ -14,12 +14,16 @@ import { Chat } from "./chat.service";
     <div class="flex flex-col">
       <div *ngFor="let message of chat?.messages">
         <ng-container *ngIf="message.from === 'user'">
-          <app-user-message [message]="message.text"></app-user-message>
+          <app-user-message
+            [message]="message.text"
+            [layout]="layout"
+          ></app-user-message>
         </ng-container>
         <ng-container *ngIf="message.from === 'bot'">
           <app-bot-message
             [message]="message.text"
             [links]="message.links"
+            [layout]="layout"
             (openViewer)="openViewer.emit($event)"
           ></app-bot-message>
         </ng-container>
@@ -30,6 +34,7 @@ import { Chat } from "./chat.service";
 })
 export class ChatAreaComponent {
   @Input() chat: Chat;
+  @Input() layout: "chat-bubbles" | "centered" = "chat-bubbles";
   @Output() openViewer = new EventEmitter<string>();
 
   @ViewChild("chatArea") private chatArea!: ElementRef;

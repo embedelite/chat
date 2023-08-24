@@ -14,18 +14,27 @@ import { Chat, ChatService } from "./chat.service";
         + New chat
       </button>
       <ng-container *ngFor="let group of chatGroups">
-        <h5 class="mb-2 font-bold text-gray-700 dark:text-gray-300">
+        <h5
+          *ngIf="group.chats.length"
+          class="mb-2 font-bold text-gray-700 dark:text-gray-300"
+        >
           {{ group.title }}
         </h5>
         <div *ngFor="let chat of group.chats; let i = index">
           <div
             (click)="selectChat(chat)"
-            class="cursor-pointer px-4 py-2 rounded-lg mb-2"
+            class="group relative cursor-pointer px-4 py-2 rounded-lg mb-2 flex items-center justify-between"
             [class.active]="currentChat?.id === chat.id"
           >
-            <p class="text-gray-600 dark:text-gray-400">
+            <p class="text-gray-600 dark:text-gray-400 mb-0">
               {{ chat.title }}
             </p>
+            <span
+              (click)="deleteChat(chat); $event.stopPropagation()"
+              class="ml-4 opacity-0 group-hover:opacity-100"
+            >
+              🗑️
+            </span>
           </div>
         </div>
       </ng-container>
@@ -36,6 +45,9 @@ import { Chat, ChatService } from "./chat.service";
       .active {
         background-color: #f3f4f6;
         dark: bg-gray-800;
+      }
+      .hover-group:hover .opacity-0 {
+        opacity: 1 !important;
       }
     `,
   ],
@@ -58,6 +70,18 @@ export class ChatSidebarComponent {
     chatService.currentChat.subscribe((chat) => {
       this.currentChat = chat;
     });
+  }
+
+  deleteChat(chat: Chat) {
+    this.chatService.deleteChat(chat.id);
+
+    // Refreshing chat groups
+    this.chatGroups = this.groupChatsByDate(this.chats);
+
+    // If the current chat was the deleted one, switch to another chat if available
+    if (this.currentChat?.id === chat.id && this.chats.length) {
+      this.selectChat(this.chats[0]);
+    }
   }
 
   selectChat(chat: Chat) {

@@ -11,6 +11,7 @@ import { Chat, ChatService } from "./chat.service";
           <app-chat-area
             class="overflow-y-auto p-4 bg-white dark:bg-gray-800 flex-grow"
             [chat]="currentChat"
+            [layout]="'centered'"
             (openViewer)="openViewer($event)"
           ></app-chat-area>
           <app-chat-input
