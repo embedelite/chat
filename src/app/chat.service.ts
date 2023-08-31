@@ -194,8 +194,10 @@ export class ChatService {
                 let parsed;
                 try {
                   parsed = JSON.parse(data);
-                  console.log("Parsed line", parsed);
-                } catch (e) {}
+                  //console.log("Parsed line", parsed);
+                } catch (e) {
+                  console.error("Error parsing line", e);
+                }
 
                 if (!parsed) continue; // Skip this iteration if parsedLine is undefined
                 const { choices } = parsed;
