@@ -4,12 +4,15 @@ import { Chat, ChatService } from "./chat.service";
 @Component({
   selector: "app-chat-sidebar",
   template: `
-    <div class="flex flex-col h-full p-4 overflow-y-auto bg-gray-200 dark:bg-gray-700">
+    <div
+      class="flex flex-col h-full p-4 overflow-y-auto bg-gray-200 dark:bg-gray-700"
+    >
       <div class="grid grid-cols-4 gap-4">
-        <app-config></app-config>
+        <app-config class="custom-btn"></app-config>
         <button
-          class="col-span-3 mb-4 bg-primary-500 text-white rounded-md px-4 py-2"
-          (click)="createNewChat()">
+          class="custom-btn col-span-3 mb-4 bg-primary-500 text-white rounded-md px-4 py-2"
+          (click)="createNewChat()"
+        >
           + New chat
         </button>
       </div>
@@ -48,6 +51,9 @@ import { Chat, ChatService } from "./chat.service";
       }
       .hover-group:hover .opacity-0 {
         opacity: 1 !important;
+      }
+      .custom-btn {
+        height: 44px;
       }
     `,
   ],
@@ -134,7 +140,7 @@ export class ChatSidebarComponent {
     return targetDate <= currentDate && targetDate >= pastDate;
   }
 
-  toggleConfig(){
+  toggleConfig() {
     this.showModal = !this.showModal;
   }
 
