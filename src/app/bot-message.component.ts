@@ -10,19 +10,21 @@ import { Component, EventEmitter, Input, Output } from "@angular/core";
       >
         <p class="text-sm whitespace-pre-wrap">
           {{ message }}
-          <ng-container *ngFor="let link of links">
-            <br /><br /><strong>{{ link.title }}</strong
-            ><br />
-            <a
-              class="cursor-pointer group inline-flex items-center gap-4 text-primary-200 hover:text-primary-100 transition-colors duration-300"
-              (click)="openViewer.emit(link.url)"
-            >
-              <!--span class="font-sans font-medium text-sm">View here</span-->
-              <i
-                class="iconify w-4 h-4 group-hover:translate-x-1 transition-transform duration-300"
-                data-icon="lucide:arrow-right"
-              ></i>
-            </a>
+          <ng-container *ngIf="links !== undefined">
+            <ng-container *ngFor="let link of links">
+              <br /><br /><strong>{{ link.title }}</strong
+              ><br />
+              <a
+                class="cursor-pointer group inline-flex items-center gap-4 text-primary-200 hover:text-primary-100 transition-colors duration-300"
+                (click)="openViewer.emit(link.url)"
+              >
+                <!--span class="font-sans font-medium text-sm">View here</span-->
+                <i
+                  class="iconify w-4 h-4 group-hover:translate-x-1 transition-transform duration-300"
+                  data-icon="lucide:arrow-right"
+                ></i>
+              </a>
+            </ng-container>
           </ng-container>
         </p>
       </div>

@@ -211,8 +211,11 @@ export class ChatService {
                     this.chats[chatIndex].messages.push(newMessage);
                     isNewMessage = false;
                   } else {
-                    newMessage.text += choices[0].delta.content;
-                    newMessage.complete = choices[0].finish_reason === "stop";
+                    let delta = choices[0].delta.content;
+                    if (delta && delta !== ""){
+                      newMessage.text += delta;
+                      newMessage.complete = choices[0].finish_reason === "stop";
+                    }
                   }
 
                   // Inform subscribers about the new message

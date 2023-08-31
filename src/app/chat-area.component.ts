@@ -69,7 +69,6 @@ export class ChatAreaComponent {
     const config = { attributes: true, childList: true, subtree: true };
     const observer = new MutationObserver(() => {
       let stickyScroll = this.storageService.getItem<boolean>('stickyScroll');
-      console.log('stickyScroll', stickyScroll);
       if (stickyScroll) {
       this.chatArea.nativeElement.parentElement.scrollTop =
         this.chatArea.nativeElement.parentElement.scrollHeight;
