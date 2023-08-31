@@ -7,11 +7,14 @@ import {
   ViewChild,
 } from "@angular/core";
 import { Chat } from "./chat.service";
+import { HostListener, NgZone } from '@angular/core'; 
+import { StorageService } from "./storage.service";
+
 
 @Component({
   selector: "app-chat-area",
   template: `
-    <div class="flex flex-col">
+    <div #msgcontainer class="flex flex-col" >
       <div *ngFor="let message of chat?.messages">
         <ng-container *ngIf="message.from === 'user'">
           <app-user-message
@@ -36,9 +39,10 @@ export class ChatAreaComponent {
   @Input() chat: Chat;
   @Input() layout: "chat-bubbles" | "centered" = "chat-bubbles";
   @Output() openViewer = new EventEmitter<string>();
+  @ViewChild('msgcontainer') chatArea!: ElementRef;
 
-  @ViewChild("chatArea") private chatArea!: ElementRef;
-  constructor() {
+  //@ViewChild("chatArea") private chatArea!: ElementRef;
+  constructor(private storageService: StorageService) {
     this.chat = {
       id: "",
       title: "",
@@ -49,14 +53,28 @@ export class ChatAreaComponent {
 
   ngAfterViewInit() {
     this.autoScrollToBottom();
+    this.chatArea.nativeElement.parentElement.addEventListener('scroll', () => {
+      const div = this.chatArea.nativeElement.parentElement;
+      if (div.scrollTop + div.offsetHeight >= div.scrollHeight) {
+        //console.log('reached bottom');
+        this.storageService.setItem('stickyScroll', true);
+      } else {
+        //console.log('not at bottom');
+        this.storageService.setItem('stickyScroll', false);
+      }
+    });
   }
 
   autoScrollToBottom() {
     const config = { attributes: true, childList: true, subtree: true };
     const observer = new MutationObserver(() => {
-      this.chatArea.nativeElement.scrollTop =
-        this.chatArea.nativeElement.scrollHeight;
+      let stickyScroll = this.storageService.getItem<boolean>('stickyScroll');
+      console.log('stickyScroll', stickyScroll);
+      if (stickyScroll) {
+      this.chatArea.nativeElement.parentElement.scrollTop =
+        this.chatArea.nativeElement.parentElement.scrollHeight;
+      }
     });
-    observer.observe(this.chatArea.nativeElement, config);
+    observer.observe(this.chatArea.nativeElement.parentElement, config);
   }
 }
