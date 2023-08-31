@@ -4,15 +4,15 @@ import { Chat, ChatService } from "./chat.service";
 @Component({
   selector: "app-chat-sidebar",
   template: `
-    <div
-      class="flex flex-col h-full p-4 overflow-y-auto bg-gray-200 dark:bg-gray-700"
-    >
-      <button
-        class="mb-4 bg-primary-500 text-white rounded-md px-4 py-2"
-        (click)="createNewChat()"
-      >
-        + New chat
-      </button>
+    <div class="flex flex-col h-full p-4 overflow-y-auto bg-gray-200 dark:bg-gray-700">
+      <div class="grid grid-cols-4 gap-4">
+        <app-config></app-config>
+        <button
+          class="col-span-3 mb-4 bg-primary-500 text-white rounded-md px-4 py-2"
+          (click)="createNewChat()">
+          + New chat
+        </button>
+      </div>
       <ng-container *ngFor="let group of chatGroups">
         <h5
           *ngIf="group.chats.length"
@@ -53,6 +53,7 @@ import { Chat, ChatService } from "./chat.service";
   ],
 })
 export class ChatSidebarComponent {
+  showModal = false;
   chats: Chat[] = [];
   currentChat: Chat = {
     id: "",
@@ -131,6 +132,10 @@ export class ChatSidebarComponent {
     const pastDate = new Date(currentDate);
     pastDate.setDate(pastDate.getDate() - pastDays);
     return targetDate <= currentDate && targetDate >= pastDate;
+  }
+
+  toggleConfig(){
+    this.showModal = !this.showModal;
   }
 
   createNewChat() {

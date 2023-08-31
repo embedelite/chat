@@ -6,7 +6,11 @@
 - Rust installation
 
 ## Getting started
-Clone the code and run:
+1. Clone the code
+2. install
+``` npm install```
+3. and run:
+
 ``` npm run tauri dev```
 
 ## Recommended IDE Setup

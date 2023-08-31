@@ -6,6 +6,7 @@ import { ChatInputComponent } from "./chat-input.component";
 import { BotMessageComponent } from "./bot-message.component";
 import { ChatAreaComponent } from "./chat-area.component";
 import { UserMessageComponent } from "./user-message.component";
+import { ConfigComponent } from "./config.component";
 import { FormsModule } from "@angular/forms";
 import { ChatService } from "./chat.service";
 import { ChatSidebarComponent } from "./sidebar.component";
@@ -22,6 +23,7 @@ import { SafePipe } from "./shared/safe.pipe";
     UserMessageComponent,
     ChatSidebarComponent,
     DocViewerComponent,
+    ConfigComponent,
     SafePipe,
   ],
   imports: [BrowserModule, FormsModule, PdfViewerModule],

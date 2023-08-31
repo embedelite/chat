@@ -20,13 +20,12 @@ export interface Chat {
 export class ChatService {
   private readonly OPENAI_API_URL =
     "https://api.openai.com/v1/chat/completions";
-  private readonly API_KEY = "fillme";
-  private readonly MODEL = "gpt-3.5-turbo";
+  private model: string;
 
   private chats: Chat[] = [
     {
       id: "1",
-      title: "Patent convolutional neural networks",
+      title: "US Patent Example",
       date: new Date(),
       messages: [
         {
@@ -65,15 +64,6 @@ export class ChatService {
         { from: "bot", text: "Hello, user!" },
       ],
     },
-    {
-      id: "3",
-      title: "Goodbye AI",
-      date: new Date(),
-      messages: [
-        { from: "user", text: "Goodbye, AI!" },
-        { from: "bot", text: "Goodbye, user!" },
-      ],
-    },
   ];
   private currentChatSubject = new BehaviorSubject<Chat>(this.chats[0]);
   currentChat = this.currentChatSubject.asObservable();
@@ -84,6 +74,10 @@ export class ChatService {
     if (storedChats) {
       this.chats = storedChats;
     }
+
+
+    this.model = "gpt-3.5-turbo";
+
   }
 
   getChats(): Observable<Chat[]> {
@@ -132,9 +126,10 @@ export class ChatService {
   }
 
   sendMessage(chatId: string, message: string): void {
+    let api_key = this.storageService.getItem<string>("api_key");
     const headers = {
       "Content-Type": "application/json",
-      Authorization: `Bearer ${this.API_KEY}`,
+      Authorization: `Bearer ${api_key}`,
     };
 
     const chatIndex = this.chats.findIndex((chat) => chat.id === chatId);
@@ -156,7 +151,7 @@ export class ChatService {
     }));
 
     const body = {
-      model: this.MODEL,
+      model: this.model,
       messages: [...history, { role: "user", content: message }],
       stream: true,
     };

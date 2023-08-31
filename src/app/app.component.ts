@@ -6,7 +6,7 @@ import { Chat, ChatService } from "./chat.service";
   template: `
     <div class="flex h-screen flex-col bg-white dark:bg-gray-800 shadow-md">
       <div class="flex-grow flex overflow-hidden">
-        <app-chat-sidebar class="h-full w-64"></app-chat-sidebar>
+        <app-chat-sidebar class="h-full w-64 flex-shrink-0"></app-chat-sidebar>
         <div class="flex flex-col flex-grow">
           <app-chat-area
             class="overflow-y-auto p-4 bg-white dark:bg-gray-800 flex-grow"
