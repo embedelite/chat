@@ -59,18 +59,34 @@ import { StorageService } from "./storage.service";
             <form class="space-y-6" action="#">
               <div>
                 <label
-                  for="api_key"
+                  for="ee_api_key"
                   class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
-                  >API KEY (OpenAI or EmbedElite)</label
+                  >EmbedElite API KEY</label
                 >
                 <input
-                  name="api_key"
-                  id="api_key"
+                  name="ee_api_key"
+                  id="ee_api_key"
                   placeholder="sk_..."
                   class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white"
                   required
-                  value="{{ api_key }}"
-                  [(ngModel)]="api_key"
+                  value="{{ ee_api_key }}"
+                  [(ngModel)]="ee_api_key"
+                />
+              </div>
+              <div>
+                <label
+                  for="oai_api_key"
+                  class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+                  >OpenAI API KEY</label
+                >
+                <input
+                  name="oai_api_key"
+                  id="oai_api_key"
+                  placeholder="sk_..."
+                  class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white"
+                  required
+                  value="{{ oai_api_key }}"
+                  [(ngModel)]="oai_api_key"
                 />
               </div>
               <div class="grid grid-cols-2 gap-4">
@@ -115,18 +131,26 @@ import { StorageService } from "./storage.service";
 })
 export class ConfigComponent {
   showModal = false;
-  api_key: string;
+  ee_api_key: string;
+  oai_api_key: string;
 
   constructor(private storageService: StorageService) {
-    this.api_key = "";
-    const api_key = this.storageService.getItem<string>("api_key");
-    if (api_key) {
-      this.api_key = api_key;
+    this.ee_api_key = "";
+    const ee_api_key = this.storageService.getItem<string>("ee_api_key");
+    if (ee_api_key) {
+      this.ee_api_key = ee_api_key;
+    }
+
+    this.oai_api_key = "";
+    const oai_api_key = this.storageService.getItem<string>("oai_api_key");
+    if (oai_api_key) {
+      this.oai_api_key = oai_api_key;
     }
   }
 
   saveConfig() {
-    this.storageService.setItem("api_key", this.api_key);
+    this.storageService.setItem("oai_api_key", this.oai_api_key);
+    this.storageService.setItem("ee_api_key", this.ee_api_key);
     this.showModal = false;
   }
 

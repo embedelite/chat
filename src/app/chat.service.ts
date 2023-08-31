@@ -126,10 +126,10 @@ export class ChatService {
   }
 
   sendMessage(chatId: string, message: string): void {
-    let api_key = this.storageService.getItem<string>("api_key");
+    let oai_api_key = this.storageService.getItem<string>("oai_api_key");
     const headers = {
       "Content-Type": "application/json",
-      Authorization: `Bearer ${api_key}`,
+      Authorization: `Bearer ${oai_api_key}`,
     };
 
     const chatIndex = this.chats.findIndex((chat) => chat.id === chatId);
