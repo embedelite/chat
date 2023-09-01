@@ -63,6 +63,10 @@ export class ChatSidebarComponent {
   chats: Chat[] = [];
   currentChat: Chat = {
     id: "",
+    mode: "oai",
+    deactivated: false,
+    product_id: null,
+    model: "gpt-3.5-turbo",
     title: "",
     date: new Date(),
     messages: [],

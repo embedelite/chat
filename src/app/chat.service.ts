@@ -11,6 +11,10 @@ export interface Message {
 
 export interface Chat {
   id: string;
+  mode: "ee" | "oai";
+  deactivated: boolean;
+  product_id: string | null;
+  model: "gpt-3.5-turbo" | "gpt-4";
   title: string;
   messages: Message[];
   date: Date;
@@ -18,14 +22,16 @@ export interface Chat {
 
 @Injectable({ providedIn: "root" })
 export class ChatService {
-  private readonly OPENAI_API_URL =
-    "https://api.openai.com/v1/chat/completions";
-  private model: string;
+  private readonly OPENAI_API_URL = "https://api.openai.com/v1/chat/completions";
 
   private chats: Chat[] = [
     {
       id: "1",
       title: "US Patent Example",
+      mode: "ee",
+      deactivated: true,
+      product_id: "uspto",
+      model: "gpt-3.5-turbo",
       date: new Date(),
       messages: [
         {
@@ -57,6 +63,10 @@ export class ChatService {
     },
     {
       id: "2",
+      mode: "oai",
+      deactivated: false,
+      product_id: null,
+      model: "gpt-3.5-turbo",
       title: "Hello AI",
       date: new Date(),
       messages: [
@@ -75,13 +85,27 @@ export class ChatService {
       this.chats = storedChats;
     }
 
-
-    this.model = "gpt-3.5-turbo";
-
   }
 
   getChats(): Observable<Chat[]> {
     return of(this.chats);
+  }
+
+  updateChatConfig(chatId: string,
+                    mode: "ee" | "oai",
+                    model: "gpt-3.5-turbo" | "gpt-4",
+                    productId: string | null
+                    ): void {
+    const chatIndex = this.chats.findIndex((chat) => chat.id === chatId);
+    if (chatIndex < 0) {
+      console.error(`No chat found with id: ${chatId}`);
+      return;
+    }
+
+    this.chats[chatIndex].mode = mode;
+    this.chats[chatIndex].model = model;
+    this.chats[chatIndex].product_id = productId;
+    this.storageService.setItem("chats", this.chats);
   }
 
   switchChat(chat: Chat) {
@@ -89,8 +113,14 @@ export class ChatService {
   }
 
   addChat(title: string): Chat {
+    const defaultModel = this.storageService.getItem<"gpt-3.5-turbo" | "gpt-4">("default_model") ?? "gpt-3.5-turbo";
+
     let newChat: Chat = {
       id: this.generateId(), // Implement a method for generating unique id
+      mode: "oai",
+      deactivated: false,
+      product_id: null,
+      model: defaultModel,
       title: title,
       date: new Date(),
       messages: [],
@@ -125,15 +155,13 @@ export class ChatService {
     return (this.chats.length + 1).toString();
   }
 
-  sendMessage(chatId: string, message: string): void {
-    let oai_api_key = this.storageService.getItem<string>("oai_api_key");
-    const headers = {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${oai_api_key}`,
-    };
-
+  sendMessage(chatId: string,
+              message: string,
+              mode: "ee" | "oai",
+              model: "gpt-3.5-turbo" | "gpt-4",
+              productId: string | null
+             ): void {
     const chatIndex = this.chats.findIndex((chat) => chat.id === chatId);
-
     if (chatIndex < 0) {
       console.error(`No chat found with id: ${chatId}`);
       return;
@@ -150,8 +178,22 @@ export class ChatService {
       content: msg.text,
     }));
 
+    if (mode === "oai") {
+      let oai_api_key = this.storageService.getItem<string>("oai_api_key");
+      this.sendMessageOAI(chatIndex, oai_api_key, model, message, history)
+    } else {
+      let ee_api_key = this.storageService.getItem<string>("ee_api_key");
+    }
+  }
+    
+  sendMessageOAI(chatIndex: number, oai_api_key: any, model: string, message: string, history: any[]){
+    const headers = {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${oai_api_key}`,
+    };
+
     const body = {
-      model: this.model,
+      model: model,
       messages: [...history, { role: "user", content: message }],
       stream: true,
     };

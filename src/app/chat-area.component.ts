@@ -46,6 +46,10 @@ export class ChatAreaComponent {
     this.chat = {
       id: "",
       title: "",
+      mode: "oai",
+      deactivated: false,
+      product_id: null,
+      model: "gpt-3.5-turbo",
       date: new Date(),
       messages: [],
     };

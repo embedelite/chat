@@ -16,7 +16,12 @@ import { Chat, ChatService } from "./chat.service";
           ></app-chat-area>
           <app-chat-input
             class="flex-shrink-0"
+            [mode]="currentChat.mode"
+            [model]="currentChat.model"
+            [product_id]="currentChat.product_id"
+            [deactivated]="currentChat.deactivated"
             (newMessage)="updateMessages($event)"
+            (updateChatConfig)="updateChatConfig($event)"
           ></app-chat-input>
         </div>
         <app-doc-viewer
@@ -32,6 +37,10 @@ import { Chat, ChatService } from "./chat.service";
 export class AppComponent {
   currentChat: Chat = {
     id: "",
+    mode: "oai",
+    deactivated: false,
+    product_id: null,
+    model: "gpt-3.5-turbo",
     title: "",
     date: new Date(),
     messages: [],
@@ -44,8 +53,12 @@ export class AppComponent {
     this.chatService.currentChat.subscribe((chat) => (this.currentChat = chat));
   }
 
-  updateMessages(message: string) {
-    this.chatService.sendMessage(this.currentChat.id, message);
+  updateChatConfig(config: any) {
+    this.chatService.updateChatConfig(this.currentChat.id, config.mode, config.model, config.product_id);
+  }
+
+  updateMessages(msgInfo: any) {
+    this.chatService.sendMessage(this.currentChat.id, msgInfo.message, msgInfo.mode, msgInfo.model, msgInfo.product_id);
   }
 
   openViewer(url: string) {
