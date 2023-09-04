@@ -1,5 +1,6 @@
 import { Component, EventEmitter, Output } from "@angular/core";
 import { Chat, ChatService } from "./chat.service";
+import { KeyboardShortcutService } from "./keyboardshortcut.service";
 
 @Component({
   selector: "app-chat-sidebar",
@@ -73,7 +74,13 @@ export class ChatSidebarComponent {
   };
   chatGroups: { title: string; chats: Chat[] }[] = [];
 
-  constructor(private chatService: ChatService) {
+  constructor(
+    private chatService: ChatService,
+    private keyboardShortcutService: KeyboardShortcutService
+  ) {
+    keyboardShortcutService.addShortcut({ key: "KeyT", ctrlKey: true }, () =>
+      this.createNewChat()
+    );
     chatService.getChats().subscribe((chats) => {
       this.chats = chats;
       this.chatGroups = this.groupChatsByDate(this.chats);
@@ -81,6 +88,10 @@ export class ChatSidebarComponent {
     chatService.currentChat.subscribe((chat) => {
       this.currentChat = chat;
     });
+  }
+
+  deleteCurrentChat() {
+    this.deleteChat(this.currentChat);
   }
 
   deleteChat(chat: Chat) {
