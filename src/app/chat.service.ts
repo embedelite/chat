@@ -22,9 +22,10 @@ export interface Chat {
 
 @Injectable({ providedIn: "root" })
 export class ChatService {
-  private readonly OPENAI_API_URL = "https://api.openai.com/v1/chat/completions";
+  private readonly OPENAI_API_URL =
+    "https://api.openai.com/v1/chat/completions";
   //private readonly EE_API_URL = "https://api.embedelite.com";
-  private readonly EE_API_URL = "https://api.dev.embedelite.com";
+  private readonly EE_API_URL = "https://api.embedelite.com";
 
   private chats: Chat[] = [
     {
@@ -86,18 +87,18 @@ export class ChatService {
     if (storedChats) {
       this.chats = storedChats;
     }
-
   }
 
   getChats(): Observable<Chat[]> {
     return of(this.chats);
   }
 
-  updateChatConfig(chatId: string,
-                    mode: "ee" | "oai",
-                    model: "gpt-3.5-turbo" | "gpt-4",
-                    productId: string | null
-                    ): void {
+  updateChatConfig(
+    chatId: string,
+    mode: "ee" | "oai",
+    model: "gpt-3.5-turbo" | "gpt-4",
+    productId: string | null
+  ): void {
     const chatIndex = this.chats.findIndex((chat) => chat.id === chatId);
     if (chatIndex < 0) {
       console.error(`No chat found with id: ${chatId}`);
@@ -115,7 +116,9 @@ export class ChatService {
   }
 
   addChat(title: string): Chat {
-    const defaultModel = this.storageService.getItem<"gpt-3.5-turbo" | "gpt-4">("default_model") ?? "gpt-3.5-turbo";
+    const defaultModel =
+      this.storageService.getItem<"gpt-3.5-turbo" | "gpt-4">("default_model") ??
+      "gpt-3.5-turbo";
 
     let newChat: Chat = {
       id: this.generateId(), // Implement a method for generating unique id
@@ -157,12 +160,13 @@ export class ChatService {
     return (this.chats.length + 1).toString();
   }
 
-  sendMessage(chatId: string,
-              message: string,
-              mode: "ee" | "oai",
-              model: "gpt-3.5-turbo" | "gpt-4",
-              productId: string | null
-             ): void {
+  sendMessage(
+    chatId: string,
+    message: string,
+    mode: "ee" | "oai",
+    model: "gpt-3.5-turbo" | "gpt-4",
+    productId: string | null
+  ): void {
     const chatIndex = this.chats.findIndex((chat) => chat.id === chatId);
     if (chatIndex < 0) {
       console.error(`No chat found with id: ${chatId}`);
@@ -182,13 +186,68 @@ export class ChatService {
 
     if (mode === "oai") {
       let oai_api_key = this.storageService.getItem<string>("oai_api_key");
-      this.sendMessageOAI(chatIndex, oai_api_key, model, message, history)
+      this.sendMessageOAI(chatIndex, oai_api_key, model, message, history);
     } else {
       let ee_api_key = this.storageService.getItem<string>("ee_api_key");
+      if (productId === null) {
+        console.log("No product id found");
+        return;
+      }
+      this.sendMessageEE(chatIndex, ee_api_key, productId, message);
     }
   }
-    
-  sendMessageOAI(chatIndex: number, oai_api_key: any, model: string, message: string, history: any[]){
+
+  sendMessageEE(
+    chatIndex: number,
+    ee_api_key: any,
+    productId: string,
+    message: string
+  ) {
+    const headers = {
+      "Content-Type": "application/json",
+      "API-Key": ee_api_key,
+    };
+
+    const body = {
+      product_id: productId,
+      query: message,
+    };
+
+    fetch(this.EE_API_URL + "/query", {
+      method: "POST",
+      headers: headers,
+      body: JSON.stringify(body),
+    })
+      .then((response) => {
+        if (!response.body) {
+          throw new Error("No ReadableStream available");
+        }
+
+        response.json().then((data) => {
+          let botMessage: Message = {
+            from: "bot",
+            text: data.response,
+          };
+          this.chats[chatIndex].messages.push(botMessage);
+
+          // Inform subscribers about the new message
+          this.currentChatSubject.next(this.chats[chatIndex]);
+
+          this.storageService.setItem("chats", this.chats);
+        });
+      })
+      .catch((error) => {
+        console.error(error);
+      });
+  }
+
+  sendMessageOAI(
+    chatIndex: number,
+    oai_api_key: any,
+    model: string,
+    message: string,
+    history: any[]
+  ) {
     const headers = {
       "Content-Type": "application/json",
       Authorization: `Bearer ${oai_api_key}`,
@@ -258,7 +317,7 @@ export class ChatService {
                     isNewMessage = false;
                   } else {
                     let delta = choices[0].delta.content;
-                    if (delta && delta !== ""){
+                    if (delta && delta !== "") {
                       newMessage.text += delta;
                       newMessage.complete = choices[0].finish_reason === "stop";
                     }
@@ -284,19 +343,21 @@ export class ChatService {
   updateProducts(ee_api_key: string) {
     const headers = {
       "Content-Type": "application/json",
-      "API-Key": ee_api_key
+      "API-Key": ee_api_key,
     };
 
     // make a http request get to the api http
     let url = this.EE_API_URL + "/products";
     fetch(url, {
       headers: headers,
-      method: 'GET',
-      mode: 'no-cors',
-    }).then((response) => {
-      console.log(response);
-    }).catch((error) => {
-      console.error(error);
-    });
+      method: "GET",
+      mode: "no-cors",
+    })
+      .then((response) => {
+        console.log(response);
+      })
+      .catch((error) => {
+        console.error(error);
+      });
   }
 }
