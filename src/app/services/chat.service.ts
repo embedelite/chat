@@ -115,6 +115,16 @@ export class ChatService {
     this.currentChatSubject.next(chat);
   }
 
+  setChatTitle(chatId: string, title: string): void {
+    const chatIndex = this.chats.findIndex((chat) => chat.id === chatId);
+    if (chatIndex < 0) {
+      console.error(`No chat found with id: ${chatId}`);
+      return;
+    }
+    this.chats[chatIndex].title = title;
+    this.storageService.setItem("chats", this.chats);
+  }
+
   addChat(title: string): Chat {
     const defaultModel =
       this.storageService.getItem<"gpt-3.5-turbo" | "gpt-4">("default_model") ??
@@ -180,6 +190,15 @@ export class ChatService {
       text: message,
     };
     this.chats[chatIndex].messages.push(userMessage);
+
+    if (this.chats[chatIndex].messages[0].from === "user") {
+      const firstMessage = this.chats[chatIndex].messages[0].text;
+      const title =
+        firstMessage.length > 16
+          ? `${firstMessage.slice(0, 16)}...`
+          : firstMessage;
+      this.setChatTitle(chatId, title);
+    }
 
     let history = this.chats[chatIndex].messages.map((msg) => ({
       role: msg.from === "user" ? "user" : "assistant",
