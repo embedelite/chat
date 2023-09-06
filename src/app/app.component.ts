@@ -1,5 +1,6 @@
 import { Component } from "@angular/core";
 import { Chat, ChatService } from "./chat.service";
+import { StorageService } from "./storage.service";
 
 @Component({
   selector: "app-root",
@@ -49,8 +50,12 @@ export class AppComponent {
   isViewerVisible = false;
   docUrl = "";
 
-  constructor(private chatService: ChatService) {
+  constructor(private chatService: ChatService, private storageService: StorageService) {
     this.chatService.currentChat.subscribe((chat) => (this.currentChat = chat));
+
+
+    const ee_api_key = this.storageService.getItem<string>("ee_api_key") ?? "";
+    this.chatService.updateProducts(ee_api_key);
   }
 
   updateChatConfig(config: any) {

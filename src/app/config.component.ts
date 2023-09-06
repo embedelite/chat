@@ -1,5 +1,6 @@
 import { Component, EventEmitter, Output } from "@angular/core";
 import { StorageService } from "./storage.service";
+import { ChatService } from "./chat.service";
 
 @Component({
   selector: "app-config",
@@ -145,7 +146,7 @@ export class ConfigComponent {
   oai_api_key: string;
   defaultModel: string;
 
-  constructor(private storageService: StorageService) {
+  constructor(private chatService: ChatService, private storageService: StorageService) {
     this.ee_api_key = "";
     const ee_api_key = this.storageService.getItem<string>("ee_api_key");
     if (ee_api_key) {
@@ -174,6 +175,8 @@ export class ConfigComponent {
     this.storageService.setItem("ee_api_key", this.ee_api_key);
     this.storageService.setItem("default_model", this.defaultModel);
     this.showModal = false;
+
+    this.chatService.updateProducts(this.ee_api_key);
   }
 
   toggleConfig() {

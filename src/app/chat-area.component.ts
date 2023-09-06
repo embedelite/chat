@@ -6,8 +6,7 @@ import {
   Output,
   ViewChild,
 } from "@angular/core";
-import { Chat } from "./chat.service";
-import { HostListener, NgZone } from '@angular/core'; 
+import { Chat, Message } from "./chat.service";
 import { StorageService } from "./storage.service";
 
 
@@ -55,8 +54,12 @@ export class ChatAreaComponent {
     };
   }
 
+  ngAfterViewChecked(){
+    let stickyScroll = this.storageService.getItem<boolean>('stickyScroll');
+    this.scrollToBottom();
+  }
+
   ngAfterViewInit() {
-    this.autoScrollToBottom();
     this.chatArea.nativeElement.parentElement.addEventListener('scroll', () => {
       const div = this.chatArea.nativeElement.parentElement;
       if (div.scrollTop + div.offsetHeight >= div.scrollHeight) {
@@ -69,15 +72,11 @@ export class ChatAreaComponent {
     });
   }
 
-  autoScrollToBottom() {
-    const config = { attributes: true, childList: true, subtree: true };
-    const observer = new MutationObserver(() => {
-      let stickyScroll = this.storageService.getItem<boolean>('stickyScroll');
-      if (stickyScroll) {
+  scrollToBottom() {
+    let stickyScroll = this.storageService.getItem<boolean>('stickyScroll');
+    if (stickyScroll) {
       this.chatArea.nativeElement.parentElement.scrollTop =
         this.chatArea.nativeElement.parentElement.scrollHeight;
-      }
-    });
-    observer.observe(this.chatArea.nativeElement.parentElement, config);
+    }
   }
 }

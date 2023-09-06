@@ -1,4 +1,11 @@
-import { Component, EventEmitter, Output, Input } from "@angular/core";
+import {
+  Component,
+  ElementRef,
+  EventEmitter,
+  Output,
+  Input,
+  ViewChild
+} from "@angular/core";
 
 @Component({
   selector: "app-chat-input",
@@ -6,7 +13,7 @@ import { Component, EventEmitter, Output, Input } from "@angular/core";
     <div
       class="flex items-center p-4 bg-gray-200 dark:bg-gray-700 rounded-br-lg"
     >
-      <textarea
+      <textarea #textarea id="chat-input"
         class="resize-none w-full px-4 py-2 mr-4 bg-white dark:bg-gray-800 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent dark:text-gray-300 dark:focus:ring-offset-gray-800"
         rows="1"
         placeholder="Type your message..."
@@ -109,6 +116,7 @@ export class ChatInputComponent {
   @Output() openViewer = new EventEmitter<string>();
   @Output() newMessage = new EventEmitter<any>();
   @Output() updateChatConfig = new EventEmitter<any>();
+  @ViewChild('textarea') textArea!: ElementRef;
   message: string;
   showChatConfig: boolean = false;
   showExtraProduct: boolean = false;
@@ -130,6 +138,11 @@ export class ChatInputComponent {
     } else {
       this.showExtraProduct = false;
     }
+  }
+
+  ngAfterViewChecked() {
+    // Focus on textarea after view is initialized
+    this.textArea.nativeElement.focus();
   }
 
   toggleChatConfig() {

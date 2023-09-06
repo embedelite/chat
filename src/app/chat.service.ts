@@ -23,6 +23,8 @@ export interface Chat {
 @Injectable({ providedIn: "root" })
 export class ChatService {
   private readonly OPENAI_API_URL = "https://api.openai.com/v1/chat/completions";
+  //private readonly EE_API_URL = "https://api.embedelite.com";
+  private readonly EE_API_URL = "https://api.dev.embedelite.com";
 
   private chats: Chat[] = [
     {
@@ -277,5 +279,24 @@ export class ChatService {
       .catch((error) => {
         console.error(error);
       });
+  }
+
+  updateProducts(ee_api_key: string) {
+    const headers = {
+      "Content-Type": "application/json",
+      "API-Key": ee_api_key
+    };
+
+    // make a http request get to the api http
+    let url = this.EE_API_URL + "/products";
+    fetch(url, {
+      headers: headers,
+      method: 'GET',
+      mode: 'no-cors',
+    }).then((response) => {
+      console.log(response);
+    }).catch((error) => {
+      console.error(error);
+    });
   }
 }
