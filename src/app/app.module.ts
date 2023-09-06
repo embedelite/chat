@@ -8,7 +8,6 @@ import { ChatAreaComponent } from "./chat-area.component";
 import { UserMessageComponent } from "./user-message.component";
 import { ConfigComponent } from "./config.component";
 import { FormsModule } from "@angular/forms";
-import { ChatService } from "./chat.service";
 import { ChatSidebarComponent } from "./sidebar.component";
 import { PdfViewerModule } from "ng2-pdf-viewer";
 import { DocViewerComponent } from "./doc-viewer.component";
@@ -27,7 +26,7 @@ import { SafePipe } from "./shared/safe.pipe";
     SafePipe,
   ],
   imports: [BrowserModule, FormsModule, PdfViewerModule],
-  providers: [ChatService],
+  providers: [],
   bootstrap: [AppComponent],
 })
 export class AppModule {}

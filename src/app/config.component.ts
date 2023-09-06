@@ -1,6 +1,6 @@
-import { Component, EventEmitter, Output } from "@angular/core";
-import { StorageService } from "./storage.service";
-import { ChatService } from "./chat.service";
+import { Component } from "@angular/core";
+import { StorageService } from "./services/storage.service";
+import { ChatService } from "./services/chat.service";
 
 @Component({
   selector: "app-config",
@@ -90,15 +90,29 @@ import { ChatService } from "./chat.service";
                   [(ngModel)]="oai_api_key"
                 />
               </div>
-              
-              <div class="flex p-0 m-0" style="margin:0">
-                <label for="default_model" class="pt-3 pr-3 shrink-0 block mb-2 text-sm font-medium text-gray-900 dark:text-white">Default OpenAI model:</label>
-                  <select id="default_model" class="block py-2.5 px-0 w-full text-sm text-gray-500 bg-transparent border-0 border-b-2 border-gray-200 appearance-none dark:text-gray-400 dark:border-gray-700 focus:outline-none focus:ring-0 focus:border-gray-200 peer" (change)="selectDefaultModel($event.target)">
 
-                  <option value="gpt-3.5-turbo" [selected]="defaultModel === 'gpt-3.5-turbo'">gpt-3.5-turbo</option>
-                  <option value="gpt-4" [selected]="defaultModel === 'gpt-4'">gpt-4</option>
+              <div class="flex p-0 m-0" style="margin:0">
+                <label
+                  for="default_model"
+                  class="pt-3 pr-3 shrink-0 block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+                  >Default OpenAI model:</label
+                >
+                <select
+                  id="default_model"
+                  class="block py-2.5 px-0 w-full text-sm text-gray-500 bg-transparent border-0 border-b-2 border-gray-200 appearance-none dark:text-gray-400 dark:border-gray-700 focus:outline-none focus:ring-0 focus:border-gray-200 peer"
+                  (change)="selectDefaultModel($event.target)"
+                >
+                  <option
+                    value="gpt-3.5-turbo"
+                    [selected]="defaultModel === 'gpt-3.5-turbo'"
+                  >
+                    gpt-3.5-turbo
+                  </option>
+                  <option value="gpt-4" [selected]="defaultModel === 'gpt-4'">
+                    gpt-4
+                  </option>
                 </select>
-              </div>          
+              </div>
 
               <div class="grid grid-cols-2 gap-4">
                 <button
@@ -146,7 +160,10 @@ export class ConfigComponent {
   oai_api_key: string;
   defaultModel: string;
 
-  constructor(private chatService: ChatService, private storageService: StorageService) {
+  constructor(
+    private chatService: ChatService,
+    private storageService: StorageService
+  ) {
     this.ee_api_key = "";
     const ee_api_key = this.storageService.getItem<string>("ee_api_key");
     if (ee_api_key) {
@@ -160,7 +177,9 @@ export class ConfigComponent {
     }
 
     this.defaultModel = "gpt-3.5-turbo";
-    const defaultModel = this.storageService.getItem<"gpt-3.5-turbo" | "gpt-4">("default_model");
+    const defaultModel = this.storageService.getItem<"gpt-3.5-turbo" | "gpt-4">(
+      "default_model"
+    );
     if (defaultModel) {
       this.defaultModel = defaultModel;
     }

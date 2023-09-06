@@ -6,14 +6,13 @@ import {
   Output,
   ViewChild,
 } from "@angular/core";
-import { Chat, Message } from "./chat.service";
-import { StorageService } from "./storage.service";
-
+import { Chat } from "./services/chat.service";
+import { StorageService } from "./services/storage.service";
 
 @Component({
   selector: "app-chat-area",
   template: `
-    <div #msgcontainer class="flex flex-col" >
+    <div #msgcontainer class="flex flex-col">
       <div *ngFor="let message of chat?.messages">
         <ng-container *ngIf="message.from === 'user'">
           <app-user-message
@@ -38,7 +37,7 @@ export class ChatAreaComponent {
   @Input() chat: Chat;
   @Input() layout: "chat-bubbles" | "centered" = "chat-bubbles";
   @Output() openViewer = new EventEmitter<string>();
-  @ViewChild('msgcontainer') chatArea!: ElementRef;
+  @ViewChild("msgcontainer") chatArea!: ElementRef;
 
   //@ViewChild("chatArea") private chatArea!: ElementRef;
   constructor(private storageService: StorageService) {
@@ -54,26 +53,26 @@ export class ChatAreaComponent {
     };
   }
 
-  ngAfterViewChecked(){
-    let stickyScroll = this.storageService.getItem<boolean>('stickyScroll');
+  ngAfterViewChecked() {
+    let stickyScroll = this.storageService.getItem<boolean>("stickyScroll");
     this.scrollToBottom();
   }
 
   ngAfterViewInit() {
-    this.chatArea.nativeElement.parentElement.addEventListener('scroll', () => {
+    this.chatArea.nativeElement.parentElement.addEventListener("scroll", () => {
       const div = this.chatArea.nativeElement.parentElement;
       if (div.scrollTop + div.offsetHeight >= div.scrollHeight) {
         //console.log('reached bottom');
-        this.storageService.setItem('stickyScroll', true);
+        this.storageService.setItem("stickyScroll", true);
       } else {
         //console.log('not at bottom');
-        this.storageService.setItem('stickyScroll', false);
+        this.storageService.setItem("stickyScroll", false);
       }
     });
   }
 
   scrollToBottom() {
-    let stickyScroll = this.storageService.getItem<boolean>('stickyScroll');
+    let stickyScroll = this.storageService.getItem<boolean>("stickyScroll");
     if (stickyScroll) {
       this.chatArea.nativeElement.parentElement.scrollTop =
         this.chatArea.nativeElement.parentElement.scrollHeight;

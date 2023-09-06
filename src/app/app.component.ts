@@ -1,6 +1,6 @@
 import { Component } from "@angular/core";
-import { Chat, ChatService } from "./chat.service";
-import { StorageService } from "./storage.service";
+import { Chat, ChatService } from "./services/chat.service";
+import { StorageService } from "./services/storage.service";
 
 @Component({
   selector: "app-root",
@@ -50,20 +50,33 @@ export class AppComponent {
   isViewerVisible = false;
   docUrl = "";
 
-  constructor(private chatService: ChatService, private storageService: StorageService) {
+  constructor(
+    private chatService: ChatService,
+    private storageService: StorageService
+  ) {
     this.chatService.currentChat.subscribe((chat) => (this.currentChat = chat));
-
 
     const ee_api_key = this.storageService.getItem<string>("ee_api_key") ?? "";
     this.chatService.updateProducts(ee_api_key);
   }
 
   updateChatConfig(config: any) {
-    this.chatService.updateChatConfig(this.currentChat.id, config.mode, config.model, config.product_id);
+    this.chatService.updateChatConfig(
+      this.currentChat.id,
+      config.mode,
+      config.model,
+      config.product_id
+    );
   }
 
   updateMessages(msgInfo: any) {
-    this.chatService.sendMessage(this.currentChat.id, msgInfo.message, msgInfo.mode, msgInfo.model, msgInfo.product_id);
+    this.chatService.sendMessage(
+      this.currentChat.id,
+      msgInfo.message,
+      msgInfo.mode,
+      msgInfo.model,
+      msgInfo.product_id
+    );
   }
 
   openViewer(url: string) {

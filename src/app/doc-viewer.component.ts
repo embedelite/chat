@@ -1,5 +1,4 @@
 import { Component, Input, OnChanges, SimpleChanges } from "@angular/core";
-import { DomSanitizer } from "@angular/platform-browser";
 
 @Component({
   selector: "app-doc-viewer",

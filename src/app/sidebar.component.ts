@@ -1,6 +1,6 @@
-import { Component, EventEmitter, Output } from "@angular/core";
-import { Chat, ChatService } from "./chat.service";
-import { KeyboardShortcutService } from "./keyboardshortcut.service";
+import { Component } from "@angular/core";
+import { Chat, ChatService } from "./services/chat.service";
+import { KeyboardShortcutService } from "./services/keyboardshortcut.service";
 
 @Component({
   selector: "app-chat-sidebar",
