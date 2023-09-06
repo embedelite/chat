@@ -157,7 +157,9 @@ export class ChatService {
 
   // Implementation for generating unique id
   private generateId(): string {
-    return (this.chats.length + 1).toString();
+    const timestamp = ((new Date().getTime() / 1000) | 0).toString(16);
+    const randomValue = crypto.getRandomValues(new Uint8Array(4)).join("");
+    return `${timestamp}-${randomValue}`;
   }
 
   sendMessage(
