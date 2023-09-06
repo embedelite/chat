@@ -1,4 +1,4 @@
-import { Component } from "@angular/core";
+import { Component, EventEmitter, Output } from "@angular/core";
 import { Chat, ChatService } from "./services/chat.service";
 import { KeyboardShortcutService } from "./services/keyboardshortcut.service";
 
@@ -9,7 +9,22 @@ import { KeyboardShortcutService } from "./services/keyboardshortcut.service";
       class="flex flex-col h-full p-4 overflow-y-auto bg-gray-200 dark:bg-gray-700"
     >
       <div class="grid grid-cols-4 gap-4">
-        <app-config class="custom-btn"></app-config>
+        <button
+          class="custom-btn mb-4mb-4 bg-primary-500 text-white rounded-md px-4 py-2"
+          (click)="openConfig()"
+        >
+          <svg
+            class="w-4 h-4 mr-2 text-white"
+            aria-hidden="true"
+            xmlns="http://www.w3.org/2000/svg"
+            fill="currentColor"
+            viewBox="0 0 20 20"
+          >
+            <path
+              d="M5 11.424V1a1 1 0 1 0-2 0v10.424a3.228 3.228 0 0 0 0 6.152V19a1 1 0 1 0 2 0v-1.424a3.228 3.228 0 0 0 0-6.152ZM19.25 14.5A3.243 3.243 0 0 0 17 11.424V1a1 1 0 0 0-2 0v10.424a3.227 3.227 0 0 0 0 6.152V19a1 1 0 1 0 2 0v-1.424a3.243 3.243 0 0 0 2.25-3.076Zm-6-9A3.243 3.243 0 0 0 11 2.424V1a1 1 0 0 0-2 0v1.424a3.228 3.228 0 0 0 0 6.152V19a1 1 0 1 0 2 0V8.576A3.243 3.243 0 0 0 13.25 5.5Z"
+            />
+          </svg>
+        </button>
         <button
           class="custom-btn col-span-3 mb-4 bg-primary-500 text-white rounded-md px-4 py-2"
           (click)="createNewChat()"
@@ -28,7 +43,7 @@ import { KeyboardShortcutService } from "./services/keyboardshortcut.service";
           <div
             (click)="selectChat(chat)"
             class="group relative cursor-pointer px-4 py-2 rounded-lg mb-2 flex items-center justify-between"
-            [class.active]="currentChat?.id === chat.id"
+            [class.active]="currentChat.id === chat.id"
           >
             <p class="text-gray-600 dark:text-gray-400 mb-0">
               {{ chat.title }}
@@ -60,7 +75,8 @@ import { KeyboardShortcutService } from "./services/keyboardshortcut.service";
   ],
 })
 export class ChatSidebarComponent {
-  showModal = false;
+  @Output() showConfig = new EventEmitter<boolean>();
+
   chats: Chat[] = [];
   currentChat: Chat = {
     id: "",
@@ -107,6 +123,7 @@ export class ChatSidebarComponent {
   }
 
   selectChat(chat: Chat) {
+    this.showConfig.emit(false);
     this.chatService.switchChat(chat);
   }
 
@@ -155,11 +172,16 @@ export class ChatSidebarComponent {
     return targetDate <= currentDate && targetDate >= pastDate;
   }
 
-  toggleConfig() {
-    this.showModal = !this.showModal;
+  openConfig() {
+    this.showConfig.emit(true);
+  }
+
+  closeConfig() {
+    this.showConfig.emit(false);
   }
 
   createNewChat() {
+    this.closeConfig();
     let newChat = this.chatService.addChat("New Chat");
     this.chatGroups = this.groupChatsByDate(this.chats);
     this.selectChat(newChat);

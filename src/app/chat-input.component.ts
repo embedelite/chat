@@ -232,7 +232,7 @@ export class ChatInputComponent {
 
   ngAfterViewChecked() {
     // Focus on textarea after view is initialized
-    //this.textArea.nativeElement.focus();
+    this.textArea.nativeElement.focus();
   }
 
   toggleChatConfig() {
