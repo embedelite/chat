@@ -71,7 +71,7 @@ import { ChatService } from "./services/chat.service";
               />
             </div>
 
-            <div class="flex p-0 m-0" style="margin:0">
+            <div class="flex p-0 m-2">
               <label
                 for="default_model"
                 class="pt-3 pr-3 shrink-0 block mb-2 text-sm font-medium text-gray-900 dark:text-white"
@@ -79,7 +79,7 @@ import { ChatService } from "./services/chat.service";
               >
               <select
                 id="default_model"
-                class="block py-2.5 px-0 w-full text-sm text-gray-500 bg-transparent border-0 border-b-2 border-gray-200 appearance-none dark:text-gray-400 dark:border-gray-700 focus:outline-none focus:ring-0 focus:border-gray-200 peer"
+                class="appearance-none px-3 py-2 h-10 text-sm leading-5 font-sans w-full border border-muted-300 bg-white text-muted-600 placeholder-muted-300 focus-visible:border-muted-300 focus-visible:shadow-lg dark:placeholder-muted-600 dark:bg-muted-700 dark:text-muted-200 dark:border-muted-600 dark:focus-visible:border-muted-600 focus-visible:ring-0 outline-transparent focus-visible:outline-2 focus-visible:outline-dashed focus-visible:outline-muted-300 dark:focus-visible:outline-muted-600 focus-visible:outline-offset-2 transition-all duration-300"
                 (change)="selectDefaultModel($event.target)"
               >
                 <option

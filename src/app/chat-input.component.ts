@@ -102,34 +102,56 @@ import {
             class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
             >Select an product id</label
           >
-          <select
-            id="countries"
-            class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-            (change)="selectProductOption($event.target)"
-          >
-            <option selected>Choose a country</option>
-            <option
-              value="vat-rules-es"
-              [selected]="product_id === 'vat-rules-es'"
+          <div class="relative">
+            <select
+              id="countries"
+              class="appearance-none px-3 py-2 h-10 text-sm leading-5 font-sans w-full border border-muted-300 bg-white text-muted-600 placeholder-muted-300 focus-visible:border-muted-300 focus-visible:shadow-lg dark:placeholder-muted-600 dark:bg-muted-700 dark:text-muted-200 dark:border-muted-600 dark:focus-visible:border-muted-600 focus-visible:ring-0 outline-transparent focus-visible:outline-2 focus-visible:outline-dashed focus-visible:outline-muted-300 dark:focus-visible:outline-muted-600 focus-visible:outline-offset-2 transition-all duration-300"
+              (change)="selectProductOption($event.target)"
             >
-              vat-rules-es
-            </option>
-            <option
-              value="vat-rules-de"
-              [selected]="product_id === 'vat-rules-de'"
+              <option selected>Choose a country</option>
+              <option
+                value="vat-rules-es"
+                [selected]="product_id === 'vat-rules-es'"
+              >
+                vat-rules-es
+              </option>
+              <option
+                value="vat-rules-de"
+                [selected]="product_id === 'vat-rules-de'"
+              >
+                vat-rules-de
+              </option>
+              <option
+                value="vat-rules-fr"
+                [selected]="product_id === 'vat-rules-fr'"
+              >
+                vat-rules-fr
+              </option>
+              <option
+                *ngIf="showExtraProduct"
+                value="{{ product_id }}"
+                selected
+              >
+                {{ product_id }}
+              </option>
+            </select>
+            <div
+              class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-300"
             >
-              vat-rules-de
-            </option>
-            <option
-              value="vat-rules-fr"
-              [selected]="product_id === 'vat-rules-fr'"
-            >
-              vat-rules-fr
-            </option>
-            <option *ngIf="showExtraProduct" value="{{ product_id }}" selected>
-              {{ product_id }}
-            </option>
-          </select>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill="currentColor"
+                class="h-4 w-4"
+                viewBox="0 0 20 20"
+              >
+                <path
+                  fill-rule="evenodd"
+                  d="M10 15a.5.5 0 01-.354-.146l-4.5-4.5a.5.5 0 01.708-.708L10 13.793l4.146-4.147a.5.5 0 01.708 0 .5.5 0 010 .708l-4.5 4.5A.5.5 0 0110 15z"
+                  clip-rule="evenodd"
+                />
+              </svg>
+            </div>
+          </div>
         </div>
         <hr class="my-0" />
         <div
@@ -158,19 +180,39 @@ import {
             class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
             >Select a model</label
           >
-          <select
-            id="countries"
-            class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-            (change)="selectModelOption($event.target)"
-          >
-            <option
-              value="gpt-3.5-turbo"
-              [selected]="model === 'gpt-3.5-turbo'"
+          <div class="relative">
+            <select
+              id="countries"
+              class="appearance-none px-3 py-2 h-10 text-sm leading-5 font-sans w-full border border-muted-300 bg-white text-muted-600 placeholder-muted-300 focus-visible:border-muted-300 focus-visible:shadow-lg dark:placeholder-muted-600 dark:bg-muted-700 dark:text-muted-200 dark:border-muted-600 dark:focus-visible:border-muted-600 focus-visible:ring-0 outline-transparent focus-visible:outline-2 focus-visible:outline-dashed focus-visible:outline-muted-300 dark:focus-visible:outline-muted-600 focus-visible:outline-offset-2 transition-all duration-300"
+              (change)="selectModelOption($event.target)"
             >
-              gpt-3.5-turbo
-            </option>
-            <option value="gpt-4" [selected]="model === 'gpt-4'">gpt-4</option>
-          </select>
+              <option
+                value="gpt-3.5-turbo"
+                [selected]="model === 'gpt-3.5-turbo'"
+              >
+                gpt-3.5-turbo
+              </option>
+              <option value="gpt-4" [selected]="model === 'gpt-4'">
+                gpt-4
+              </option>
+            </select>
+            <div
+              class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-300"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill="currentColor"
+                class="h-4 w-4"
+                viewBox="0 0 20 20"
+              >
+                <path
+                  fill-rule="evenodd"
+                  d="M10 15a.5.5 0 01-.354-.146l-4.5-4.5a.5.5 0 01.708-.708L10 13.793l4.146-4.147a.5.5 0 01.708 0 .5.5 0 010 .708l-4.5 4.5A.5.5 0 0110 15z"
+                  clip-rule="evenodd"
+                />
+              </svg>
+            </div>
+          </div>
         </div>
       </div>
     </div>
