@@ -1,7 +1,7 @@
 [package]
 name = "embedelite-native"
-version = "0.0.0"
-description = "A Tauri App"
+version = "0.1.0"
+description = "EmbedElite Chat"
 authors = ["you"]
 license = ""
 repository = ""
