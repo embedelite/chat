@@ -1,11 +1,12 @@
-# Chat
+# Chat ([demo](https://demo.embedelite.com/))
 
-The offical EmbedElite Chat, open sourced and free. Nothing is store in the cloud, all stays in your own computer.
+The offical EmbedElite Chat, open sourced and free. Nothing is store in the cloud, all stays in your own computer cookies. Test it here [demo.embedelite.com/](https://demo.embedelite.com/). 🔥
+
 <p align="center">
    <img width="1205" alt="image" src="https://github.com/embedelite/chat/assets/7406833/4df37fa5-8908-4c8a-871f-aace757dfe54">
 </p>
 
-<br>EE Chat contains binary for Mac, Windows, iPhone and web interface, just head to [Releases](https://github.com/embedelite/chat/releases).
+<br>EE Chat contains binary for Mac, Windows, iPhone and web interface, just head to [Releases](https://github.com/embedelite/chat/releases) and download the one for your OS. If you want to launch the web version already running and free go to [demo.embedelite.com/](https://demo.embedelite.com/).
 
 You can use your EE key or OpenAI key. You can use it with specifi EE embedings or just as a normal chat with your OpenAI key
 
