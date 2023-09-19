@@ -1,6 +1,6 @@
 # Chat ([demo](https://demo.embedelite.com/))
 
-The offical EmbedElite Chat, open sourced and free. Nothing is store in the cloud, all stays in your own computer cookies. Test it here [demo.embedelite.com/](https://demo.embedelite.com/). 🔥
+The offical EmbedElite Chat, open sourced and free. Nothing is stored in the cloud, all stays in your own computer cookies. Test it here [demo.embedelite.com/](https://demo.embedelite.com/). 🔥
 
 <p align="center">
    <img width="1205" alt="image" src="https://github.com/embedelite/chat/assets/7406833/4df37fa5-8908-4c8a-871f-aace757dfe54">
