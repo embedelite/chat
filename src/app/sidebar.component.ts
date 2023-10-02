@@ -11,7 +11,7 @@ import { KeyboardShortcutService } from "./services/keyboardshortcut.service";
       <div class="grid grid-cols-4 gap-4">
         <button
           class="custom-btn mb-4mb-4 bg-primary-500 text-white rounded-md px-4 py-2"
-          (click)="openConfig()"
+          routerLink="/settings"
         >
           <svg
             class="w-4 h-4 mr-2 text-white"

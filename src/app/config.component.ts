@@ -5,7 +5,7 @@ import { ChatService } from "./services/chat.service";
 @Component({
   selector: "app-config",
   template: `
-    <div class="w-full h-full flex items-center justify-center p-6">
+    <div class="w-full h-full flex items-center justify-center p-6 ">
       <!-- Modal content -->
       <div
         class="relative bg-white rounded-lg shadow dark:bg-gray-700 w-4/5 max-h-full"
