@@ -6,7 +6,7 @@ import { Router } from "@angular/router";
 @Component({
   selector: "app-config",
   template: `
-    <div class="w-full h-full flex items-center justify-center p-6 ">
+    <div class="w-full h-full flex items-start justify-center p-6 ">
       <!-- Modal content -->
       <div
         class="relative bg-white rounded-lg shadow dark:bg-gray-700 w-4/5 max-h-full"

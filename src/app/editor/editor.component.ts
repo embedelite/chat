@@ -4,11 +4,11 @@ import { StorageService } from "../services/storage.service";
 @Component({
   selector: "app-editor",
   template: `
-    <div class="w-full h-full flex items-center justify-center p-6">
+    <div class="w-full h-full flex items-start justify-center p-6 ">
       <div
         class="relative bg-white rounded-lg shadow dark:bg-gray-700 w-4/5 max-h-full"
       >
-        <div class="px-6 py-6 lg:px-8">
+        <div class="p-6 lg:px-8 space-y-4">
           <h3 class="mb-4 text-xl font-medium text-gray-900 dark:text-white">
             Editor Configuration
           </h3>
@@ -21,7 +21,7 @@ import { StorageService } from "../services/storage.service";
               >
               <select
                 id="product-dropdown"
-                class="bg-gray-50 border border-gray-300 text-gray-900 rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:text-white"
+                class="appearance-none px-3 py-2 h-10 text-sm leading-5 font-sans w-full border border-muted-300 bg-white text-muted-600 placeholder-muted-300 focus-visible:border-muted-300 focus-visible:shadow-lg dark:placeholder-muted-600 dark:bg-muted-700 dark:text-muted-200 dark:border-muted-600 dark:focus-visible:border-muted-600 focus-visible:ring-0 outline-transparent focus-visible:outline-2 focus-visible:outline-dashed focus-visible:outline-muted-300 dark:focus-visible:outline-muted-600 focus-visible:outline-offset-2 transition-all duration-300"
                 required
                 (change)="onProductChange($event)"
               >
@@ -45,13 +45,15 @@ import { StorageService } from "../services/storage.service";
                 (change)="onFileSelected($event)"
               />
             </div>
-            <button
-              type="submit"
-              class="text-white bg-primary-500 hover:bg-primary-800 focus:ring-4 focus:outline-none focus:ring-primary-300 font-medium rounded-lg text-sm px-4 py-2.5 text-center dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800 float-right"
-              (click)="saveEditorConfig()"
-            >
-              Save
-            </button>
+            <div>
+              <button
+                type="submit"
+                class="text-white bg-primary-500 hover:bg-primary-800 focus:ring-4 focus:outline-none focus:ring-primary-300 font-medium rounded-lg text-sm px-4 py-2.5 text-center dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800 max-w-max p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:text-white float-right mt-4 mb-4"
+                (click)="saveEditorConfig()"
+              >
+                Save
+              </button>
+            </div>
           </form>
         </div>
       </div>
