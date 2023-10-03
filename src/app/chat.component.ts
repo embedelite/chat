@@ -4,10 +4,10 @@ import { Chat, ChatService } from "./services/chat.service";
 @Component({
   selector: "app-chat",
   template: `
-    <div class="flex h-screen flex-col bg-white dark:bg-gray-800 shadow-md">
-      <div class="flex-grow flex overflow-hidden">
+    <div class="flex h-full flex-col bg-white dark:bg-gray-800 shadow-md">
+      <div class="flex overflow-hidden">
         <app-chat-sidebar
-          class="h-full w-64 flex-shrink-0"
+          class="overflow-y-auto h-full w-64 flex-shrink-0"
           (showConfig)="updateShowConfig($event)"
         ></app-chat-sidebar>
         <ng-container>
@@ -37,7 +37,16 @@ import { Chat, ChatService } from "./services/chat.service";
       </div>
     </div>
   `,
-  styles: [],
+  styles: [
+    `
+      :host {
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+      }
+    `,
+  ],
 })
 export class ChatComponent {
   currentChat: Chat = {

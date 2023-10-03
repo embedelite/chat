@@ -39,7 +39,8 @@
         "resizable": true,
         "title": "EmbedElite Chat",
         "width": 1024,
-        "height": 1024
+        "height": 1024,
+        "titleBarStyle": "Transparent"
       }
     ]
   }

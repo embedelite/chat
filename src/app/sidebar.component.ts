@@ -5,58 +5,44 @@ import { KeyboardShortcutService } from "./services/keyboardshortcut.service";
 @Component({
   selector: "app-chat-sidebar",
   template: `
-    <div
-      class="flex flex-col h-full p-4 overflow-y-auto bg-gray-200 dark:bg-gray-700"
-    >
+    <div class="flex flex-col h-full p-4 bg-gray-200 dark:bg-gray-700">
       <div class="grid grid-cols-4 gap-4">
-        <button
-          class="custom-btn mb-4mb-4 bg-primary-500 text-white rounded-md px-4 py-2"
-          routerLink="/settings"
-        >
-          <svg
-            class="w-4 h-4 mr-2 text-white"
-            aria-hidden="true"
-            xmlns="http://www.w3.org/2000/svg"
-            fill="currentColor"
-            viewBox="0 0 20 20"
+        <div class="col-span-4">
+          <button
+            class="custom-btn w-full mb-4 bg-primary-500 text-white rounded-md px-4 py-2"
+            (click)="createNewChat()"
           >
-            <path
-              d="M5 11.424V1a1 1 0 1 0-2 0v10.424a3.228 3.228 0 0 0 0 6.152V19a1 1 0 1 0 2 0v-1.424a3.228 3.228 0 0 0 0-6.152ZM19.25 14.5A3.243 3.243 0 0 0 17 11.424V1a1 1 0 0 0-2 0v10.424a3.227 3.227 0 0 0 0 6.152V19a1 1 0 1 0 2 0v-1.424a3.243 3.243 0 0 0 2.25-3.076Zm-6-9A3.243 3.243 0 0 0 11 2.424V1a1 1 0 0 0-2 0v1.424a3.228 3.228 0 0 0 0 6.152V19a1 1 0 1 0 2 0V8.576A3.243 3.243 0 0 0 13.25 5.5Z"
-            />
-          </svg>
-        </button>
-        <button
-          class="custom-btn col-span-3 mb-4 bg-primary-500 text-white rounded-md px-4 py-2"
-          (click)="createNewChat()"
-        >
-          + New chat
-        </button>
-      </div>
-      <ng-container *ngFor="let group of chatGroups">
-        <h5
-          *ngIf="group.chats.length"
-          class="mb-2 font-bold text-gray-700 dark:text-gray-300"
-        >
-          {{ group.title }}
-        </h5>
-        <div *ngFor="let chat of group.chats; let i = index">
-          <div
-            (click)="selectChat(chat)"
-            class="group relative cursor-pointer px-4 py-2 rounded-lg mb-2 flex items-center justify-between"
-            [class.active]="currentChat.id === chat.id"
-          >
-            <p class="text-gray-600 dark:text-gray-400 mb-0">
-              {{ chat.title }}
-            </p>
-            <span
-              (click)="deleteChat(chat); $event.stopPropagation()"
-              class="ml-4 opacity-0 group-hover:opacity-100"
-            >
-              🗑️
-            </span>
-          </div>
+            + New chat
+          </button>
         </div>
-      </ng-container>
+      </div>
+      <div class="overflow-y-auto">
+        <ng-container *ngFor="let group of chatGroups">
+          <h5
+            *ngIf="group.chats.length"
+            class="mb-2 font-bold text-gray-700 dark:text-gray-300"
+          >
+            {{ group.title }}
+          </h5>
+          <div *ngFor="let chat of group.chats; let i = index">
+            <div
+              (click)="selectChat(chat)"
+              class="group relative cursor-pointer px-4 py-2 rounded-lg mb-2 flex items-center justify-between"
+              [class.active]="currentChat.id === chat.id"
+            >
+              <p class="text-gray-600 dark:text-gray-400 mb-0">
+                {{ chat.title }}
+              </p>
+              <span
+                (click)="deleteChat(chat); $event.stopPropagation()"
+                class="ml-4 opacity-0 group-hover:opacity-100"
+              >
+                🗑️
+              </span>
+            </div>
+          </div>
+        </ng-container>
+      </div>
     </div>
   `,
   styles: [

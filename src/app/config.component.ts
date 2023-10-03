@@ -1,6 +1,7 @@
 import { Component, EventEmitter, Output } from "@angular/core";
 import { StorageService } from "./services/storage.service";
 import { ChatService } from "./services/chat.service";
+import { Router } from "@angular/router";
 
 @Component({
   selector: "app-config",
@@ -135,7 +136,8 @@ export class ConfigComponent {
 
   constructor(
     private chatService: ChatService,
-    private storageService: StorageService
+    private storageService: StorageService,
+    private router: Router
   ) {
     this.ee_api_key = "";
     const ee_api_key = this.storageService.getItem<string>("ee_api_key");
@@ -171,6 +173,7 @@ export class ConfigComponent {
   }
 
   closeConfig() {
-    this.showConfig.emit(false);
+    //go back one page
+    this.router.navigate(["/"]);
   }
 }
