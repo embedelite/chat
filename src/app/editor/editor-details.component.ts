@@ -1,5 +1,7 @@
 import { Component, EventEmitter, Output } from "@angular/core";
 import { StorageService } from "../services/storage.service";
+import { ActivatedRoute } from "@angular/router";
+import { Product, ProductService } from "../services/product.service";
 
 @Component({
   selector: "app-editor",
@@ -15,20 +17,17 @@ import { StorageService } from "../services/storage.service";
           <form class="space-y-6">
             <div>
               <label
-                for="product-dropdown"
+                for="product-name"
                 class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
-                >Select Product</label
+                >Product Name</label
               >
-              <select
-                id="product-dropdown"
+              <input
+                id="product-name"
+                name="product-name"
+                [(ngModel)]="selectedProduct"
                 class="appearance-none px-3 py-2 h-10 text-sm leading-5 font-sans w-full border border-muted-300 bg-white text-muted-600 placeholder-muted-300 focus-visible:border-muted-300 focus-visible:shadow-lg dark:placeholder-muted-600 dark:bg-muted-700 dark:text-muted-200 dark:border-muted-600 dark:focus-visible:border-muted-600 focus-visible:ring-0 outline-transparent focus-visible:outline-2 focus-visible:outline-dashed focus-visible:outline-muted-300 dark:focus-visible:outline-muted-600 focus-visible:outline-offset-2 transition-all duration-300"
                 required
-                (change)="onProductChange($event)"
-              >
-                <option *ngFor="let product of products" [value]="product">
-                  {{ product }}
-                </option>
-              </select>
+              />
             </div>
             <div>
               <label
@@ -64,20 +63,23 @@ import { StorageService } from "../services/storage.service";
 export class EditorComponent {
   @Output() showEditor = new EventEmitter<boolean>();
 
-  selectedProduct: string;
-  products: string[];
+  product?: Product;
+  selectedProduct: string = "";
   file: File | null = null;
 
-  constructor(private storageService: StorageService) {
-    this.products = ["Product1", "Product2", "Product3"];
-    this.selectedProduct = this.products[0]; // default to first product
-  }
+  constructor(
+    private route: ActivatedRoute,
+    private productService: ProductService,
+    private storageService: StorageService
+  ) {}
 
-  onProductChange(selectedProduct: Event) {
-    const target = selectedProduct.target as HTMLSelectElement;
-    if (target) {
-      this.selectedProduct = target.value;
+  async ngOnInit() {
+    const productId = this.route.snapshot.paramMap.get("id");
+    if (productId) {
+      this.product = await this.productService.getProduct(productId);
     }
+    // replace the dropdown with input for the product
+    this.selectedProduct = this.product?.name || "";
   }
 
   onFileSelected(event: Event) {
@@ -87,9 +89,15 @@ export class EditorComponent {
     }
   }
 
-  saveEditorConfig() {
-    this.storageService.setItem("selected_product", this.selectedProduct);
-    // TODO: Implement logic to upload selected file
-    this.showEditor.emit(false);
+  async saveEditorConfig() {
+    if (this.product) {
+      this.product.name = this.selectedProduct;
+
+      await this.productService.updateProduct(this.product);
+
+      this.storageService.setItem("selected_product", this.selectedProduct);
+      // TODO: Implement logic to upload selected file
+      this.showEditor.emit(false);
+    }
   }
 }

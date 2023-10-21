@@ -12,9 +12,11 @@ import { ChatSidebarComponent } from "./sidebar.component";
 import { PdfViewerModule } from "ng2-pdf-viewer";
 import { DocViewerComponent } from "./doc-viewer.component";
 import { SafePipe } from "./shared/safe.pipe";
-import { EditorComponent } from "./editor/editor.component";
+import { EditorComponent } from "./editor/editor-details.component";
 import { ChatComponent } from "./chat.component";
 import { AppRoutingModule } from "./app-routing.module";
+import { EditorOverviewComponent } from "./editor/editor-overview.component";
+import { HttpClientModule } from "@angular/common/http";
 
 @NgModule({
   declarations: [
@@ -28,9 +30,16 @@ import { AppRoutingModule } from "./app-routing.module";
     DocViewerComponent,
     ConfigComponent,
     EditorComponent,
+    EditorOverviewComponent,
     SafePipe,
   ],
-  imports: [AppRoutingModule, BrowserModule, FormsModule, PdfViewerModule],
+  imports: [
+    AppRoutingModule,
+    BrowserModule,
+    HttpClientModule,
+    FormsModule,
+    PdfViewerModule,
+  ],
   providers: [],
   bootstrap: [AppComponent],
 })
