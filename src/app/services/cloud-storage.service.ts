@@ -8,6 +8,10 @@ import {
 } from "@azure/storage-blob";
 import { StorageService } from "./storage.service";
 
+interface ProgressEvent {
+  loadedBytes: number;
+}
+
 @Injectable({ providedIn: "root" })
 export class CloudStorageService {
   private containerName?: string;
@@ -15,20 +19,31 @@ export class CloudStorageService {
     "https://api.dev.embedelite.com/files/token";
   private readonly blobUrl: string =
     "https://stuploadsprod.blob.core.windows.net";
-  private authorizationData: Promise<{ sas_token: string; blob_url: string }> =
-    this.refreshAuthorization();
+  private authorizationData: Promise<{
+    sas_token: string;
+    blob_url: string;
+    expiry: Date;
+  }> = this.refreshAuthorization();
 
   constructor(
     private http: HttpClient,
     private storageService: StorageService
   ) {
     this.refreshAuthorization();
+
+    setInterval(async () => {
+      const authData = await this.authorizationData;
+      if (this.isTokenExpiryClose(authData)) {
+        this.authorizationData = this.refreshAuthorization();
+      }
+    }, 60 * 1000); // Check every minute
   }
 
   // Refreshing the SAS token
   private refreshAuthorization(): Promise<{
     sas_token: string;
     blob_url: string;
+    expiry: Date;
   }> {
     return (async () => {
       const ee_api_key = this.storageService.getItem<string>("ee_api_key");
@@ -48,9 +63,10 @@ export class CloudStorageService {
       }
 
       const { sas_token, blob_url } = response;
+      const expiry = this.decodeTokenExpiry(sas_token); // Get token expiry
 
       this.containerName = blob_url.substr(blob_url.lastIndexOf("/") + 1);
-      return { sas_token, blob_url };
+      return { sas_token, blob_url, expiry };
     })();
   }
 
@@ -114,6 +130,40 @@ export class CloudStorageService {
     return uploadResponse;
   }
 
+  async storeFiles(
+    file: File,
+    path: string,
+    onProgress: (progress: number) => void // explicit `void` return type
+  ): Promise<BlobUploadCommonResponse> {
+    const filePath = `${path}/${file.name}`;
+    const blobServiceClient = await this.getBlobServiceClient();
+
+    const blockBlobClient = blobServiceClient
+      .getContainerClient(this.containerName!)
+      .getBlockBlobClient(filePath);
+
+    const blockSize = 512 * 1024; // 512KB
+
+    const concurrency = 20;
+
+    const uploadOptions = {
+      blockSize,
+      maxSingleShotSize: blockSize,
+      concurrency,
+      onProgress: (progress: ProgressEvent) => {
+        const uploadedFraction = (progress.loadedBytes / file.size) * 100; // convert decimal to percentage
+        onProgress(uploadedFraction);
+      },
+    };
+
+    const uploadResponse = await blockBlobClient.uploadData(
+      file,
+      uploadOptions
+    );
+
+    return uploadResponse;
+  }
+
   async getFile(filename: string): Promise<string> {
     // get the blob service client
     const blobServiceClient = await this.getBlobServiceClient();
@@ -130,6 +180,14 @@ export class CloudStorageService {
     return blobBody;
   }
 
+  async deleteFile(path: string): Promise<void> {
+    const blobServiceClient = await this.getBlobServiceClient();
+    const blobClient = blobServiceClient
+      .getContainerClient(this.containerName!)
+      .getBlobClient(path);
+    await blobClient.delete();
+  }
+
   // Converts a browser Blob into a string.
   async blobToString(blob: Blob): Promise<string> {
     return new Promise((resolve, reject) => {
@@ -138,5 +196,41 @@ export class CloudStorageService {
       reader.onerror = reject;
       reader.readAsText(blob);
     });
+  }
+
+  private decodeTokenExpiry(sasToken: string): Date {
+    // Split the token into separate key=value strings
+    const parts = sasToken.split("&");
+    let tokenExpiry: Date | undefined;
+    // Find the "se" part
+    for (let part of parts) {
+      if (part.includes("se=")) {
+        // Convert the "se" part into a proper date time string (replace the URL encoding)
+        const expiryDateTimeString = decodeURIComponent(
+          part.replace("se=", "")
+        );
+        tokenExpiry = new Date(expiryDateTimeString);
+        break;
+      }
+    }
+
+    if (tokenExpiry === undefined) {
+      throw new Error("Could not find expiry date in SAS token");
+    }
+
+    return tokenExpiry;
+  }
+
+  private isTokenExpiryClose(authData: {
+    sas_token: string;
+    blob_url: string;
+    expiry: Date;
+  }): boolean {
+    // Get the current date time
+    const currentDateTime = new Date();
+    // Adjust it to X minutes in the future
+    currentDateTime.setMinutes(currentDateTime.getMinutes() + 5); // 5 minutes buffer
+    // Compare
+    return authData.expiry <= currentDateTime;
   }
 }
