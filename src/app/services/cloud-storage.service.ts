@@ -11,7 +11,8 @@ import { StorageService } from "./storage.service";
 interface ProgressEvent {
   loadedBytes: number;
 }
-
+// define the block size for the file chunks; Azure supports up to 100MB (in bytes)
+const UPLOAD_BLOCK_SIZE = 512 * 1024;
 @Injectable({ providedIn: "root" })
 export class CloudStorageService {
   private containerName?: string;
@@ -109,16 +110,13 @@ export class CloudStorageService {
       .getContainerClient(this.containerName!)
       .getBlockBlobClient(file.name);
 
-    // define the block size for the file chunks; Azure supports up to 100MB (in bytes)
-    const blockSize = 4 * 1024 * 1024; // 4MB
-
     // define concurrency for simultaneous uploading of the blocks; can be adjusted according to network conditions for optimal results
     const concurrency = 20;
 
     // upload the file in parallel
     const uploadOptions = {
-      blockSize,
-      maxSingleShotSize: blockSize,
+      UPLOAD_BLOCK_SIZE,
+      maxSingleShotSize: UPLOAD_BLOCK_SIZE,
       concurrency,
     };
     const uploadResponse = await blockBlobClient.uploadData(
@@ -142,13 +140,11 @@ export class CloudStorageService {
       .getContainerClient(this.containerName!)
       .getBlockBlobClient(filePath);
 
-    const blockSize = 512 * 1024; // 512KB
-
     const concurrency = 20;
 
     const uploadOptions = {
-      blockSize,
-      maxSingleShotSize: blockSize,
+      UPLOAD_BLOCK_SIZE,
+      maxSingleShotSize: UPLOAD_BLOCK_SIZE,
       concurrency,
       onProgress: (progress: ProgressEvent) => {
         const uploadedFraction = (progress.loadedBytes / file.size) * 100; // convert decimal to percentage

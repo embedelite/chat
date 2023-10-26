@@ -139,7 +139,7 @@ interface FileUploadInfo {
             <div>
               <button
                 type="submit"
-                class="text-white bg-primary-500 hover:bg-primary-800 focus:ring-4 focus:outline-none focus:ring-primary-300 font-medium rounded-lg text-sm px-4 py-2.5 text-center dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800 max-w-max p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:text-white float-right mt-4 mb-4"
+                class="text-white bg-primary-500 hover:bg-primary-800 focus:ring-4 focus:outline-none focus:ring-primary-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800 float-right mt-4 mb-4"
                 (click)="saveEditorConfig()"
               >
                 Save
@@ -167,6 +167,14 @@ export class EditorComponent {
 
   async ngOnInit() {
     const productId = this.route.snapshot.paramMap.get("id");
+    if (productId === "new") {
+      this.product = {
+        id: "",
+        name: "",
+        files: [],
+      };
+      return;
+    }
     if (productId) {
       await this.initializeProduct(productId);
     }
@@ -218,50 +226,50 @@ export class EditorComponent {
   }
 
   async saveEditorConfig() {
-    if (this.product) {
-      this.product.name = this.selectedProduct;
-      this.product.files = [];
-
-      const uploadPromises = this.files.map((fileInfo, index) => {
-        //TODO: Update SAS token to allow delete
-        // if (fileInfo.deleted) {
-        //   return this.cloudStorageService.deleteFile(
-        //     `${this.product?.id}/${fileInfo.file.name}`
-        //   );
-        // }
-        if (fileInfo.uploadProgress !== 100) {
-          return this.cloudStorageService.storeFiles(
-            fileInfo.file,
-            this.product!.id,
-            (progress) => {
-              const individualFileProgress = Math.floor(progress);
-              this.files[index].uploadProgress = individualFileProgress;
-
-              console.log(
-                `Upload Progress of ${fileInfo.file.name}: ${individualFileProgress}% `
-              );
-
-              if (individualFileProgress === 100) {
-                this.files[index].isFileUploaded = true;
-              }
-            }
-          );
-        } else {
-          return null;
-        }
-      });
-
-      await Promise.all(uploadPromises.filter((promise) => promise !== null));
-
-      this.product.files = this.files
-        .filter((fileInfo) => !fileInfo.deleted) // Remove deleted files
-        .map((fileInfo) => fileInfo.file.name);
-
-      this.product = await this.productService.updateProduct(this.product);
-      if (this.product) {
-        await this.initializeProduct(this.product.id);
-      }
-      this.showEditor.emit(false);
+    if (!this.product) {
+      return;
     }
+    this.product.name = this.selectedProduct;
+    this.product.files = [];
+
+    const uploadPromises = this.files.map((fileInfo, index) => {
+      if (fileInfo.uploadProgress !== 100) {
+        return this.cloudStorageService.storeFiles(
+          fileInfo.file,
+          this.product!.id,
+          (progress) => {
+            const individualFileProgress = Math.floor(progress);
+            this.files[index].uploadProgress = individualFileProgress;
+
+            console.log(
+              `Upload Progress of ${fileInfo.file.name}: ${individualFileProgress}% `
+            );
+
+            if (individualFileProgress === 100) {
+              this.files[index].isFileUploaded = true;
+            }
+          }
+        );
+      } else {
+        return null;
+      }
+    });
+
+    await Promise.all(uploadPromises.filter((promise) => promise !== null));
+
+    this.product.files = this.files
+      .filter((fileInfo) => !fileInfo.deleted)
+      .map((fileInfo) => fileInfo.file.name);
+
+    if (this.product.id === "") {
+      this.product = await this.productService.createProduct(this.product);
+    } else {
+      this.product = await this.productService.updateProduct(this.product);
+    }
+
+    if (this.product) {
+      await this.initializeProduct(this.product.id);
+    }
+    this.showEditor.emit(false);
   }
 }

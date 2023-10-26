@@ -2,6 +2,7 @@ import { Component, OnInit } from "@angular/core";
 import { StorageService } from "../services/storage.service";
 import { CloudStorageService } from "../services/cloud-storage.service";
 import { ProductService } from "../services/product.service";
+import { Router } from "@angular/router";
 
 @Component({
   selector: "app-editor-overview",
@@ -14,6 +15,13 @@ import { ProductService } from "../services/product.service";
           <h3 class="mb-4 text-xl font-medium text-gray-900 dark:text-white">
             My Knowledge Bases
           </h3>
+
+          <button
+            class="text-white bg-primary-500 hover:bg-primary-800 focus:ring-4 focus:outline-none focus:ring-primary-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800"
+            (click)="createNewProduct()"
+          >
+            Create New Product
+          </button>
           <ul class="space-y-4">
             <li
               *ngFor="let product of products"
@@ -38,10 +46,14 @@ import { ProductService } from "../services/product.service";
 export class EditorOverviewComponent implements OnInit {
   products: any[] = []; // Replace any with your product data type
 
-  constructor(private productService: ProductService) {}
+  constructor(private productService: ProductService, private router: Router) {}
 
   async ngOnInit() {
     this.products = await this.productService.listProducts();
     // more logic...
+  }
+
+  createNewProduct() {
+    this.router.navigate(["/editor/new"]);
   }
 }

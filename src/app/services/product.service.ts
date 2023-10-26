@@ -27,7 +27,7 @@ export class ProductService {
     return product;
   }
 
-  async createProduct(product: Product): Promise<void> {
+  async createProduct(product: Product): Promise<Product> {
     const products = await this.listProducts();
     const index = products.findIndex((p) => p.id === product.id);
     if (index !== -1) {
@@ -39,6 +39,7 @@ export class ProductService {
 
     const file = this.jsonObjectToFile(products, "index.json");
     await this.cloudStorageService.storeFile(file);
+    return product;
   }
 
   async updateProduct(product: Product): Promise<Product> {

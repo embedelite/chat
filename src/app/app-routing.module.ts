@@ -9,7 +9,8 @@ const routes: Routes = [
   { path: "chat", component: ChatComponent },
   { path: "settings", component: ConfigComponent },
   { path: "editor", component: EditorOverviewComponent },
-  { path: "editor/:id", component: EditorComponent },
+  { path: "editor/:id", component: EditorComponent, pathMatch: "full" },
+  { path: "editor/new", component: EditorComponent },
   { path: "", redirectTo: "/chat", pathMatch: "full" }, // default route
 ];
 
