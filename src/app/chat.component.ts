@@ -5,7 +5,7 @@ import { Chat, ChatService } from "./services/chat.service";
   selector: "app-chat",
   template: `
     <div class="flex h-full flex-col bg-white dark:bg-gray-800 shadow-md">
-      <div class="flex overflow-hidden">
+      <div class="flex overflow-hidden h-screen">
         <app-chat-sidebar
           class="overflow-y-auto h-full w-64 flex-shrink-0"
           (showConfig)="updateShowConfig($event)"
