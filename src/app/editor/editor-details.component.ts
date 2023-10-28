@@ -1,15 +1,19 @@
-import { Component, EventEmitter, Output } from "@angular/core";
+import {
+  Component,
+  EventEmitter,
+  OnDestroy,
+  OnInit,
+  Output,
+} from "@angular/core";
 import { StorageService } from "../services/storage.service";
 import { ActivatedRoute } from "@angular/router";
-import { Product, ProductService } from "../services/product.service";
+import {
+  FileUploadInfo,
+  Product,
+  ProductService,
+} from "../services/product.service";
 import { CloudStorageService } from "../services/cloud-storage.service";
-
-interface FileUploadInfo {
-  file: File;
-  uploadProgress: number;
-  isFileUploaded: boolean;
-  deleted?: boolean;
-}
+import { Subscription } from "rxjs";
 
 @Component({
   selector: "app-editor",
@@ -61,80 +65,82 @@ interface FileUploadInfo {
               </button>
             </div>
             <div
-              *ngFor="let fileInfo of files; let i = index"
               class="file-upload p-4 gap-4 rounded-xl bg-white dark:bg-gray-700 shadow-md flex items-center justify-between w-full bg-white text-gray-600 my-3 border-2 border-muted-300"
+              *ngFor="let fileInfo of files; let i = index"
             >
               <h4 class="font-medium text-gray-800 dark:text-white flex-grow">
                 {{ fileInfo.file.name }}
               </h4>
-              <div
-                class="px-3 py-1 text-xs font-semibold rounded-full"
-                [ngClass]="{
-                  'bg-red-200 text-red-500':
-                    (fileInfo.uploadProgress !== 100 &&
-                      !fileInfo.isFileUploaded) ||
-                    fileInfo.deleted,
-                  'bg-green-200 text-green-500':
-                    fileInfo.uploadProgress === 100 ||
-                    (fileInfo.isFileUploaded && !fileInfo.deleted)
-                }"
-                style="width: 150px;"
-              >
+              <div class="file-info flex-grow flex justify-end items-center">
                 <div
-                  class="h-full rounded-full"
-                  [style.width.%]="fileInfo.uploadProgress"
+                  class="px-3 py-1 text-xs font-semibold rounded-full w-36"
                   [ngClass]="{
-                    'bg-red-500':
-                      fileInfo.uploadProgress === 0 || fileInfo.deleted,
-                    'bg-green-500':
-                      fileInfo.uploadProgress > 0 && !fileInfo.deleted
+                    'bg-red-200 text-red-500':
+                      (fileInfo.uploadProgress !== 100 &&
+                        !fileInfo.isFileUploaded) ||
+                      fileInfo.deleted,
+                    'bg-green-200 text-green-500':
+                      fileInfo.uploadProgress === 100 ||
+                      (fileInfo.isFileUploaded && !fileInfo.deleted),
+                    'bg-yellow-400 text-yellow-700':
+                      fileInfo.uploadProgress > 0 &&
+                      fileInfo.uploadProgress < 100 &&
+                      !fileInfo.isFileUploaded &&
+                      !fileInfo.deleted
                   }"
-                ></div>
-                <span
-                  class="relative inset-0 flex items-center justify-center pointer-events-none"
                 >
-                  {{
-                    fileInfo.deleted
-                      ? "Marked for Deletion"
-                      : (fileInfo.uploadProgress | number : "1.0-0")
-                  }}{{ fileInfo.deleted ? "" : "%" }}
-                </span>
+                  <span
+                    class="relative inset-0 flex items-center justify-center pointer-events-none"
+                  >
+                    {{
+                      fileInfo.deleted
+                        ? "Marked for Deletion"
+                        : (fileInfo.uploadProgress | number : "1.0-0")
+                    }}{{ fileInfo.deleted ? "" : "%" }}
+                  </span>
+                </div>
+                <div class="flex items-center justify-end w-8">
+                  <button
+                    class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-full h-8 inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white"
+                    (click)="removeFile(i)"
+                    *ngIf="
+                      fileInfo.uploadProgress === 0 ||
+                      (fileInfo.uploadProgress === 100 && !fileInfo.deleted)
+                    "
+                  >
+                    <svg
+                      class="h-5 w-5"
+                      fill="none"
+                      viewBox="0 0 20 20"
+                      stroke="currentColor"
+                    >
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M6 18L18 6M6 6l12 12"
+                      ></path>
+                    </svg>
+                  </button>
+                  <button
+                    class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-full h-8 inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white"
+                    (click)="removeFile(i)"
+                    *ngIf="fileInfo.deleted"
+                  >
+                    <svg
+                      class="h-5 w-5"
+                      viewBox="0 0 20 20"
+                      fill="currentColor"
+                    >
+                      <path
+                        fill-rule="evenodd"
+                        d="M10 2a8 8 0 100 16 8 8 0 000-16zM8.707 14.707a1 1 0 01-1.414-1.414L8.586 10 7.293 8.707a1 1 0 011.414-1.414L10 8.586l1.293-1.293a1 1 0 111.414 1.414L11.414 10l1.293 1.293a1 1 0 01-1.414 1.414L10 11.414l-1.293 1.293z"
+                        clip-rule="evenodd"
+                      />
+                    </svg>
+                  </button>
+                </div>
               </div>
-              <button
-                class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ml-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white"
-                (click)="removeFile(i)"
-                *ngIf="
-                  fileInfo.uploadProgress === 0 ||
-                  (fileInfo.uploadProgress === 100 && !fileInfo.deleted)
-                "
-              >
-                <svg
-                  class="h-5 w-5"
-                  fill="none"
-                  viewBox="0 0 20 20"
-                  stroke="currentColor"
-                >
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
-                    d="M6 18L18 6M6 6l12 12"
-                  ></path>
-                </svg>
-              </button>
-              <button
-                class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ml-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white"
-                (click)="removeFile(i)"
-                *ngIf="fileInfo.deleted"
-              >
-                <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                  <path
-                    fill-rule="evenodd"
-                    d="M10 2a8 8 0 100 16 8 8 0 000-16zM8.707 14.707a1 1 0 01-1.414-1.414L8.586 10 7.293 8.707a1 1 0 011.414-1.414L10 8.586l1.293-1.293a1 1 0 111.414 1.414L11.414 10l1.293 1.293a1 1 0 01-1.414 1.414L10 11.414l-1.293 1.293z"
-                    clip-rule="evenodd"
-                  />
-                </svg>
-              </button>
             </div>
             <div>
               <button
@@ -152,17 +158,17 @@ interface FileUploadInfo {
   `,
   styles: [],
 })
-export class EditorComponent {
+export class EditorComponent implements OnInit, OnDestroy {
   @Output() showEditor = new EventEmitter<boolean>();
 
   product?: Product;
   selectedProduct: string = "";
   files: FileUploadInfo[] = [];
+  private subscription?: Subscription;
 
   constructor(
     private route: ActivatedRoute,
-    private productService: ProductService,
-    private cloudStorageService: CloudStorageService
+    private productService: ProductService
   ) {}
 
   async ngOnInit() {
@@ -179,6 +185,16 @@ export class EditorComponent {
       await this.initializeProduct(productId);
     }
     this.selectedProduct = this.product?.name || "";
+
+    this.subscription = this.productService.uploadProgressSubject.subscribe(
+      (files) => {
+        this.files = files;
+      }
+    );
+  }
+
+  ngOnDestroy() {
+    this.subscription?.unsubscribe();
   }
 
   async initializeProduct(productId: string): Promise<void> {
@@ -222,7 +238,18 @@ export class EditorComponent {
       return;
     }
 
-    this.files[index].deleted = !this.files[index].deleted;
+    if (this.files[index].uploadProgress === 0) {
+      this.files.splice(index, 1);
+    } else {
+      this.files[index].deleted = !this.files[index].deleted;
+    }
+  }
+
+  shouldShowDeleteButton(fileInfo: FileUploadInfo): boolean {
+    return (
+      fileInfo.uploadProgress === 0 ||
+      (fileInfo.uploadProgress === 100 && !fileInfo.deleted)
+    );
   }
 
   async saveEditorConfig() {
@@ -230,42 +257,10 @@ export class EditorComponent {
       return;
     }
     this.product.name = this.selectedProduct;
-    this.product.files = [];
-
-    const uploadPromises = this.files.map((fileInfo, index) => {
-      if (fileInfo.uploadProgress !== 100) {
-        return this.cloudStorageService.storeFiles(
-          fileInfo.file,
-          this.product!.id,
-          (progress) => {
-            const individualFileProgress = Math.floor(progress);
-            this.files[index].uploadProgress = individualFileProgress;
-
-            console.log(
-              `Upload Progress of ${fileInfo.file.name}: ${individualFileProgress}% `
-            );
-
-            if (individualFileProgress === 100) {
-              this.files[index].isFileUploaded = true;
-            }
-          }
-        );
-      } else {
-        return null;
-      }
-    });
-
-    await Promise.all(uploadPromises.filter((promise) => promise !== null));
-
-    this.product.files = this.files
-      .filter((fileInfo) => !fileInfo.deleted)
-      .map((fileInfo) => fileInfo.file.name);
-
-    if (this.product.id === "") {
-      this.product = await this.productService.createProduct(this.product);
-    } else {
-      this.product = await this.productService.updateProduct(this.product);
-    }
+    this.product = await this.productService.createOrUpdateProduct(
+      this.product,
+      this.files
+    );
 
     if (this.product) {
       await this.initializeProduct(this.product.id);
