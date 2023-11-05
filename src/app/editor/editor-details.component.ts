@@ -5,14 +5,12 @@ import {
   OnInit,
   Output,
 } from "@angular/core";
-import { StorageService } from "../services/storage.service";
 import { ActivatedRoute } from "@angular/router";
 import {
   FileUploadInfo,
   Product,
   ProductService,
 } from "../services/product.service";
-import { CloudStorageService } from "../services/cloud-storage.service";
 import { Subscription } from "rxjs";
 
 @Component({
@@ -64,6 +62,7 @@ import { Subscription } from "rxjs";
                 Select Files
               </button>
             </div>
+
             <div
               class="file-upload p-4 gap-4 rounded-xl bg-white dark:bg-gray-700 shadow-md flex items-center justify-between w-full bg-white text-gray-600 my-3 border-2 border-muted-300"
               *ngFor="let fileInfo of files; let i = index"
@@ -187,8 +186,8 @@ export class EditorComponent implements OnInit, OnDestroy {
     this.selectedProduct = this.product?.name || "";
 
     this.subscription = this.productService.uploadProgressSubject.subscribe(
-      (files) => {
-        this.files = files;
+      (newFiles) => {
+        this.files = [...this.files, ...newFiles];
       }
     );
   }

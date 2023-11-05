@@ -1,7 +1,8 @@
 import { Injectable } from "@angular/core";
 import { CloudStorageService } from "./cloud-storage.service";
 import { v4 } from "uuid";
-import { BehaviorSubject } from "rxjs";
+import { BehaviorSubject, take } from "rxjs";
+import { PipelineService } from "./pipeline.service";
 
 export interface Product {
   id: string;
@@ -20,7 +21,10 @@ export interface FileUploadInfo {
 export class ProductService {
   uploadProgressSubject = new BehaviorSubject<FileUploadInfo[]>([]);
 
-  constructor(private cloudStorageService: CloudStorageService) {}
+  constructor(
+    private cloudStorageService: CloudStorageService,
+    private pipelineService: PipelineService
+  ) {}
 
   async listProducts(): Promise<Product[]> {
     const json = await this.cloudStorageService.getFile("index.json");
@@ -64,6 +68,7 @@ export class ProductService {
 
     const file = this.jsonObjectToFile(products, "index.json");
     await this.cloudStorageService.storeFile(file);
+    this.submitJob(product.id);
     return product;
   }
 
@@ -81,7 +86,7 @@ export class ProductService {
 
     const file = this.jsonObjectToFile(products, "index.json");
     await this.cloudStorageService.storeFile(file);
-
+    this.submitJob(product.id);
     return product; // return updated product
   }
 
@@ -118,6 +123,20 @@ export class ProductService {
     return files
       .filter((fileInfo) => !fileInfo.deleted)
       .map((fileInfo) => fileInfo.file.name);
+  }
+
+  private submitJob(productId: string) {
+    this.pipelineService
+      .triggerPipeline(productId)
+      .pipe(take(1))
+      .subscribe(
+        (result) => {
+          console.log(result);
+        },
+        (error) => {
+          console.error("Error while submitting job ", error);
+        }
+      );
   }
 
   jsonObjectToFile(jsonObject: any, fileName: string): File {
