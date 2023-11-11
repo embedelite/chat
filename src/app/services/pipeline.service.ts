@@ -5,9 +5,17 @@ import { StorageService } from "./storage.service";
 
 const PIPELINE_URL = "https://api.dev.embedelite.com/jobs";
 
+export enum JobStatus {
+  PENDING = "pending",
+  RUNNING = "running",
+  FAILED = "failed",
+  SUCCESS = "success",
+  CANCELLED = "cancelled",
+}
+
 export interface PipelineResponse {
   job_id: string;
-  status: string;
+  status: JobStatus;
 }
 
 @Injectable({
@@ -19,8 +27,8 @@ export class PipelineService {
     private storageService: StorageService
   ) {}
 
-  triggerPipeline(productId: string): Observable<PipelineResponse> {
-    let ee_api_key = this.storageService.getItem<string>("ee_api_key") || "";
+  startNewJob(productId: string): Observable<PipelineResponse> {
+    const ee_api_key = this.storageService.getItem<string>("ee_api_key") || "";
     const headers = new HttpHeaders({
       "Content-Type": "application/json",
       "API-Key": ee_api_key,
@@ -31,5 +39,17 @@ export class PipelineService {
       { productId },
       { headers: headers }
     );
+  }
+
+  stopJob(jobId: string): Observable<PipelineResponse> {
+    const ee_api_key = this.storageService.getItem<string>("ee_api_key") || "";
+    const headers = new HttpHeaders({
+      "Content-Type": "application/json",
+      "API-Key": ee_api_key,
+    });
+
+    return this.http.delete<PipelineResponse>(`${PIPELINE_URL}/${jobId}`, {
+      headers: headers,
+    });
   }
 }

@@ -5,6 +5,7 @@ const plugin = require("tailwindcss/plugin");
 
 module.exports = {
   content: ["./src/**/*.{html,ts}"],
+  darkMode: "class",
   theme: {
     extend: {
       screens: {

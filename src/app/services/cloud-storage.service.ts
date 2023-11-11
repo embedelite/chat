@@ -65,7 +65,7 @@ export class CloudStorageService {
 
       const { sas_token, blob_url } = response;
       const expiry = this.decodeTokenExpiry(sas_token); // Get token expiry
-
+      console.log("sas_token", sas_token);
       this.containerName = blob_url.substr(blob_url.lastIndexOf("/") + 1);
       return { sas_token, blob_url, expiry };
     })();

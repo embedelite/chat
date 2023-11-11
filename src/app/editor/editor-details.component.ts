@@ -8,6 +8,7 @@ import {
 import { ActivatedRoute } from "@angular/router";
 import {
   FileUploadInfo,
+  Job,
   Product,
   ProductService,
 } from "../services/product.service";
@@ -22,14 +23,14 @@ import { Subscription } from "rxjs";
       >
         <div class="p-6 lg:px-8 space-y-4">
           <h3 class="mb-4 text-xl font-medium text-gray-900 dark:text-white">
-            Editor Configuration
+            Solution Configuration
           </h3>
           <form class="space-y-6">
             <div>
               <label
                 for="product-name"
-                class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
-                >Product Name</label
+                class="block mb-2 text font-medium text-gray-900 dark:text-white"
+                >Solution Name</label
               >
               <input
                 id="product-name"
@@ -42,7 +43,7 @@ import { Subscription } from "rxjs";
             <div>
               <label
                 for="file-upload"
-                class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+                class="block mb-2 text font-medium text-gray-900 dark:text-white"
                 >Upload Files</label
               >
               <input
@@ -64,7 +65,7 @@ import { Subscription } from "rxjs";
             </div>
 
             <div
-              class="file-upload p-4 gap-4 rounded-xl bg-white dark:bg-gray-700 shadow-md flex items-center justify-between w-full bg-white text-gray-600 my-3 border-2 border-muted-300"
+              class="border border-gray-300 rounded-lg p-2 mb-2 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 transition-all duration-300 gap-4 flex items-center justify-between w-full"
               *ngFor="let fileInfo of files; let i = index"
             >
               <h4 class="font-medium text-gray-800 dark:text-white flex-grow">
@@ -141,6 +142,96 @@ import { Subscription } from "rxjs";
                 </div>
               </div>
             </div>
+            <div class="mt-10 border-gray-300">
+              <p
+                class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+              >
+                Job Overview
+              </p>
+              <div
+                class="cursor-pointer py-4 bg-gray-50 dark:bg-gray-800 transition duration-200 ease-in-out grid grid-cols-6 gap-4 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-900"
+                *ngFor="let job of jobs; let i = index"
+                (click)="toggleShowLogs(i)"
+              >
+                <div
+                  class="mx-2 flex items-center text-sm text-gray-900 dark:text-gray-100"
+                >
+                  <p>
+                    {{
+                      job.createdAt | date : "yyyy-MM-ddTHH:mm:ss.sssZ" : "UTC"
+                    }}
+                  </p>
+                </div>
+
+                <div
+                  class="flex items-center text-sm text-gray-900 dark:text-gray-100"
+                >
+                  <p>{{ job.id }}</p>
+                </div>
+
+                <div
+                  class="col-span-1 flex items-center text-sm text-gray-900 dark:text-gray-100 text-right ml-auto"
+                >
+                  <p class="capitalize">{{ job.status }}</p>
+                </div>
+
+                <div
+                  class="col-span-2 flex justify-between items-center w-full text-right ml-auto"
+                >
+                  <button
+                    class="ml-2 py-1 px-2 bg-red-500 text-white rounded"
+                    *ngIf="job.status === 'running'"
+                    (click)="stopJob(job.id); $event.stopPropagation()"
+                  >
+                    Stop Job
+                  </button>
+
+                  <div
+                    class="status-icons flex justify-end items-center space-x-2"
+                  >
+                    <button
+                      class="animate-spin"
+                      *ngIf="job.status === 'running'"
+                    >
+                      ⏳
+                    </button>
+                    <button
+                      class="text-green-500"
+                      *ngIf="job.status === 'success'"
+                    >
+                      ✔️
+                    </button>
+                    <button
+                      class="text-red-500"
+                      *ngIf="job.status === 'failed'"
+                    >
+                      ❌
+                    </button>
+                  </div>
+                </div>
+
+                <div class="col-span-4 py-2" *ngIf="job.showLogs">
+                  <pre
+                    class="p-2 text-xs text-gray-400 dark:text-gray-500 whitespace-pre-wrap"
+                    >{{
+                      job.logs.join(
+                        "
+"
+                      )
+                    }}</pre
+                  >
+                </div>
+              </div>
+              <div
+                *ngIf="!hasJobs()"
+                class="mt-10 border-gray-300 px-4 py-2 bg-yellow-100 text-yellow-700 rounded-lg dark:bg-yellow-700 dark:text-yellow-100 dark:border-yellow-700"
+              >
+                <p>
+                  No jobs exist at the moment. The jobs will appear here once
+                  you have uploaded files and saved the product.
+                </p>
+              </div>
+            </div>
             <div>
               <button
                 type="submit"
@@ -163,6 +254,7 @@ export class EditorComponent implements OnInit, OnDestroy {
   product?: Product;
   selectedProduct: string = "";
   files: FileUploadInfo[] = [];
+  jobs: (Job & { showLogs?: boolean })[] = [];
   private subscription?: Subscription;
 
   constructor(
@@ -177,6 +269,7 @@ export class EditorComponent implements OnInit, OnDestroy {
         id: "",
         name: "",
         files: [],
+        jobs: [],
       };
       return;
     }
@@ -208,6 +301,11 @@ export class EditorComponent implements OnInit, OnDestroy {
           isFileUploaded: true,
         };
       }) ?? [];
+    this.jobs = await this.productService.getJobs(this.product.id);
+    this.jobs.sort(
+      (a, b) =>
+        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+    );
   }
 
   addFiles() {
@@ -244,11 +342,28 @@ export class EditorComponent implements OnInit, OnDestroy {
     }
   }
 
+  toggleShowLogs(index: number) {
+    this.jobs[index].showLogs = !this.jobs[index].showLogs;
+  }
+
   shouldShowDeleteButton(fileInfo: FileUploadInfo): boolean {
     return (
       fileInfo.uploadProgress === 0 ||
       (fileInfo.uploadProgress === 100 && !fileInfo.deleted)
     );
+  }
+
+  async stopJob(jobId: string) {
+    if (!this.product) {
+      return;
+    }
+    await this.productService.stopJob(this.product.id, jobId);
+    //refresh jobs
+    this.jobs = await this.productService.getJobs(this.product.id);
+  }
+
+  hasJobs(): boolean {
+    return this.jobs && this.jobs.length > 0;
   }
 
   async saveEditorConfig() {
