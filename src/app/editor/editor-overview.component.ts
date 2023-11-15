@@ -1,6 +1,7 @@
 import { Component, OnInit } from "@angular/core";
 import { Product, ProductService } from "../services/product.service";
 import { Router } from "@angular/router";
+import { CloudStorageService } from "../services/cloud-storage.service";
 
 @Component({
   selector: "app-editor-overview",
@@ -20,7 +21,11 @@ import { Router } from "@angular/router";
           >
             Create New Solution
           </button>
-          <ul class="space-y-4">
+          <div *ngIf="isLoading$ | async" class="text-gray-500 dark:text-white">
+            Loading...
+          </div>
+
+          <ul *ngIf="!(isLoading$ | async)" class="space-y-4">
             <li
               *ngFor="let product of products"
               class="border border-gray-300 rounded-lg p-4 mb-2 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 transition-all duration-300"
@@ -43,8 +48,13 @@ import { Router } from "@angular/router";
 })
 export class EditorOverviewComponent implements OnInit {
   products: Product[] = [];
+  isLoading$ = this.cloudStorageService.isLoading;
 
-  constructor(private productService: ProductService, private router: Router) {}
+  constructor(
+    private cloudStorageService: CloudStorageService,
+    private productService: ProductService,
+    private router: Router
+  ) {}
 
   async ngOnInit() {
     this.products = await this.productService.listProducts();

@@ -7,6 +7,7 @@ import {
   BlobUploadCommonResponse,
 } from "@azure/storage-blob";
 import { StorageService } from "./storage.service";
+import { BehaviorSubject } from "rxjs";
 
 interface ProgressEvent {
   loadedBytes: number;
@@ -24,13 +25,15 @@ export class CloudStorageService {
     sas_token: string;
     blob_url: string;
     expiry: Date;
-  }> = this.refreshAuthorization();
+  }>;
+  isLoading: BehaviorSubject<boolean>;
 
   constructor(
     private http: HttpClient,
     private storageService: StorageService
   ) {
-    this.refreshAuthorization();
+    this.isLoading = new BehaviorSubject<boolean>(false);
+    this.authorizationData = this.refreshAuthorization();
 
     setInterval(async () => {
       const authData = await this.authorizationData;
@@ -51,6 +54,7 @@ export class CloudStorageService {
       if (!ee_api_key) {
         throw new Error("API key not found in storage");
       }
+      this.isLoading.next(true);
       const headers = { "API-Key": ee_api_key };
       const response = await this.http
         .get<{
@@ -67,6 +71,7 @@ export class CloudStorageService {
       const expiry = this.decodeTokenExpiry(sas_token); // Get token expiry
       console.log("sas_token", sas_token);
       this.containerName = blob_url.substr(blob_url.lastIndexOf("/") + 1);
+      this.isLoading.next(false);
       return { sas_token, blob_url, expiry };
     })();
   }

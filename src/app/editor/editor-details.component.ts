@@ -46,6 +46,7 @@ import { Subscription } from "rxjs";
                 class="block mb-2 text font-medium text-gray-900 dark:text-white"
                 >Upload Files</label
               >
+
               <input
                 type="file"
                 id="file-upload"
@@ -143,13 +144,11 @@ import { Subscription } from "rxjs";
               </div>
             </div>
             <div class="mt-10 border-gray-300">
-              <p
-                class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
-              >
+              <p class="block mb-2 font-medium text-gray-900 dark:text-white">
                 Job Overview
               </p>
               <div
-                class="cursor-pointer py-4 bg-gray-50 dark:bg-gray-800 transition duration-200 ease-in-out grid grid-cols-6 gap-4 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-900"
+                class="cursor-pointer py-4 bg-gray-50 dark:bg-gray-800 transition duration-200 ease-in-out grid grid-cols-5 gap-4 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-900"
                 *ngFor="let job of jobs; let i = index"
                 (click)="toggleShowLogs(i)"
               >
@@ -199,7 +198,7 @@ import { Subscription } from "rxjs";
                       class="text-green-500"
                       *ngIf="job.status === 'success'"
                     >
-                      ✔️
+                      ✅
                     </button>
                     <button
                       class="text-red-500"
