@@ -12,7 +12,7 @@ import {
   Product,
   ProductService,
 } from "../services/product.service";
-import { Subscription } from "rxjs";
+import { Subscription, interval, of, switchMap, takeWhile } from "rxjs";
 
 @Component({
   selector: "app-editor",
@@ -148,77 +148,85 @@ import { Subscription } from "rxjs";
                 Job Overview
               </p>
               <div
-                class="cursor-pointer py-4 bg-gray-50 dark:bg-gray-800 transition duration-200 ease-in-out grid grid-cols-5 gap-4 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-900"
-                *ngFor="let job of jobs; let i = index"
-                (click)="toggleShowLogs(i)"
+                *ngIf="hasJobs()"
+                class="rounded-lg overflow-hidden roundex-xl "
               >
                 <div
-                  class="mx-2 flex items-center text-sm text-gray-900 dark:text-gray-100"
+                  class="cursor-pointer py-4 bg-gray-50 dark:bg-gray-800 transition duration-200 ease-in-out grid grid-cols-3 gap-3 hover:bg-gray-100 dark:hover:bg-gray-900"
+                  *ngFor="let job of jobs; let i = index"
+                  (click)="toggleShowLogs(i)"
                 >
-                  <p>
-                    {{
-                      job.createdAt | date : "yyyy-MM-ddTHH:mm:ss.sssZ" : "UTC"
-                    }}
-                  </p>
-                </div>
-
-                <div
-                  class="flex items-center text-sm text-gray-900 dark:text-gray-100"
-                >
-                  <p>{{ job.id }}</p>
-                </div>
-
-                <div
-                  class="col-span-1 flex items-center text-sm text-gray-900 dark:text-gray-100 text-right ml-auto"
-                >
-                  <p class="capitalize">{{ job.status }}</p>
-                </div>
-
-                <div
-                  class="col-span-2 flex justify-between items-center w-full text-right ml-auto"
-                >
-                  <button
-                    class="ml-2 py-1 px-2 bg-red-500 text-white rounded"
-                    *ngIf="job.status === 'running'"
-                    (click)="stopJob(job.id); $event.stopPropagation()"
+                  <div
+                    class="mx-2 flex items-center text-sm text-gray-900 dark:text-gray-100"
                   >
-                    Stop Job
-                  </button>
+                    <p>
+                      {{
+                        job.createdAt
+                          | date : "yyyy-MM-ddTHH:mm:ss.sssZ" : "UTC"
+                      }}
+                    </p>
+                  </div>
 
                   <div
-                    class="status-icons flex justify-end items-center space-x-2"
+                    class="flex items-center text-sm text-gray-900 dark:text-gray-100"
                   >
-                    <button
-                      class="animate-spin"
-                      *ngIf="job.status === 'running'"
-                    >
-                      ⏳
-                    </button>
-                    <button
-                      class="text-green-500"
-                      *ngIf="job.status === 'success'"
-                    >
-                      ✅
-                    </button>
-                    <button
-                      class="text-red-500"
-                      *ngIf="job.status === 'failed'"
-                    >
-                      ❌
-                    </button>
+                    <p>{{ job.id }}</p>
                   </div>
-                </div>
 
-                <div class="col-span-4 py-2" *ngIf="job.showLogs">
-                  <pre
-                    class="p-2 text-xs text-gray-400 dark:text-gray-500 whitespace-pre-wrap"
-                    >{{
-                      job.logs.join(
-                        "
+                  <div class="flex justify-between items-center text-right">
+                    <div
+                      class="status-icons flex justify-end items-center space-x-2"
+                    >
+                      <button
+                        class="text-yellow-500"
+                        *ngIf="job.status === 'pending'"
+                      >
+                        ⏳
+                      </button>
+                      <button
+                        class="text-yellow-500"
+                        *ngIf="job.status === 'running'"
+                      >
+                        🔄
+                      </button>
+                      <button
+                        class="text-green-500"
+                        *ngIf="job.status === 'success'"
+                      >
+                        ✅
+                      </button>
+                      <button
+                        class="text-red-500"
+                        *ngIf="job.status === 'failed'"
+                      >
+                        ❌
+                      </button>
+                      <p
+                        class=" text-sm text-gray-900 dark:text-gray-100 capitalize"
+                      >
+                        {{ job.status }}
+                      </p>
+                      <button
+                        class="ml-2 py-1 px-2 bg-red-500 text-white rounded"
+                        *ngIf="job.status === 'running'"
+                        (click)="stopJob(job.id); $event.stopPropagation()"
+                      >
+                        Stop Job
+                      </button>
+                    </div>
+                  </div>
+
+                  <div class="col-span-4 py-2" *ngIf="job.showLogs">
+                    <pre
+                      class="p-2 text-xs text-gray-400 dark:text-gray-500 whitespace-pre-wrap"
+                      >{{
+                        job.logs.join(
+                          "
 "
-                      )
-                    }}</pre
-                  >
+                        )
+                      }}</pre
+                    >
+                  </div>
                 </div>
               </div>
               <div
@@ -237,7 +245,15 @@ import { Subscription } from "rxjs";
                 class="text-white bg-primary-500 hover:bg-primary-800 focus:ring-4 focus:outline-none focus:ring-primary-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800 float-right mt-4 mb-4"
                 (click)="saveEditorConfig()"
               >
-                Save
+                <span
+                  class="inset-0 flex items-center justify-center"
+                  *ngIf="isSaving"
+                >
+                  <span
+                    class="animate-spin h-5 w-5 border-t-2 border-b-2 border-primary-500 rounded-full"
+                  ></span>
+                </span>
+                <span *ngIf="!isSaving">Save</span>
               </button>
             </div>
           </form>
@@ -245,10 +261,23 @@ import { Subscription } from "rxjs";
       </div>
     </div>
   `,
-  styles: [],
+  styles: [
+    `
+      @keyframes spin {
+        0% {
+          transform: rotate(0deg);
+        }
+        100% {
+          transform: rotate(360deg);
+        }
+      }
+    `,
+  ],
 })
 export class EditorComponent implements OnInit, OnDestroy {
   @Output() showEditor = new EventEmitter<boolean>();
+  isSaving = false;
+  alive = true;
 
   product?: Product;
   selectedProduct: string = "";
@@ -282,6 +311,25 @@ export class EditorComponent implements OnInit, OnDestroy {
         this.files = [...this.files, ...newFiles];
       }
     );
+
+    interval(10000)
+      .pipe(
+        switchMap(async () => {
+          if (this.isJobRunning() && this.product) {
+            this.jobs = await this.productService.getJobs(this.product.id);
+            return of(
+              this.jobs.sort(
+                (a, b) =>
+                  new Date(b.createdAt).getTime() -
+                  new Date(a.createdAt).getTime()
+              )
+            );
+          }
+          return of(null); // return Observable of null when not running
+        }),
+        takeWhile(() => this.alive && this.isJobRunning())
+      )
+      .subscribe();
   }
 
   ngOnDestroy() {
@@ -370,14 +418,21 @@ export class EditorComponent implements OnInit, OnDestroy {
       return;
     }
     this.product.name = this.selectedProduct;
+    this.isSaving = true;
     this.product = await this.productService.createOrUpdateProduct(
       this.product,
       this.files
     );
+    this.isSaving = false;
 
     if (this.product) {
       await this.initializeProduct(this.product.id);
     }
-    this.showEditor.emit(false);
+  }
+
+  isJobRunning(): boolean {
+    return this.jobs.some(
+      (job) => job.status === "running" || job.status === "pending"
+    );
   }
 }

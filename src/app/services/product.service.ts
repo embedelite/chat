@@ -64,7 +64,7 @@ export class ProductService {
       updatedProduct = await this.updateProduct(product, files);
     }
 
-    this.submitJob(updatedProduct.id);
+    await this.submitJob(updatedProduct.id);
 
     return updatedProduct;
   }
@@ -140,32 +140,25 @@ export class ProductService {
       .map((fileInfo) => fileInfo.file.name);
   }
 
-  private submitJob(productId: string) {
-    this.pipelineService
-      .startNewJob(productId)
-      .pipe(take(1))
-      .subscribe(
-        async (result) => {
-          console.log(result);
-          // find the product with the provided productId
-          const products = await this.listProducts();
-          const product = products.find((product) => product.id === productId);
-          // if jobs is undefined, initialize it
-          if (!product) {
-            throw new Error(`Product with id ${productId} not found`);
-          }
-          if (!product.jobs) {
-            product.jobs = [];
-          }
-          // push the job id to the jobs array of the product
-          product.jobs.push(result.job_id);
-          // update the product in the 'database'
-          await this.addToJobs(productId, result.job_id);
-        },
-        (error) => {
-          console.error("Error while submitting job ", error);
-        }
-      );
+  private async submitJob(productId: string): Promise<any> {
+    try {
+      const result = await this.pipelineService
+        .startNewJob(productId)
+        .pipe(take(1))
+        .toPromise();
+
+      console.log(result);
+
+      if (!result?.job_id) {
+        throw new Error("Job id not found in response");
+      }
+
+      await this.addToJobs(productId, result.job_id);
+
+      return result;
+    } catch (error) {
+      console.error("Error while submitting job ", error);
+    }
   }
 
   async addToJobs(productId: string, jobId: string) {
