@@ -18,9 +18,7 @@ import { Subscription, interval, of, switchMap, takeWhile } from "rxjs";
   selector: "app-editor",
   template: `
     <div class="w-full h-full flex items-start justify-center p-6 ">
-      <div
-        class="relative bg-white rounded-lg shadow dark:bg-gray-700 w-4/5 max-h-full"
-      >
+      <div class="relative bg-white rounded-lg shadow dark:bg-gray-700 w-4/5">
         <div class="p-6 lg:px-8 space-y-4">
           <h3 class="mb-4 text-xl font-medium text-gray-900 dark:text-white">
             Solution Configuration
