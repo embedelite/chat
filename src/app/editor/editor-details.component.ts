@@ -107,36 +107,14 @@ import { Subscription, interval, of, switchMap, takeWhile } from "rxjs";
                       (fileInfo.uploadProgress === 100 && !fileInfo.deleted)
                     "
                   >
-                    <svg
-                      class="h-5 w-5"
-                      fill="none"
-                      viewBox="0 0 20 20"
-                      stroke="currentColor"
-                    >
-                      <path
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        stroke-width="2"
-                        d="M6 18L18 6M6 6l12 12"
-                      ></path>
-                    </svg>
+                    <i class="fa-regular fa-xmark"></i>
                   </button>
                   <button
                     class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-full h-8 inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white"
                     (click)="removeFile(i)"
                     *ngIf="fileInfo.deleted"
                   >
-                    <svg
-                      class="h-5 w-5"
-                      viewBox="0 0 20 20"
-                      fill="currentColor"
-                    >
-                      <path
-                        fill-rule="evenodd"
-                        d="M10 2a8 8 0 100 16 8 8 0 000-16zM8.707 14.707a1 1 0 01-1.414-1.414L8.586 10 7.293 8.707a1 1 0 011.414-1.414L10 8.586l1.293-1.293a1 1 0 111.414 1.414L11.414 10l1.293 1.293a1 1 0 01-1.414 1.414L10 11.414l-1.293 1.293z"
-                        clip-rule="evenodd"
-                      />
-                    </svg>
+                    <i class="fa-regular fa-arrow-rotate-left"></i>
                   </button>
                 </div>
               </div>
@@ -179,25 +157,25 @@ import { Subscription, interval, of, switchMap, takeWhile } from "rxjs";
                         class="text-yellow-500"
                         *ngIf="job.status === 'pending'"
                       >
-                        ⏳
+                        <i class="fa-regular fa-clock"></i>
                       </button>
                       <button
                         class="text-yellow-500"
                         *ngIf="job.status === 'running'"
                       >
-                        🔄
+                        <i class="fa-solid fa-fan fa-spin"></i>
                       </button>
                       <button
                         class="text-green-500"
                         *ngIf="job.status === 'success'"
                       >
-                        ✅
+                        <i class="fa-regular fa-circle-check"></i>
                       </button>
                       <button
                         class="text-red-500"
                         *ngIf="job.status === 'failed'"
                       >
-                        ❌
+                        <i class="fa-regular fa-circle-xmark"></i>
                       </button>
                       <p
                         class=" text-sm text-gray-900 dark:text-gray-100 capitalize"
@@ -240,7 +218,7 @@ import { Subscription, interval, of, switchMap, takeWhile } from "rxjs";
             <div>
               <button
                 type="submit"
-                class="text-white bg-primary-500 hover:bg-primary-800 focus:ring-4 focus:outline-none focus:ring-primary-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800 float-right mt-4 mb-4"
+                class="primary-btn float-right mt-4 mb-4"
                 (click)="saveEditorConfig()"
               >
                 <span

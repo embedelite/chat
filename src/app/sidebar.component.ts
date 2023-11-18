@@ -8,10 +8,7 @@ import { KeyboardShortcutService } from "./services/keyboardshortcut.service";
     <div class="flex flex-col h-full p-4 bg-gray-200 dark:bg-gray-700">
       <div class="grid grid-cols-4 gap-4">
         <div class="col-span-4">
-          <button
-            class="custom-btn w-full mb-4 bg-primary-500 text-white rounded-md px-4 py-2"
-            (click)="createNewChat()"
-          >
+          <button class="primary-btn w-full mb-4" (click)="createNewChat()">
             + New chat
           </button>
         </div>
@@ -49,7 +46,6 @@ import { KeyboardShortcutService } from "./services/keyboardshortcut.service";
     `
       .active {
         background-color: #f3f4f6;
-        dark: bg-gray-800;
       }
       .hover-group:hover .opacity-0 {
         opacity: 1 !important;

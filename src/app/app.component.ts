@@ -25,7 +25,7 @@ import { ThemeService } from "./services/theme.service";
           routerLink="/settings"
           routerLinkActive="text-black bg-gray-300 dark:bg-gray-800"
           class="px-3 py-2 rounded text-gray-900 dark:text-gray-200 hover:bg-gray-300 dark:hover:bg-gray-800"
-          >Settings
+          ><i class="fas fa-cog"></i>
         </a>
       </div>
     </nav>
