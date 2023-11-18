@@ -25,7 +25,7 @@ export class ChatService {
   private readonly OPENAI_API_URL =
     "https://api.openai.com/v1/chat/completions";
   //private readonly EE_API_URL = "https://api.embedelite.com";
-  private readonly EE_API_URL = "https://api.embedelite.com";
+  private readonly EE_API_URL = "https://api.dev.embedelite.com";
 
   private chats: Chat[] = [
     {

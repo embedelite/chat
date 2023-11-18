@@ -6,6 +6,7 @@ import {
   Input,
   ViewChild,
 } from "@angular/core";
+import { Product, ProductService } from "./services/product.service";
 
 @Component({
   selector: "app-chat-input",
@@ -105,34 +106,20 @@ import {
           >
           <div class="relative">
             <select
-              id="countries"
+              id="products"
               class="appearance-none px-3 py-2 h-10 text-sm leading-5 font-sans w-full border border-muted-300 bg-white text-muted-600 placeholder-muted-300 focus-visible:border-muted-300 focus-visible:shadow-lg dark:placeholder-muted-600 dark:bg-muted-700 dark:text-muted-200 dark:border-muted-600 dark:focus-visible:border-muted-600 focus-visible:ring-0 outline-transparent focus-visible:outline-2 focus-visible:outline-dashed focus-visible:outline-muted-300 dark:focus-visible:outline-muted-600 focus-visible:outline-offset-2 transition-all duration-300"
               (change)="selectProductOption($event.target)"
             >
-              <option selected>Choose a country</option>
+              <option selected>Choose a product</option>
               <option
-                value="vat-rules-es"
-                [selected]="product_id === 'vat-rules-es'"
+                *ngFor="let product of products"
+                [value]="product.id"
+                [selected]="product_id === product.id"
               >
-                vat-rules-es
+                {{ product.name }}
+                <!-- Modify as per the attribute of Product -->
               </option>
-              <option
-                value="vat-rules-de"
-                [selected]="product_id === 'vat-rules-de'"
-              >
-                vat-rules-de
-              </option>
-              <option
-                value="vat-rules-fr"
-                [selected]="product_id === 'vat-rules-fr'"
-              >
-                vat-rules-fr
-              </option>
-              <option
-                *ngIf="showExtraProduct"
-                value="{{ product_id }}"
-                selected
-              >
+              <option *ngIf="showExtraProduct" [value]="product_id" selected>
                 {{ product_id }}
               </option>
             </select>
@@ -251,14 +238,21 @@ export class ChatInputComponent {
   showChatConfig: boolean = false;
   showExtraProduct: boolean = false;
 
-  constructor() {
+  products: Product[] = [];
+
+  constructor(private productService: ProductService) {
     this.message = "";
     // if product id is not fr, de, or es then show extra product
     this.updateExtraProduct();
+    this.fetchProducts();
   }
 
   ngOnChanges() {
     this.updateExtraProduct();
+  }
+
+  async fetchProducts() {
+    this.products = await this.productService.listProducts();
   }
 
   updateExtraProduct() {
