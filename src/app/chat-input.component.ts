@@ -21,6 +21,7 @@ import { Product, ProductService } from "./services/product.service";
         rows="1"
         placeholder="Type your message..."
         (input)="adjustTextarea($event)"
+        (paste)="adjustTextarea($event)"
         (keyup.enter)="sendMessage()"
         [(ngModel)]="message"
         [attr.disabled]="deactivated ? true : null"
@@ -208,7 +209,9 @@ import { Product, ProductService } from "./services/product.service";
     `
       textarea {
         transition: height 0.2s;
-        overflow-y: hidden;
+        overflow-y: auto;
+        max-height: 300px;
+        min-height: 20px;
       }
       #dropdownTopButton {
         position: relative;
@@ -290,11 +293,21 @@ export class ChatInputComponent {
   }
 
   adjustTextarea(event: any) {
-    const textarea: any = event
-      ? event.target
-      : document.querySelector("textarea");
-    textarea.style.height = "auto"; // Reset height
-    textarea.style.height = `${textarea.scrollHeight}px`; // Set to scrollHeight
+    setTimeout(() => {
+      const textarea: any = event
+        ? event.target
+        : document.querySelector("textarea");
+      if (textarea.value === "") {
+        // Reset textarea size if there's no content
+        textarea.style.height = "auto";
+      } else if (textarea.scrollHeight < 300) {
+        // Increase height if scrollHeight is under 150.
+        textarea.style.height = `${textarea.scrollHeight}px`;
+      } else if (textarea.clientHeight < 300) {
+        // If content is larger but textarea's visible height is less, set it to 150
+        textarea.style.height = `300px`;
+      }
+    }, 0);
   }
 
   selectModelOption(model: any) {
