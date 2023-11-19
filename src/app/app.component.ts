@@ -1,22 +1,34 @@
+import { appWindow } from "@tauri-apps/api/window";
 import { Component } from "@angular/core";
 import { ThemeService } from "./services/theme.service";
+import { Location } from "@angular/common";
+
 @Component({
   selector: "app-root",
   template: `
     <nav
-      class="flex justify-between items-center bg-gray-200 dark:bg-gray-900 shadow-md px-6 py-1 flex-shrink-0 border-b border-gray-800"
+      data-tauri-drag-region
+      class="flex justify-between items-center bg-muted-100 dark:bg-muted-1000 shadow-md px-6 py-1 flex-shrink-0 border-b border-gray-800"
     >
-      <div class="flex space-x-4">
+      <div class="flex ml-14 text-sm">
+        <i
+          class="fas fa-arrow-left cursor-pointer px-3 py-3 rounded text-gray-900 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-800"
+          (click)="goBack()"
+        ></i>
+        <i
+          class="fas fa-arrow-right cursor-pointer px-3 py-3 rounded text-gray-900 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-800"
+          (click)="goForward()"
+        ></i>
         <a
           routerLink="/chat"
           routerLinkActive="text-black bg-gray-300 dark:bg-gray-800"
-          class="px-3 py-2 rounded text-gray-900 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-800"
+          class="px-4 py-2 rounded text-gray-900 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-800"
           >Chat</a
         >
         <a
           routerLink="/editor"
           routerLinkActive="text-black bg-gray-300 dark:bg-gray-800"
-          class="px-3 py-2 rounded text-gray-900 dark:text-gray-200 hover:bg-gray-300 dark:hover:bg-gray-800"
+          class="px-4 py-2 rounded text-gray-900 dark:text-gray-200 hover:bg-gray-300 dark:hover:bg-gray-800"
           >Solutions</a
         >
       </div>
@@ -29,7 +41,7 @@ import { ThemeService } from "./services/theme.service";
         </a>
       </div>
     </nav>
-    <div class="bg-gray-200 dark:bg-gray-900 flex-grow overflow-auto">
+    <div class="bg-muted-100 dark:bg-muted-1000 flex-grow overflow-auto">
       <router-outlet></router-outlet>
     </div>
   `,
@@ -44,5 +56,13 @@ import { ThemeService } from "./services/theme.service";
   ],
 })
 export class AppComponent {
-  constructor(private themeService: ThemeService) {}
+  constructor(private themeService: ThemeService, private location: Location) {}
+
+  goBack() {
+    this.location.back();
+  }
+
+  goForward() {
+    this.location.forward();
+  }
 }

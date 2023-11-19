@@ -16,6 +16,9 @@
       "shell": {
         "all": false,
         "open": true
+      },
+      "window": {
+        "startDragging": true
       }
     },
     "bundle": {
@@ -37,10 +40,10 @@
       {
         "fullscreen": false,
         "resizable": true,
-        "title": "EmbedElite Chat",
+        "title": "",
         "width": 1024,
         "height": 1024,
-        "titleBarStyle": "Transparent"
+        "titleBarStyle": "Overlay"
       }
     ]
   }
