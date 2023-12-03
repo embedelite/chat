@@ -10,7 +10,7 @@ export class ThemeService {
   currentTheme = this.themeSource.asObservable();
 
   constructor(private storageService: StorageService) {
-    const theme = this.storageService.getItem<string>("theme") || "light";
+    const theme = this.storageService.getItem<string>("theme") || "dark";
     this.themeSource.next(theme);
     this.setThemePreference(theme);
   }
