@@ -2,6 +2,7 @@ import { Component, OnInit } from "@angular/core";
 import { Product, ProductService } from "../services/product.service";
 import { Router } from "@angular/router";
 import { CloudStorageService } from "../services/cloud-storage.service";
+import { trigger, transition, style, animate } from "@angular/animations";
 
 @Component({
   selector: "app-editor-overview",
@@ -40,11 +41,45 @@ import { CloudStorageService } from "../services/cloud-storage.service";
         </div>
       </div>
     </div>
+    <div
+      *ngIf="apiKeyPromptVisible"
+      class="fixed inset-0 flex items-center justify-center bg-opacity-60 bg-gray-500 dark:bg-opacity-60 dark:bg-gray-800 blurred-bg"
+    >
+      <div class="bg-white dark:bg-gray-800 w-full sm:w-2/3 rounded-lg p-10">
+        <div class="flex justify-between items-center">
+          <h2 class="text-2xl text-gray-800 dark:text-white">
+            No API key found
+          </h2>
+        </div>
+        <p class="text-gray-800 dark:text-gray-200 mt-4 mb-4">
+          Please go to settings and provide an EmbedElite API key.
+        </p>
+        <div class="flex justify-end">
+          <button (click)="redirectToSettings()" class="primary-btn">
+            Go to Settings
+          </button>
+        </div>
+      </div>
+    </div>
   `,
-  styles: [],
+  styles: [
+    `
+      .blurred-bg::after {
+        content: "";
+        position: fixed;
+        top: 0;
+        bottom: 0;
+        width: 100%;
+        height: 100%;
+        backdrop-filter: blur(5px);
+        z-index: -1;
+      }
+    `,
+  ],
 })
 export class EditorOverviewComponent implements OnInit {
   products: Product[] = [];
+  apiKeyPromptVisible: boolean = false;
   isLoading$ = this.cloudStorageService.isLoading;
 
   constructor(
@@ -54,10 +89,18 @@ export class EditorOverviewComponent implements OnInit {
   ) {}
 
   async ngOnInit() {
-    this.products = await this.productService.listProducts();
+    try {
+      this.products = await this.productService.listProducts();
+    } catch (err) {
+      this.apiKeyPromptVisible = true;
+    }
   }
 
   createNewProduct() {
     this.router.navigate(["/editor/new"]);
+  }
+
+  redirectToSettings() {
+    this.router.navigate(["/settings"]);
   }
 }

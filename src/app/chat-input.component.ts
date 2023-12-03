@@ -12,7 +12,7 @@ import { Product, ProductService } from "./services/product.service";
   selector: "app-chat-input",
   template: `
     <div
-      class="flex items-center p-4 bg-gray-200 dark:bg-gray-700 rounded-br-lg"
+      class="flex items-center p-2 bg-gray-200 dark:bg-gray-700 rounded-br-lg"
     >
       <textarea
         #textarea
@@ -36,40 +36,13 @@ import { Product, ProductService } from "./services/product.service";
           type="button"
           (click)="toggleChatConfig()"
         >
-          <svg
-            class="w-2.5 h-2.5"
-            aria-hidden="true"
-            xmlns="http://www.w3.org/2000/svg"
-            fill="none"
-            viewBox="0 0 10 6"
-          >
-            <path
-              stroke="currentColor"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M9 5 5 1 1 5"
-            />
-          </svg>
+          <i class="fas fa-angle-up"></i>
         </button>
         <button
-          class="flex items-center justify-center w-12 h-12 rounded-r-lg bg-primary-500 hover:bg-primary-600 focus:outline-none focus:ring-2 focus:ring-primary-700 focus:ring-offset-2"
+          class="flex items-center justify-center w-12 h-11 rounded-r-lg bg-primary-500 hover:bg-primary-600 focus:outline-none focus:ring-2 focus:ring-primary-700 focus:ring-offset-2"
           (click)="sendMessage()"
         >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-            class="w-6 h-6 text-white"
-          >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M5 12h14M12 5l7 7-7 7"
-            ></path>
-          </svg>
+          <i class="fas fa-arrow-right text-white"></i>
         </button>
       </div>
 

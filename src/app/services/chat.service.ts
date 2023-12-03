@@ -30,42 +30,6 @@ export class ChatService {
   private chats: Chat[] = [
     {
       id: "1",
-      title: "US Patent Example",
-      mode: "ee",
-      deactivated: true,
-      product_id: "uspto",
-      model: "gpt-3.5-turbo",
-      date: new Date(),
-      messages: [
-        {
-          from: "user",
-          text: "Can you locate any US patents filed within the last 5 years, which discuss applying convolutional neural networks for image recognition in medical devices, even if they do not explicitly use these terms but the implied meaning aligns with this search?",
-        },
-        {
-          from: "bot",
-          text: "Yes, I have found 3 patents filed recently related to your query.",
-          links: [
-            {
-              title:
-                '1. Patent US-20230162428-A1: "APPARATUS AND METHOD FOR ACCELERATION DATA STRUCTURE REFIT" (filed on 2023-05-25 by APODACA; Michael et al.)',
-              url: "https://image-ppubs.uspto.gov/dirsearch-public/print/downloadPdf/20230162428",
-            },
-            {
-              title:
-                '2. Patent US-20230157618-A1: "Method and System to Assess Pulmonary Hypertension Using Phase Space Tomography and Machine Learning" (filed on 2023-05-25 by Grouchy; Paul et al.)',
-              url: "https://image-ppubs.uspto.gov/dirsearch-public/print/downloadPdf/20230157618",
-            },
-            {
-              title:
-                '3. Patent US-20230162043-A1: "SYSTEMS AND METHODS FOR MAGNETIC RESONANCE IMAGING STANDARDIZATION USING DEEP LEARNING" (filed on 2023-05-25 by Zhang; Tao et al.)',
-              url: "https://image-ppubs.uspto.gov/dirsearch-public/print/downloadPdf/20230162043",
-            },
-          ],
-        },
-      ],
-    },
-    {
-      id: "2",
       mode: "oai",
       deactivated: false,
       product_id: null,
@@ -86,6 +50,7 @@ export class ChatService {
     const storedChats = this.storageService.getItem<Chat[]>("chats");
     if (storedChats) {
       this.chats = storedChats;
+      this.currentChatSubject.next(this.chats[0]);
     }
   }
 
