@@ -90,17 +90,28 @@ import { ThemeService } from "./services/theme.service";
               </label>
             </div>
             <!-- Buttons -->
-            <div class="grid grid-cols-2 gap-4">
-              <button
-                type="button"
-                class="text-white bg-red-500 hover:bg-red-800 focus:ring-4 focus:outline-none focus:ring-red-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-red-600 dark:hover:bg-red-700 dark:focus:ring-red-800"
-                (click)="closeConfig()"
-              >
-                Cancel
-              </button>
-              <button type="button" class="primary-btn" (click)="saveConfig()">
-                Save
-              </button>
+            <div class="flex justify-between">
+              <div>
+                <button
+                  *ngIf="configForm.dirty"
+                  type="button"
+                  class="w-40 text-white bg-red-500 hover:bg-red-800 focus:ring-4 focus:outline-none focus:ring-red-300 font-medium rounded-lg text-sm px-10 py-3 mt-4 text-center dark:bg-red-600 dark:hover:bg-red-700 dark:focus:ring-red-800"
+                  (click)="closeConfig()"
+                >
+                  Cancel
+                </button>
+                <div *ngIf="!configForm.dirty" class="flex-grow"></div>
+              </div>
+              <div>
+                <button
+                  type="button"
+                  class="w-40 primary-btn px-10 py-3 mt-4"
+                  (click)="saveConfig()"
+                  [disabled]="!configForm.dirty"
+                >
+                  Save
+                </button>
+              </div>
             </div>
             <!-- Link to obtain EmbedElite Key -->
             <div class="text-sm font-medium text-gray-500 dark:text-gray-300">
