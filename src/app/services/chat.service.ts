@@ -216,9 +216,6 @@ export class ChatService {
           };
           this.chats[chatIndex].messages.push(botMessage);
 
-          // Inform subscribers about the new message
-          this.currentChatSubject.next(this.chats[chatIndex]);
-
           this.storageService.setItem("chats", this.chats);
         });
       })
@@ -308,9 +305,6 @@ export class ChatService {
                       newMessage.complete = choices[0].finish_reason === "stop";
                     }
                   }
-
-                  // Inform subscribers about the new message
-                  this.currentChatSubject.next(this.chats[chatIndex]);
 
                   this.storageService.setItem("chats", this.chats);
                 }
