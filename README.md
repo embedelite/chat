@@ -4,12 +4,19 @@ We are thrilled to unveil the official release of the EmbedElite Chat v0.2.0, no
 
 <p align="center">
   <img width="1161" alt="Screenshot 2024-01-07 at 22 34 20" src="https://github.com/embedelite/chat/assets/14837115/603cc89e-9513-4e1d-be98-b8a07a4f0569">
-afb47b">
 </p>
 
- Catering to various platforms, EmbedElite Chat includes binaries for macOS, Windows, Linux, and a seamless web interface. Simply visit our [Releases](https://github.com/embedelite/chat/releases) page to download the version most fitting for your operating system. If you'd rather immerse in a swift, free trial, feel free to explore our demo at [demo.embedelite.com](https://demo.embedelite.com/).
+# Main Features
 
- The solution appropriately provides flexibility for users, enabling use of your EmbedElite key or OpenAI key, or even just functioning as a normal chat interface.
+- Access to multiple LLMs (OpenAI GPT4, GPT3.5 Turbo, more coming soon) with streaming support
+- RAG Solution editor
+- Chat History
+- Keyboard shortcuts
+- Cross-platform support: MacOS, Windows, Linux and Web
+
+Catering to various platforms, EmbedElite Chat includes binaries for macOS, Windows, Linux, and a seamless web interface. Simply visit our [Releases](https://github.com/embedelite/chat/releases) page to download the version most fitting for your operating system. If you'd rather immerse in a swift, free trial, feel free to explore our demo at [demo.embedelite.com](https://demo.embedelite.com/).
+
+The solution appropriately provides flexibility for users, enabling use of your EmbedElite key or OpenAI key, or even just functioning as a normal chat interface.
 
 <p align="center">
    <img width="532" alt="269084181-e8e68a3e-953d-4051-b806-c07c379eed6b" src="https://github.com/embedelite/chat/assets/14837115/ff27f5e2-aea8-4000-a314-8b571cae47d1">
