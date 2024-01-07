@@ -1,4 +1,4 @@
- # EmbedElite Enterprise Chat v 0.2.0 - Open Source Project ([demo](https://demo.embedelite.com/))
+ # EmbedElite Enterprise Chat v 0.2.0 - Open Source Project ([Live Web Demo](https://demo.embedelite.com/))
 
 We are thrilled to unveil the official release of the EmbedElite Chat v0.2.0, now open-sourced and available for free. This project places a clear emphasis on your privacy, ensuring that data is not stored in the cloud but rather in the local storage of your web browser.
 
