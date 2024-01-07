@@ -1,9 +1,10 @@
- # EmbedElite Chat v 0.1.0 - Open Source Project ([demo](https://demo.embedelite.com/))
+ # EmbedElite Chat v 0.2.0 - Open Source Project ([demo](https://demo.embedelite.com/))
 
-We are thrilled to unveil the official release of the EmbedElite Chat v0.1.0, now open-sourced and available for free. This project places a clear emphasis on your privacy, ensuring that data is not stored in the cloud but rather in the local storage of your web browser.
+We are thrilled to unveil the official release of the EmbedElite Chat v0.2.0, now open-sourced and available for free. This project places a clear emphasis on your privacy, ensuring that data is not stored in the cloud but rather in the local storage of your web browser.
 
 <p align="center">
-   <img width="1205" alt="269086711-4df37fa5-8908-4c8a-871f-aace757dfe54" src="https://github.com/embedelite/chat/assets/14837115/333fe9b7-1a23-4be8-8885-525bafafb47b">
+  <img width="1161" alt="Screenshot 2024-01-07 at 22 34 20" src="https://github.com/embedelite/chat/assets/14837115/603cc89e-9513-4e1d-be98-b8a07a4f0569">
+afb47b">
 </p>
 
  Catering to various platforms, EmbedElite Chat includes binaries for macOS, Windows, Linux, and a seamless web interface. Simply visit our [Releases](https://github.com/embedelite/chat/releases) page to download the version most fitting for your operating system. If you'd rather immerse in a swift, free trial, feel free to explore our demo at [demo.embedelite.com](https://demo.embedelite.com/).
