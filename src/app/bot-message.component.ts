@@ -17,15 +17,10 @@ import {
       >
         <ng-container
           *ngFor="
-            let line of messageCopy.split(
-              '
-'
-            )
+            let line of messageCopy.split('\n')
           "
         >
-          <p class="text-sm whitespace-pre-wrap">
-            {{ line }}
-          </p>
+          <p class="text-sm whitespace-pre-wrap">{{line}}\n</p>
         </ng-container>
         <ng-container *ngIf="links !== undefined">
           <ng-container *ngFor="let link of links">
