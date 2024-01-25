@@ -156,6 +156,9 @@ import { Product, ProductService } from "./services/product.service";
               <option value="gpt-4" [selected]="model === 'gpt-4'">
                 gpt-4
               </option>
+              <option value="gpt-4-1106-preview" [selected]="model === 'gpt-4-1106-preview'">
+                gpt-4-1106-preview
+              </option>
             </select>
             <div
               class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-300"
@@ -200,7 +203,7 @@ import { Product, ProductService } from "./services/product.service";
 })
 export class ChatInputComponent {
     @Input() mode: "ee" | "oai" = "ee";
-    @Input() model: "gpt-3.5-turbo" | "gpt-4" = "gpt-3.5-turbo";
+    @Input() model: "gpt-3.5-turbo" | "gpt-4" | "gpt-4-1106-preview" = "gpt-4";
     @Input() product_id: string | null = null;
     @Input() deactivated: boolean = false;
     @Output() openViewer = new EventEmitter<string>();

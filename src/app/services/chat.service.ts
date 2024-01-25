@@ -14,7 +14,7 @@ export interface Chat {
   mode: "ee" | "oai";
   deactivated: boolean;
   product_id: string | null;
-  model: "gpt-3.5-turbo" | "gpt-4";
+  model: "gpt-3.5-turbo" | "gpt-4" | "gpt-4-1106-preview";
   title: string;
   messages: Message[];
   date: Date;
@@ -61,7 +61,7 @@ export class ChatService {
   updateChatConfig(
     chatId: string,
     mode: "ee" | "oai",
-    model: "gpt-3.5-turbo" | "gpt-4",
+    model: "gpt-3.5-turbo" | "gpt-4" | "gpt-4-1106-preview",
     productId: string | null
   ): void {
     const chatIndex = this.chats.findIndex((chat) => chat.id === chatId);
@@ -92,7 +92,7 @@ export class ChatService {
 
   addChat(title: string): Chat {
     const defaultModel =
-      this.storageService.getItem<"gpt-3.5-turbo" | "gpt-4">("default_model") ??
+      this.storageService.getItem<"gpt-3.5-turbo" | "gpt-4" | "gpt-4-1106-preview">("default_model") ??
       "gpt-3.5-turbo";
 
     let newChat: Chat = {
@@ -141,7 +141,7 @@ export class ChatService {
     chatId: string,
     message: string,
     mode: "ee" | "oai",
-    model: "gpt-3.5-turbo" | "gpt-4",
+    model: "gpt-3.5-turbo" | "gpt-4" | "gpt-4-1106-preview",
     productId: string | null
   ): void {
     const chatIndex = this.chats.findIndex((chat) => chat.id === chatId);
