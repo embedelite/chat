@@ -1,5 +1,5 @@
 import { appWindow } from "@tauri-apps/api/window";
-import { Component } from "@angular/core";
+import { Component, EventEmitter, Output } from '@angular/core';
 import { ThemeService } from "./services/theme.service";
 import { Location } from "@angular/common";
 
@@ -11,6 +11,10 @@ import { Location } from "@angular/common";
       class="flex justify-between items-center bg-muted-100 dark:bg-muted-1000 shadow-md px-6 py-1 flex-shrink-0 border-b border-gray-800"
     >
       <div class="flex ml-14 text-sm">
+        <i
+          class="fas fa-bars cursor-pointer px-3 py-3 rounded text-gray-900 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-800"
+          (click)="toggleSidebarVisibility()"
+        ></i>
         <i
           class="fas fa-arrow-left cursor-pointer px-3 py-3 rounded text-gray-900 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-800"
           (click)="goBack()"
@@ -56,6 +60,9 @@ import { Location } from "@angular/common";
   ],
 })
 export class AppComponent {
+  @Output() toggleSidebar = new EventEmitter<boolean>();
+  private sidebarVisible: boolean = true;
+
   constructor(private themeService: ThemeService, private location: Location) {}
 
   goBack() {
@@ -64,5 +71,10 @@ export class AppComponent {
 
   goForward() {
     this.location.forward();
+  }
+
+  toggleSidebarVisibility() {
+    this.sidebarVisible = !this.sidebarVisible;
+    this.toggleSidebar.emit(this.sidebarVisible);
   }
 }
