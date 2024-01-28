@@ -4,11 +4,10 @@ import { Chat, ChatService } from "./services/chat.service";
 @Component({
   selector: "app-chat",
   template: `
-    <div class="relative flex h-full flex-col bg-white dark:bg-gray-800 shadow-md">
+    <div class="flex h-full flex-col bg-white dark:bg-gray-800 shadow-md">
       <div class="flex overflow-hidden h-screen">
         <app-chat-sidebar
-          id="sidenav-1"
-          class="z-100 overflow-y-auto h-full w-64 flex-shrink-0"
+          class="overflow-y-auto h-full w-64 flex-shrink-0"
           (showConfig)="updateShowConfig($event)"
         ></app-chat-sidebar>
         <ng-container>

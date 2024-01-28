@@ -1,5 +1,5 @@
 import { appWindow } from "@tauri-apps/api/window";
-import { Component, EventEmitter, Output } from '@angular/core';
+import { Component } from "@angular/core";
 import { ThemeService } from "./services/theme.service";
 import { Location } from "@angular/common";
 
@@ -60,9 +60,6 @@ import { Location } from "@angular/common";
   ],
 })
 export class AppComponent {
-  @Output() toggleSidebar = new EventEmitter<boolean>();
-  private sidebarVisible: boolean = true;
-
   constructor(private themeService: ThemeService, private location: Location) {}
 
   goBack() {
@@ -72,9 +69,5 @@ export class AppComponent {
   goForward() {
     this.location.forward();
   }
-
-  toggleSidebarVisibility() {
-    this.sidebarVisible = !this.sidebarVisible;
     this.toggleSidebar.emit(this.sidebarVisible);
-  }
 }
