@@ -1,6 +1,7 @@
 import { appWindow } from "@tauri-apps/api/window";
 import { Component } from "@angular/core";
 import { ThemeService } from "./services/theme.service";
+import { ChatService } from './services/chat.service';
 import { Location } from "@angular/common";
 
 @Component({
@@ -60,7 +61,7 @@ import { Location } from "@angular/common";
   ],
 })
 export class AppComponent {
-  constructor(private themeService: ThemeService, private location: Location) {}
+  constructor(private themeService: ThemeService, private chatService: ChatService, private location: Location) {}
 
   goBack() {
     this.location.back();
@@ -69,5 +70,8 @@ export class AppComponent {
   goForward() {
     this.location.forward();
   }
-    this.toggleSidebar.emit(this.sidebarVisible);
+
+  toggleSidebarVisibility() {
+    this.chatService.toggleChatsVisibility();
+  }
 }

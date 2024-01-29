@@ -1,4 +1,4 @@
-import { Component } from "@angular/core";
+import { Component, OnInit } from "@angular/core";
 import { Chat, ChatService } from "./services/chat.service";
 
 @Component({
@@ -7,6 +7,7 @@ import { Chat, ChatService } from "./services/chat.service";
     <div class="flex h-full flex-col bg-white dark:bg-gray-800 shadow-md">
       <div class="flex overflow-hidden h-screen">
         <app-chat-sidebar
+	  *ngIf="currentVisibility"
           class="overflow-y-auto h-full w-64 flex-shrink-0"
           (showConfig)="updateShowConfig($event)"
         ></app-chat-sidebar>
@@ -48,7 +49,7 @@ import { Chat, ChatService } from "./services/chat.service";
     `,
   ],
 })
-export class ChatComponent {
+export class ChatComponent implements OnInit{
   currentChat: Chat = {
     id: "",
     mode: "oai",
@@ -63,9 +64,15 @@ export class ChatComponent {
   isViewerVisible = false;
   showConfig = false;
   docUrl = "";
+  currentVisibility = true;
 
   constructor(private chatService: ChatService) {
     this.chatService.currentChat.subscribe((chat) => (this.currentChat = chat));
+    this.currentVisibility = true;
+  }
+
+  ngOnInit() {
+    this.chatService.currentVisibility.subscribe((state) => (this.currentVisibility = state));
   }
 
   updateShowConfig(newShowConfigValue: boolean) {
