@@ -133,7 +133,7 @@ import { Product, ProductService } from "./services/product.service";
             <label
               for="bordered-radio-2"
               class="w-full py-4 ml-2 text-sm font-medium text-gray-900 dark:text-gray-300"
-              >OpenAI mode</label
+              >GPT mode</label
             >
           </div>
           <label
@@ -200,6 +200,7 @@ import { Product, ProductService } from "./services/product.service";
 })
 export class ChatInputComponent {
     @Input() mode: "ee" | "oai" = "ee";
+    @Input() source: "openai" | "azure" = "openai";
     @Input() model: "gpt-3.5-turbo" | "gpt-4" = "gpt-3.5-turbo";
     @Input() product_id: string | null = null;
     @Input() deactivated: boolean = false;
@@ -252,6 +253,7 @@ export class ChatInputComponent {
         let msg_info = {
             message: this.message.trim(),
             mode: this.mode,
+	    source: this.source,
             model: this.model,
             product_id: this.product_id,
         };

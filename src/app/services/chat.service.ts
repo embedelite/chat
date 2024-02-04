@@ -1,6 +1,9 @@
 import { Injectable } from "@angular/core";
 import { BehaviorSubject, Observable, of } from "rxjs";
 import { StorageService } from "./storage.service";
+import { OpenAIClient, AzureKeyCredential }  from "@azure/openai"
+import { OpenAI  } from 'openai';
+
 
 export interface Message {
   from: "user" | "bot";
@@ -171,8 +174,17 @@ export class ChatService {
     }));
 
     if (mode === "oai") {
-      let oai_api_key = this.storageService.getItem<string>("oai_api_key");
-      this.sendMessageOAI(chatIndex, oai_api_key, model, message, history);
+      const source = this.storageService.getItem<string>("default_source");
+      if (source === "openai") {
+	let oai_api_key = this.storageService.getItem<string>("oai_api_key");
+	this.sendMessageOAI(chatIndex, oai_api_key, model, message, history);
+      } else if (source === "azure") {
+	let azure_api_key = this.storageService.getItem<string>("azure_api_key");
+	let azure_endpoint = this.storageService.getItem<string>("azure_endpoint");
+	this.sendMessageAzure(chatIndex, azure_api_key, azure_endpoint, model, message, history);
+      } else {
+	console.log(`Wrong source, ${source} is not a valid source`);
+      }
     } else {
       let ee_api_key = this.storageService.getItem<string>("ee_api_key");
       if (productId === null) {
@@ -222,6 +234,54 @@ export class ChatService {
       .catch((error) => {
         console.error(error);
       });
+  }
+
+  async sendMessageAzure(
+    chatIndex: number,
+    azure_api_key: any,
+    endpoint: any,
+    model: string,
+    message: string,
+    history: any[]
+  ) {
+    const client = new OpenAIClient(endpoint, new AzureKeyCredential(azure_api_key));
+
+    //const deploymentId = "gpt-35-turbo";
+    const deploymentId = model.replace(/\./g, '');
+    console.log(deploymentId);
+    let messages = [...history, { role: "user", content: message }];
+    const events = await client.streamChatCompletions(
+      deploymentId,
+      messages,
+      //{ maxTokens: 128 },
+    );
+
+    let isNewMessage = true;
+    let newMessage: Message;
+    newMessage = {
+      from: "bot",
+      text: "",
+      complete: false,
+    };
+    for await (const event of events) {
+      console.log(event.choices[0]);
+      const choice = event.choices[0];
+      if (choice && choice.delta?.content) {
+	  let delta = choice.delta.content;
+
+	  if (delta && delta !== "") {
+	    newMessage.text += delta;
+	  }
+	    
+	  if (isNewMessage) {
+	    this.chats[chatIndex].messages.push(newMessage);
+	    isNewMessage = false;
+	  }
+
+	  this.storageService.setItem("chats", this.chats);
+      }
+    }
+    newMessage.complete = true;
   }
 
   sendMessageOAI(

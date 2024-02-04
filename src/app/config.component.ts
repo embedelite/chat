@@ -42,6 +42,38 @@ import { ThemeService } from "./services/theme.service";
                 required
               />
             </div>
+            <!-- Azure endpoint -->
+            <div>
+              <label
+                for="azure_endpoint"
+                class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+              >
+                Azure endpoint URL
+              </label>
+              <input
+                formControlName="azure_endpoint"
+                id="azure_endpoint"
+                placeholder="https://..."
+                class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white"
+                required
+              />
+            </div>
+            <!-- Azure API KEY Control -->
+            <div>
+              <label
+                for="azure_api_key"
+                class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+              >
+                Azure API KEY
+              </label>
+              <input
+                formControlName="azure_api_key"
+                id="azure_api_key"
+                placeholder="87..."
+                class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white"
+                required
+              />
+            </div>
             <!-- OpenAI API KEY Control -->
             <div>
               <label
@@ -57,6 +89,23 @@ import { ThemeService } from "./services/theme.service";
                 class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white"
                 required
               />
+            </div>
+            <!-- Default Source -->
+            <div class="flex p-0 m-2">
+              <label
+                for="default_source"
+                class="pt-3 pr-3 shrink-0 block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+              >
+                Default source to use
+              </label>
+              <select
+                formControlName="defaultSource"
+                id="default_source"
+                class="appearance-none px-3 py-2 h-10 text-sm leading-5 font-sans w-full border border-muted-300 bg-white text-muted-600 placeholder-muted-300 focus-visible:border-muted-300 focus-visible:shadow-lg dark:placeholder-muted-600 dark:bg-muted-700 dark:text-muted-200 dark:border-muted-600 dark:focus-visible:border-muted-600 focus-visible:ring-0 outline-transparent focus-visible:outline-2 focus-visible:outline-dashed focus-visible:outline-muted-300 dark:focus-visible:outline-muted-600 focus-visible:outline-offset-2 transition-all duration-300"
+              >
+                <option [value]="'openai'">OpenAI</option>
+                <option [value]="'azure'">Azure</option>
+              </select>
             </div>
             <!-- Default OpenAI Model Control -->
             <div class="flex p-0 m-2">
@@ -145,17 +194,25 @@ export class ConfigComponent implements OnInit {
   ) {}
 
   ngOnInit() {
+    const azure_endpoint = this.storageService.getItem<string>("azure_endpoint") || "";
+    const azure_api_key = this.storageService.getItem<string>("azure_api_key") || "";
     const ee_api_key = this.storageService.getItem<string>("ee_api_key") || "";
     const oai_api_key =
       this.storageService.getItem<string>("oai_api_key") || "";
+    const defaultSource =
+      this.storageService.getItem<"openai" | "azure">("default_source") ||
+      "openai";
     const defaultModel =
       this.storageService.getItem<"gpt-3.5-turbo" | "gpt-4">("default_model") ||
       "";
     const isDarkMode = this.detectDarkMode();
 
     this.configForm = this.fb.group({
+      azure_endpoint: [azure_endpoint, Validators.required],
+      azure_api_key: [azure_api_key, Validators.required],
       ee_api_key: [ee_api_key, Validators.required],
       oai_api_key: [oai_api_key, Validators.required],
+      defaultSource: [defaultSource],
       defaultModel: [defaultModel],
       isDarkMode: [isDarkMode],
     });
@@ -173,12 +230,24 @@ export class ConfigComponent implements OnInit {
 
   saveConfig() {
     this.storageService.setItem(
+      "azure_endpoint",
+      this.configForm.get("azure_endpoint")?.value
+    );
+    this.storageService.setItem(
+      "azure_api_key",
+      this.configForm.get("azure_api_key")?.value
+    );
+    this.storageService.setItem(
       "oai_api_key",
       this.configForm.get("oai_api_key")?.value
     );
     this.storageService.setItem(
       "ee_api_key",
       this.configForm.get("ee_api_key")?.value
+    );
+    this.storageService.setItem(
+      "default_source",
+      this.configForm.get("defaultSource")?.value
     );
     this.storageService.setItem(
       "default_model",
