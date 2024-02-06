@@ -57,8 +57,6 @@ import { KeyboardShortcutService } from "./services/keyboardshortcut.service";
   ],
 })
 export class ChatSidebarComponent {
-  @Output() showConfig = new EventEmitter<boolean>();
-
   chats: Chat[] = [];
   currentChat: Chat = {
     id: "",
@@ -105,7 +103,6 @@ export class ChatSidebarComponent {
   }
 
   selectChat(chat: Chat) {
-    this.showConfig.emit(false);
     this.chatService.switchChat(chat);
   }
 
@@ -154,16 +151,7 @@ export class ChatSidebarComponent {
     return targetDate <= currentDate && targetDate >= pastDate;
   }
 
-  openConfig() {
-    this.showConfig.emit(true);
-  }
-
-  closeConfig() {
-    this.showConfig.emit(false);
-  }
-
   createNewChat() {
-    this.closeConfig();
     let newChat = this.chatService.addChat("New Chat");
     this.chatGroups = this.groupChatsByDate(this.chats);
     this.selectChat(newChat);

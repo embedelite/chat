@@ -1,8 +1,9 @@
 import { appWindow } from "@tauri-apps/api/window";
 import { Component } from "@angular/core";
 import { ThemeService } from "./services/theme.service";
-import { ChatService } from './services/chat.service';
+import { ChatService } from "./services/chat.service";
 import { Location } from "@angular/common";
+import { NavigationEnd, Router } from "@angular/router";
 
 @Component({
   selector: "app-root",
@@ -11,8 +12,9 @@ import { Location } from "@angular/common";
       data-tauri-drag-region
       class="flex justify-between items-center bg-muted-100 dark:bg-muted-1000 shadow-md px-6 py-1 flex-shrink-0 border-b border-gray-800"
     >
-      <div class="flex ml-14 text-sm">
+      <div class="flex md:ml-14 text-sm">
         <i
+          *ngIf="showToggleIcon"
           class="fas fa-bars cursor-pointer px-3 py-3 rounded text-gray-900 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-800"
           (click)="toggleSidebarVisibility()"
         ></i>
@@ -61,7 +63,22 @@ import { Location } from "@angular/common";
   ],
 })
 export class AppComponent {
-  constructor(private themeService: ThemeService, private chatService: ChatService, private location: Location) {}
+  showToggleIcon: boolean = false;
+
+  constructor(
+    private themeService: ThemeService,
+    private chatService: ChatService,
+    private location: Location,
+    private router: Router
+  ) {}
+
+  ngOnInit() {
+    this.router.events.subscribe((event) => {
+      if (event instanceof NavigationEnd) {
+        this.showToggleIcon = this.router.url === "/chat";
+      }
+    });
+  }
 
   goBack() {
     this.location.back();
