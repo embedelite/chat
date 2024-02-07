@@ -107,34 +107,81 @@ export class ChatSidebarComponent {
   }
 
   groupChatsByDate(chats: Chat[]): { title: string; chats: Chat[] }[] {
-    let today: Chat[] = [];
-    let yesterday: Chat[] = [];
-    let previous7Days: Chat[] = [];
-    let previous30Days: Chat[] = [];
+    const specialGroups: { [key: string]: Chat[] } = {
+      Today: [],
+      Yesterday: [],
+      "Previous 30 days": [],
+    };
+    const monthGroups: { [key: string]: Chat[] } = {};
+    const yearGroups: { [key: string]: Chat[] } = {};
 
-    const todayDate = new Date();
-    const yesterdayDate = new Date();
-    yesterdayDate.setDate(todayDate.getDate() - 1);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0); // Normalize to start of the day
+    const yesterday = new Date(today.getTime());
+    yesterday.setDate(yesterday.getDate() - 1);
+    const thirtyDaysAgo = new Date(today.getTime());
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
 
-    for (let chat of chats) {
-      let chatDate = new Date(chat.date);
-      if (this.isSameDay(todayDate, chatDate)) {
-        today.push(chat);
-      } else if (this.isSameDay(yesterdayDate, chatDate)) {
-        yesterday.push(chat);
-      } else if (this.isInPastDays(chatDate, todayDate, 7)) {
-        previous7Days.push(chat);
-      } else if (this.isInPastDays(chatDate, todayDate, 30)) {
-        previous30Days.push(chat);
+    chats.forEach((chat) => {
+      const chatDate = new Date(chat.date);
+      chatDate.setHours(0, 0, 0, 0); // Normalize to start of the day
+
+      if (this.isSameDay(chatDate, today)) {
+        specialGroups["Today"].push(chat);
+      } else if (this.isSameDay(chatDate, yesterday)) {
+        specialGroups["Yesterday"].push(chat);
+      } else if (chatDate > thirtyDaysAgo) {
+        specialGroups["Previous 30 days"].push(chat);
+      } else {
+        const year = chatDate.getFullYear();
+        const monthName = this.getMonthName(chatDate.getMonth());
+
+        if (year === today.getFullYear()) {
+          if (!monthGroups[monthName]) monthGroups[monthName] = [];
+          monthGroups[monthName].push(chat);
+        } else {
+          if (!yearGroups[year]) yearGroups[year] = [];
+          yearGroups[year].push(chat);
+        }
       }
-    }
+    });
 
-    return [
-      { title: "Today", chats: today },
-      { title: "Yesterday", chats: yesterday },
-      { title: "Previous 7 days", chats: previous7Days },
-      { title: "Previous 30 days", chats: previous30Days },
+    // Combine and sort the groups
+    const combinedGroups = [
+      ...Object.keys(specialGroups)
+        .filter((key) => specialGroups[key].length > 0)
+        .map((key) => ({ title: key, chats: specialGroups[key] })),
+      ...Object.keys(monthGroups)
+        .sort(
+          (a, b) =>
+            new Date(`${b} 1, ${today.getFullYear()}`).getTime() -
+            new Date(`${a} 1, ${today.getFullYear()}`).getTime()
+        )
+        .map((month) => ({ title: month, chats: monthGroups[month] })),
+      ...Object.keys(yearGroups)
+        .sort((a, b) => parseInt(b) - parseInt(a))
+        .map((year) => ({ title: year.toString(), chats: yearGroups[year] })),
     ];
+
+    return combinedGroups;
+  }
+
+  getMonthName(monthIndex: number): string {
+    const monthNames = [
+      "January",
+      "February",
+      "March",
+      "April",
+      "May",
+      "June",
+      "July",
+      "August",
+      "September",
+      "October",
+      "November",
+      "December",
+    ];
+    return monthNames[monthIndex];
   }
 
   isSameDay(date1: Date, date2: Date): boolean {
@@ -143,12 +190,6 @@ export class ChatSidebarComponent {
       date1.getMonth() === date2.getMonth() &&
       date1.getFullYear() === date2.getFullYear()
     );
-  }
-
-  isInPastDays(targetDate: Date, currentDate: Date, pastDays: number): boolean {
-    const pastDate = new Date(currentDate);
-    pastDate.setDate(pastDate.getDate() - pastDays);
-    return targetDate <= currentDate && targetDate >= pastDate;
   }
 
   createNewChat() {
