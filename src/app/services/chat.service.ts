@@ -45,6 +45,9 @@ export class ChatService {
   private currentChatSubject = new BehaviorSubject<Chat>(this.chats[0]);
   currentChat = this.currentChatSubject.asObservable();
 
+  private chatsVisibility = new BehaviorSubject(true);  // set initial state to 'false'
+  currentVisibility = this.chatsVisibility.asObservable();
+
   constructor(private storageService: StorageService) {
     // Try to load chats from local storage during service initialization
     const storedChats = this.storageService.getItem<Chat[]>("chats");
@@ -52,6 +55,10 @@ export class ChatService {
       this.chats = storedChats;
       this.currentChatSubject.next(this.chats[0]);
     }
+  }
+
+  toggleChatsVisibility(){
+    this.chatsVisibility.next(!this.chatsVisibility.value);
   }
 
   getChats(): Observable<Chat[]> {

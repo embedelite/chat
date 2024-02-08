@@ -8,7 +8,7 @@ import { ThemeService } from "./services/theme.service";
 @Component({
   selector: "app-config",
   template: `
-    <div class="w-full h-full flex items-start justify-center p-6 ">
+    <div class="w-full h-full flex items-start justify-center md:p-6 xs:p-2">
       <!-- Modal content -->
       <div
         class="relative bg-white rounded-lg shadow dark:bg-gray-700 w-4/5 max-h-full"
@@ -73,7 +73,9 @@ import { ThemeService } from "./services/theme.service";
               >
                 <option [value]="'gpt-3.5-turbo'">gpt-3.5-turbo</option>
                 <option [value]="'gpt-4'">gpt-4</option>
-                <option [value]="'gpt-4-turbo-preview'">gpt-4-turbo-preview</option>
+                <option [value]="'gpt-4-turbo-preview'">
+                  gpt-4-turbo-preview
+                </option>
               </select>
             </div>
             <!-- Dark Mode Control -->
@@ -150,8 +152,9 @@ export class ConfigComponent implements OnInit {
     const oai_api_key =
       this.storageService.getItem<string>("oai_api_key") || "";
     const defaultModel =
-      this.storageService.getItem<"gpt-3.5-turbo" | "gpt-4" | "gpt-4-turbo-preview">("default_model") ||
-      "";
+      this.storageService.getItem<
+        "gpt-3.5-turbo" | "gpt-4" | "gpt-4-turbo-preview"
+      >("default_model") || "";
     const isDarkMode = this.detectDarkMode();
 
     this.configForm = this.fb.group({

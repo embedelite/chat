@@ -7,7 +7,7 @@ import { trigger, transition, style, animate } from "@angular/animations";
 @Component({
   selector: "app-editor-overview",
   template: `
-    <div class="w-full h-full flex items-start justify-center p-6 ">
+    <div class="w-full h-full flex items-start justify-center md:p-6 xs:p-2">
       <div
         class="relative bg-white rounded-lg shadow dark:bg-gray-700 w-4/5 max-h-full"
       >
@@ -45,7 +45,9 @@ import { trigger, transition, style, animate } from "@angular/animations";
       *ngIf="apiKeyPromptVisible"
       class="fixed inset-0 flex items-center justify-center bg-opacity-60 bg-gray-500 dark:bg-opacity-60 dark:bg-gray-800 blurred-bg"
     >
-      <div class="bg-white dark:bg-gray-800 w-full sm:w-2/3 rounded-lg p-10">
+      <div
+        class="bg-white dark:bg-gray-800 w-full sm:w-2/3 rounded-lg p-10 m-5"
+      >
         <div class="flex justify-between items-center">
           <h2 class="text-2xl text-gray-800 dark:text-white">
             No API key found

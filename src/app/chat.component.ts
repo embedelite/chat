@@ -1,4 +1,4 @@
-import { Component } from "@angular/core";
+import { Component, OnInit } from "@angular/core";
 import { Chat, ChatService } from "./services/chat.service";
 
 @Component({
@@ -7,12 +7,14 @@ import { Chat, ChatService } from "./services/chat.service";
     <div class="flex h-full flex-col bg-white dark:bg-gray-800 shadow-md">
       <div class="flex overflow-hidden h-screen">
         <app-chat-sidebar
-          class="overflow-y-auto h-full w-64 flex-shrink-0"
-          (showConfig)="updateShowConfig($event)"
+          *ngIf="currentVisibility"
+          [ngClass]="{ show: currentVisibility }"
+          class="overflow-y-auto h-full w-64 flex-shrink-0 sidebar-mobile-overlay"
         ></app-chat-sidebar>
         <ng-container>
           <div class="flex flex-col flex-grow">
             <app-chat-area
+              (click)="closeSidebar()"
               class="overflow-y-auto p-4 bg-white dark:bg-gray-800 flex-grow"
               [chat]="currentChat"
               [layout]="'centered'"
@@ -45,10 +47,34 @@ import { Chat, ChatService } from "./services/chat.service";
         flex-direction: column;
         overflow: hidden;
       }
+
+      @media (max-width: 767px) {
+        .sidebar-mobile-overlay {
+          position: fixed;
+          top: 48px;
+          left: 0;
+          height: 100%;
+          width: 80%; /* Adjust this value based on your design requirements */
+          background-color: #ffffff; /* Or whichever your desired background color is */
+          z-index: 100; /* Ensures it floats above other content */
+          transform: translateX(-100%);
+          transition: transform 0.3s ease-in-out;
+        }
+
+        .sidebar-mobile-overlay.show {
+          transform: translateX(0);
+        }
+      }
+
+      @media (min-width: 768px) {
+        .sidebar-normal {
+          /* Define styles for larger screens if necessary, or rely on default styles */
+        }
+      }
     `,
   ],
 })
-export class ChatComponent {
+export class ChatComponent implements OnInit {
   currentChat: Chat = {
     id: "",
     mode: "oai",
@@ -63,9 +89,17 @@ export class ChatComponent {
   isViewerVisible = false;
   showConfig = false;
   docUrl = "";
+  currentVisibility = true;
 
   constructor(private chatService: ChatService) {
     this.chatService.currentChat.subscribe((chat) => (this.currentChat = chat));
+    this.currentVisibility = true;
+  }
+
+  ngOnInit() {
+    this.chatService.currentVisibility.subscribe(
+      (state) => (this.currentVisibility = state)
+    );
   }
 
   updateShowConfig(newShowConfigValue: boolean) {
@@ -98,5 +132,12 @@ export class ChatComponent {
       msgInfo.model,
       msgInfo.product_id
     );
+  }
+
+  closeSidebar() {
+    // Check if we are on a mobile device by window width
+    if (window.innerWidth <= 767) {
+      this.chatService.toggleChatsVisibility();
+    }
   }
 }
