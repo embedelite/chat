@@ -1,7 +1,7 @@
 import { Injectable } from "@angular/core";
 import { BehaviorSubject, Observable, of } from "rxjs";
 import { StorageService } from "./storage.service";
-import { OpenAIClient, AzureKeyCredential }  from "@azure/openai"
+import { OpenAIClient, AzureKeyCredential, OpenAIClientOptions }  from "@azure/openai"
 import { OpenAI  } from 'openai';
 
 
@@ -244,7 +244,7 @@ export class ChatService {
     message: string,
     history: any[]
   ) {
-    const client = new OpenAIClient(endpoint, new AzureKeyCredential(azure_api_key));
+    const client = new OpenAIClient(endpoint, new AzureKeyCredential(azure_api_key), { allowInsecureConnection:true });
 
     //const deploymentId = "gpt-35-turbo";
     const deploymentId = model.replace(/\./g, '');
