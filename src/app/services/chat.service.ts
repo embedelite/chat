@@ -14,7 +14,7 @@ export interface Chat {
   mode: "ee" | "oai";
   deactivated: boolean;
   product_id: string | null;
-  model: "gpt-3.5-turbo" | "gpt-4";
+  model: "gpt-3.5-turbo" | "gpt-4" | "gpt-4-turbo-preview";
   title: string;
   messages: Message[];
   date: Date;
@@ -25,47 +25,11 @@ export class ChatService {
   private readonly OPENAI_API_URL =
     "https://api.openai.com/v1/chat/completions";
   //private readonly EE_API_URL = "https://api.embedelite.com";
-  private readonly EE_API_URL = "https://api.embedelite.com";
+  private readonly EE_API_URL = "https://api.dev.embedelite.com";
 
   private chats: Chat[] = [
     {
       id: "1",
-      title: "US Patent Example",
-      mode: "ee",
-      deactivated: true,
-      product_id: "uspto",
-      model: "gpt-3.5-turbo",
-      date: new Date(),
-      messages: [
-        {
-          from: "user",
-          text: "Can you locate any US patents filed within the last 5 years, which discuss applying convolutional neural networks for image recognition in medical devices, even if they do not explicitly use these terms but the implied meaning aligns with this search?",
-        },
-        {
-          from: "bot",
-          text: "Yes, I have found 3 patents filed recently related to your query.",
-          links: [
-            {
-              title:
-                '1. Patent US-20230162428-A1: "APPARATUS AND METHOD FOR ACCELERATION DATA STRUCTURE REFIT" (filed on 2023-05-25 by APODACA; Michael et al.)',
-              url: "https://image-ppubs.uspto.gov/dirsearch-public/print/downloadPdf/20230162428",
-            },
-            {
-              title:
-                '2. Patent US-20230157618-A1: "Method and System to Assess Pulmonary Hypertension Using Phase Space Tomography and Machine Learning" (filed on 2023-05-25 by Grouchy; Paul et al.)',
-              url: "https://image-ppubs.uspto.gov/dirsearch-public/print/downloadPdf/20230157618",
-            },
-            {
-              title:
-                '3. Patent US-20230162043-A1: "SYSTEMS AND METHODS FOR MAGNETIC RESONANCE IMAGING STANDARDIZATION USING DEEP LEARNING" (filed on 2023-05-25 by Zhang; Tao et al.)',
-              url: "https://image-ppubs.uspto.gov/dirsearch-public/print/downloadPdf/20230162043",
-            },
-          ],
-        },
-      ],
-    },
-    {
-      id: "2",
       mode: "oai",
       deactivated: false,
       product_id: null,
@@ -81,12 +45,20 @@ export class ChatService {
   private currentChatSubject = new BehaviorSubject<Chat>(this.chats[0]);
   currentChat = this.currentChatSubject.asObservable();
 
+  private chatsVisibility = new BehaviorSubject(true);  // set initial state to 'false'
+  currentVisibility = this.chatsVisibility.asObservable();
+
   constructor(private storageService: StorageService) {
     // Try to load chats from local storage during service initialization
     const storedChats = this.storageService.getItem<Chat[]>("chats");
     if (storedChats) {
       this.chats = storedChats;
+      this.currentChatSubject.next(this.chats[0]);
     }
+  }
+
+  toggleChatsVisibility(){
+    this.chatsVisibility.next(!this.chatsVisibility.value);
   }
 
   getChats(): Observable<Chat[]> {
@@ -96,7 +68,7 @@ export class ChatService {
   updateChatConfig(
     chatId: string,
     mode: "ee" | "oai",
-    model: "gpt-3.5-turbo" | "gpt-4",
+    model: "gpt-3.5-turbo" | "gpt-4" | "gpt-4-turbo-preview",
     productId: string | null
   ): void {
     const chatIndex = this.chats.findIndex((chat) => chat.id === chatId);
@@ -127,8 +99,8 @@ export class ChatService {
 
   addChat(title: string): Chat {
     const defaultModel =
-      this.storageService.getItem<"gpt-3.5-turbo" | "gpt-4">("default_model") ??
-      "gpt-3.5-turbo";
+      this.storageService.getItem<"gpt-3.5-turbo" | "gpt-4" | "gpt-4-turbo-preview">("default_model") ??
+      "gpt-4";
 
     let newChat: Chat = {
       id: this.generateId(), // Implement a method for generating unique id
@@ -176,7 +148,7 @@ export class ChatService {
     chatId: string,
     message: string,
     mode: "ee" | "oai",
-    model: "gpt-3.5-turbo" | "gpt-4",
+    model: "gpt-3.5-turbo" | "gpt-4" | "gpt-4-turbo-preview",
     productId: string | null
   ): void {
     const chatIndex = this.chats.findIndex((chat) => chat.id === chatId);
@@ -250,9 +222,6 @@ export class ChatService {
             text: data.response,
           };
           this.chats[chatIndex].messages.push(botMessage);
-
-          // Inform subscribers about the new message
-          this.currentChatSubject.next(this.chats[chatIndex]);
 
           this.storageService.setItem("chats", this.chats);
         });
@@ -343,9 +312,6 @@ export class ChatService {
                       newMessage.complete = choices[0].finish_reason === "stop";
                     }
                   }
-
-                  // Inform subscribers about the new message
-                  this.currentChatSubject.next(this.chats[chatIndex]);
 
                   this.storageService.setItem("chats", this.chats);
                 }

@@ -6,12 +6,13 @@ import {
   Input,
   ViewChild,
 } from "@angular/core";
+import { Product, ProductService } from "./services/product.service";
 
 @Component({
   selector: "app-chat-input",
   template: `
     <div
-      class="flex items-center p-4 bg-gray-200 dark:bg-gray-700 rounded-br-lg"
+      class="flex items-center p-2 bg-gray-200 dark:bg-gray-700 rounded-br-lg"
     >
       <textarea
         #textarea
@@ -20,6 +21,7 @@ import {
         rows="1"
         placeholder="Type your message..."
         (input)="adjustTextarea($event)"
+        (paste)="adjustTextarea($event)"
         (keyup.enter)="sendMessage()"
         [(ngModel)]="message"
         [attr.disabled]="deactivated ? true : null"
@@ -30,44 +32,17 @@ import {
           id="dropdownTopButton"
           data-dropdown-toggle="dropdownTop"
           data-dropdown-placement="top"
-          class="mr-0 mb-3 md:mb-0 text-white bg-primary-500 hover:bg-primary-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-l-lg text-sm px-5 py-2.5 text-center inline-flex items-center dark:bg-primary-600 dark:hover:bg-primary-500 dark:focus:ring-primary-800"
+          class="mr-0 mb-0 text-white bg-primary-500 hover:bg-primary-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-l-lg text-sm px-5 py-2.5 text-center inline-flex items-center dark:bg-primary-600 dark:hover:bg-primary-500 dark:focus:ring-primary-800"
           type="button"
           (click)="toggleChatConfig()"
         >
-          <svg
-            class="w-2.5 h-2.5"
-            aria-hidden="true"
-            xmlns="http://www.w3.org/2000/svg"
-            fill="none"
-            viewBox="0 0 10 6"
-          >
-            <path
-              stroke="currentColor"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M9 5 5 1 1 5"
-            />
-          </svg>
+          <i class="fas fa-angle-up"></i>
         </button>
         <button
-          class="flex items-center justify-center w-12 h-12 rounded-r-lg bg-primary-500 hover:bg-primary-600 focus:outline-none focus:ring-2 focus:ring-primary-700 focus:ring-offset-2"
+          class="flex items-center justify-center w-12 h-11 rounded-r-lg bg-primary-500 hover:bg-primary-600 focus:outline-none focus:ring-2 focus:ring-primary-700 focus:ring-offset-2"
           (click)="sendMessage()"
         >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-            class="w-6 h-6 text-white"
-          >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M5 12h14M12 5l7 7-7 7"
-            ></path>
-          </svg>
+          <i class="fas fa-arrow-right text-white"></i>
         </button>
       </div>
 
@@ -104,34 +79,20 @@ import {
           >
           <div class="relative">
             <select
-              id="countries"
+              id="products"
               class="appearance-none px-3 py-2 h-10 text-sm leading-5 font-sans w-full border border-muted-300 bg-white text-muted-600 placeholder-muted-300 focus-visible:border-muted-300 focus-visible:shadow-lg dark:placeholder-muted-600 dark:bg-muted-700 dark:text-muted-200 dark:border-muted-600 dark:focus-visible:border-muted-600 focus-visible:ring-0 outline-transparent focus-visible:outline-2 focus-visible:outline-dashed focus-visible:outline-muted-300 dark:focus-visible:outline-muted-600 focus-visible:outline-offset-2 transition-all duration-300"
               (change)="selectProductOption($event.target)"
             >
-              <option selected>Choose a country</option>
+              <option selected>Choose a product</option>
               <option
-                value="vat-rules-es"
-                [selected]="product_id === 'vat-rules-es'"
+                *ngFor="let product of products"
+                [value]="product.id"
+                [selected]="product_id === product.id"
               >
-                vat-rules-es
+                {{ product.name }}
+                <!-- Modify as per the attribute of Product -->
               </option>
-              <option
-                value="vat-rules-de"
-                [selected]="product_id === 'vat-rules-de'"
-              >
-                vat-rules-de
-              </option>
-              <option
-                value="vat-rules-fr"
-                [selected]="product_id === 'vat-rules-fr'"
-              >
-                vat-rules-fr
-              </option>
-              <option
-                *ngIf="showExtraProduct"
-                value="{{ product_id }}"
-                selected
-              >
+              <option *ngIf="showExtraProduct" [value]="product_id" selected>
                 {{ product_id }}
               </option>
             </select>
@@ -195,6 +156,12 @@ import {
               <option value="gpt-4" [selected]="model === 'gpt-4'">
                 gpt-4
               </option>
+              <option
+                value="gpt-4-turbo-preview"
+                [selected]="model === 'gpt-4-turbo-preview'"
+              >
+                gpt-4-turbo-preview
+              </option>
             </select>
             <div
               class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-300"
@@ -221,7 +188,9 @@ import {
     `
       textarea {
         transition: height 0.2s;
-        overflow-y: hidden;
+        overflow-y: auto;
+        max-height: 300px;
+        min-height: 20px;
       }
       #dropdownTopButton {
         position: relative;
@@ -237,7 +206,8 @@ import {
 })
 export class ChatInputComponent {
   @Input() mode: "ee" | "oai" = "ee";
-  @Input() model: "gpt-3.5-turbo" | "gpt-4" = "gpt-3.5-turbo";
+  @Input() model: "gpt-3.5-turbo" | "gpt-4" | "gpt-4-turbo-preview" =
+    "gpt-4-turbo-preview";
   @Input() product_id: string | null = null;
   @Input() deactivated: boolean = false;
   @Output() openViewer = new EventEmitter<string>();
@@ -248,14 +218,21 @@ export class ChatInputComponent {
   showChatConfig: boolean = false;
   showExtraProduct: boolean = false;
 
-  constructor() {
+  products: Product[] = [];
+
+  constructor(private productService: ProductService) {
     this.message = "";
     // if product id is not fr, de, or es then show extra product
     this.updateExtraProduct();
+    this.fetchProducts();
   }
 
   ngOnChanges() {
     this.updateExtraProduct();
+  }
+
+  async fetchProducts() {
+    this.products = await this.productService.listProducts();
   }
 
   updateExtraProduct() {
@@ -270,11 +247,6 @@ export class ChatInputComponent {
     } else {
       this.showExtraProduct = false;
     }
-  }
-
-  ngAfterViewChecked() {
-    // Focus on textarea after view is initialized
-    this.textArea.nativeElement.focus();
   }
 
   toggleChatConfig() {
@@ -296,11 +268,21 @@ export class ChatInputComponent {
   }
 
   adjustTextarea(event: any) {
-    const textarea: any = event
-      ? event.target
-      : document.querySelector("textarea");
-    textarea.style.height = "auto"; // Reset height
-    textarea.style.height = `${textarea.scrollHeight}px`; // Set to scrollHeight
+    setTimeout(() => {
+      const textarea: any = event
+        ? event.target
+        : document.querySelector("textarea");
+      if (textarea.value === "") {
+        // Reset textarea size if there's no content
+        textarea.style.height = "auto";
+      } else if (textarea.scrollHeight < 300) {
+        // Increase height if scrollHeight is under 150.
+        textarea.style.height = `${textarea.scrollHeight}px`;
+      } else if (textarea.clientHeight < 300) {
+        // If content is larger but textarea's visible height is less, set it to 150
+        textarea.style.height = `300px`;
+      }
+    }, 0);
   }
 
   selectModelOption(model: any) {

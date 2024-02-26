@@ -1,69 +1,51 @@
-import { Component, EventEmitter, Output } from "@angular/core";
+import { Component } from "@angular/core";
 import { Chat, ChatService } from "./services/chat.service";
 import { KeyboardShortcutService } from "./services/keyboardshortcut.service";
 
 @Component({
   selector: "app-chat-sidebar",
   template: `
-    <div
-      class="flex flex-col h-full p-4 overflow-y-auto bg-gray-200 dark:bg-gray-700"
-    >
+    <div class="flex flex-col h-full p-4 bg-gray-200 dark:bg-gray-700">
       <div class="grid grid-cols-4 gap-4">
-        <button
-          class="custom-btn mb-4mb-4 bg-primary-500 text-white rounded-md px-4 py-2"
-          (click)="openConfig()"
-        >
-          <svg
-            class="w-4 h-4 mr-2 text-white"
-            aria-hidden="true"
-            xmlns="http://www.w3.org/2000/svg"
-            fill="currentColor"
-            viewBox="0 0 20 20"
-          >
-            <path
-              d="M5 11.424V1a1 1 0 1 0-2 0v10.424a3.228 3.228 0 0 0 0 6.152V19a1 1 0 1 0 2 0v-1.424a3.228 3.228 0 0 0 0-6.152ZM19.25 14.5A3.243 3.243 0 0 0 17 11.424V1a1 1 0 0 0-2 0v10.424a3.227 3.227 0 0 0 0 6.152V19a1 1 0 1 0 2 0v-1.424a3.243 3.243 0 0 0 2.25-3.076Zm-6-9A3.243 3.243 0 0 0 11 2.424V1a1 1 0 0 0-2 0v1.424a3.228 3.228 0 0 0 0 6.152V19a1 1 0 1 0 2 0V8.576A3.243 3.243 0 0 0 13.25 5.5Z"
-            />
-          </svg>
-        </button>
-        <button
-          class="custom-btn col-span-3 mb-4 bg-primary-500 text-white rounded-md px-4 py-2"
-          (click)="createNewChat()"
-        >
-          + New chat
-        </button>
-      </div>
-      <ng-container *ngFor="let group of chatGroups">
-        <h5
-          *ngIf="group.chats.length"
-          class="mb-2 font-bold text-gray-700 dark:text-gray-300"
-        >
-          {{ group.title }}
-        </h5>
-        <div *ngFor="let chat of group.chats; let i = index">
-          <div
-            (click)="selectChat(chat)"
-            class="group relative cursor-pointer px-4 py-2 rounded-lg mb-2 flex items-center justify-between"
-            [class.active]="currentChat.id === chat.id"
-          >
-            <p class="text-gray-600 dark:text-gray-400 mb-0">
-              {{ chat.title }}
-            </p>
-            <span
-              (click)="deleteChat(chat); $event.stopPropagation()"
-              class="ml-4 opacity-0 group-hover:opacity-100"
-            >
-              🗑️
-            </span>
-          </div>
+        <div class="col-span-4">
+          <button class="primary-btn w-full mb-4" (click)="createNewChat()">
+            + New chat
+          </button>
         </div>
-      </ng-container>
+      </div>
+      <div class="overflow-y-auto">
+        <ng-container *ngFor="let group of chatGroups">
+          <h5
+            *ngIf="group.chats.length"
+            class="mb-2 font-bold text-gray-700 dark:text-gray-300"
+          >
+            {{ group.title }}
+          </h5>
+          <div *ngFor="let chat of group.chats; let i = index">
+            <div
+              (click)="selectChat(chat)"
+              class="group relative cursor-pointer px-4 py-2 rounded-lg mb-2 flex items-center justify-between"
+              [class.active]="currentChat.id === chat.id"
+            >
+              <p class="text-gray-600 dark:text-gray-400 mb-0">
+                {{ chat.title }}
+              </p>
+              <span
+                (click)="deleteChat(chat); $event.stopPropagation()"
+                class="ml-4 opacity-0 group-hover:opacity-100"
+              >
+                🗑️
+              </span>
+            </div>
+          </div>
+        </ng-container>
+      </div>
     </div>
   `,
   styles: [
     `
       .active {
         background-color: #f3f4f6;
-        dark: bg-gray-800;
       }
       .hover-group:hover .opacity-0 {
         opacity: 1 !important;
@@ -75,8 +57,6 @@ import { KeyboardShortcutService } from "./services/keyboardshortcut.service";
   ],
 })
 export class ChatSidebarComponent {
-  @Output() showConfig = new EventEmitter<boolean>();
-
   chats: Chat[] = [];
   currentChat: Chat = {
     id: "",
@@ -123,39 +103,85 @@ export class ChatSidebarComponent {
   }
 
   selectChat(chat: Chat) {
-    this.showConfig.emit(false);
     this.chatService.switchChat(chat);
   }
 
   groupChatsByDate(chats: Chat[]): { title: string; chats: Chat[] }[] {
-    let today: Chat[] = [];
-    let yesterday: Chat[] = [];
-    let previous7Days: Chat[] = [];
-    let previous30Days: Chat[] = [];
+    const specialGroups: { [key: string]: Chat[] } = {
+      Today: [],
+      Yesterday: [],
+      "Previous 30 days": [],
+    };
+    const monthGroups: { [key: string]: Chat[] } = {};
+    const yearGroups: { [key: string]: Chat[] } = {};
 
-    const todayDate = new Date();
-    const yesterdayDate = new Date();
-    yesterdayDate.setDate(todayDate.getDate() - 1);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0); // Normalize to start of the day
+    const yesterday = new Date(today.getTime());
+    yesterday.setDate(yesterday.getDate() - 1);
+    const thirtyDaysAgo = new Date(today.getTime());
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
 
-    for (let chat of chats) {
-      let chatDate = new Date(chat.date);
-      if (this.isSameDay(todayDate, chatDate)) {
-        today.push(chat);
-      } else if (this.isSameDay(yesterdayDate, chatDate)) {
-        yesterday.push(chat);
-      } else if (this.isInPastDays(chatDate, todayDate, 7)) {
-        previous7Days.push(chat);
-      } else if (this.isInPastDays(chatDate, todayDate, 30)) {
-        previous30Days.push(chat);
+    chats.forEach((chat) => {
+      const chatDate = new Date(chat.date);
+      chatDate.setHours(0, 0, 0, 0); // Normalize to start of the day
+
+      if (this.isSameDay(chatDate, today)) {
+        specialGroups["Today"].push(chat);
+      } else if (this.isSameDay(chatDate, yesterday)) {
+        specialGroups["Yesterday"].push(chat);
+      } else if (chatDate > thirtyDaysAgo) {
+        specialGroups["Previous 30 days"].push(chat);
+      } else {
+        const year = chatDate.getFullYear();
+        const monthName = this.getMonthName(chatDate.getMonth());
+
+        if (year === today.getFullYear()) {
+          if (!monthGroups[monthName]) monthGroups[monthName] = [];
+          monthGroups[monthName].push(chat);
+        } else {
+          if (!yearGroups[year]) yearGroups[year] = [];
+          yearGroups[year].push(chat);
+        }
       }
-    }
+    });
 
-    return [
-      { title: "Today", chats: today },
-      { title: "Yesterday", chats: yesterday },
-      { title: "Previous 7 days", chats: previous7Days },
-      { title: "Previous 30 days", chats: previous30Days },
+    // Combine and sort the groups
+    const combinedGroups = [
+      ...Object.keys(specialGroups)
+        .filter((key) => specialGroups[key].length > 0)
+        .map((key) => ({ title: key, chats: specialGroups[key] })),
+      ...Object.keys(monthGroups)
+        .sort(
+          (a, b) =>
+            new Date(`${b} 1, ${today.getFullYear()}`).getTime() -
+            new Date(`${a} 1, ${today.getFullYear()}`).getTime()
+        )
+        .map((month) => ({ title: month, chats: monthGroups[month] })),
+      ...Object.keys(yearGroups)
+        .sort((a, b) => parseInt(b) - parseInt(a))
+        .map((year) => ({ title: year.toString(), chats: yearGroups[year] })),
     ];
+
+    return combinedGroups;
+  }
+
+  getMonthName(monthIndex: number): string {
+    const monthNames = [
+      "January",
+      "February",
+      "March",
+      "April",
+      "May",
+      "June",
+      "July",
+      "August",
+      "September",
+      "October",
+      "November",
+      "December",
+    ];
+    return monthNames[monthIndex];
   }
 
   isSameDay(date1: Date, date2: Date): boolean {
@@ -166,22 +192,7 @@ export class ChatSidebarComponent {
     );
   }
 
-  isInPastDays(targetDate: Date, currentDate: Date, pastDays: number): boolean {
-    const pastDate = new Date(currentDate);
-    pastDate.setDate(pastDate.getDate() - pastDays);
-    return targetDate <= currentDate && targetDate >= pastDate;
-  }
-
-  openConfig() {
-    this.showConfig.emit(true);
-  }
-
-  closeConfig() {
-    this.showConfig.emit(false);
-  }
-
   createNewChat() {
-    this.closeConfig();
     let newChat = this.chatService.addChat("New Chat");
     this.chatGroups = this.groupChatsByDate(this.chats);
     this.selectChat(newChat);

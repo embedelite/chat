@@ -8,7 +8,7 @@
   },
   "package": {
     "productName": "embedelite-native",
-    "version": "0.1.0"
+    "version": "0.2.0"
   },
   "tauri": {
     "allowlist": {
@@ -16,6 +16,9 @@
       "shell": {
         "all": false,
         "open": true
+      },
+      "window": {
+        "startDragging": true
       }
     },
     "bundle": {
@@ -37,9 +40,10 @@
       {
         "fullscreen": false,
         "resizable": true,
-        "title": "EmbedElite Chat",
+        "title": "",
         "width": 1024,
-        "height": 1024
+        "height": 1024,
+        "titleBarStyle": "Overlay"
       }
     ]
   }
