@@ -7,7 +7,7 @@ import { Chat, ChatService } from "./services/chat.service";
     <div class="flex h-full flex-col bg-white dark:bg-gray-800 shadow-md">
       <div class="flex overflow-hidden h-screen">
         <app-chat-sidebar
-          *ngIf="currentVisibility"
+	  [hidden]="!currentVisibility"
           [ngClass]="{ show: currentVisibility }"
           class="overflow-y-auto h-full w-64 flex-shrink-0 sidebar-mobile-overlay"
         ></app-chat-sidebar>
