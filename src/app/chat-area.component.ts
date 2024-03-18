@@ -13,11 +13,12 @@ import { StorageService } from "./services/storage.service";
   selector: "app-chat-area",
   template: `
     <div #msgcontainer class="flex flex-col">
-      <div *ngFor="let message of chat?.messages">
+      <div *ngFor="let message of chat?.messages; let i = index; trackBy: trackByMessage">
         <ng-container *ngIf="message.from === 'user'">
           <app-user-message
             [message]="message.text"
             [layout]="layout"
+	    [messageIndex]="i"
           ></app-user-message>
         </ng-container>
         <ng-container *ngIf="message.from === 'bot'">
@@ -56,6 +57,10 @@ export class ChatAreaComponent {
   ngAfterViewChecked() {
     let stickyScroll = this.storageService.getItem<boolean>("stickyScroll");
     this.scrollToBottom();
+  }
+
+  trackByMessage(index: number, message: any) {
+    return message.text; 
   }
 
   ngAfterViewInit() {

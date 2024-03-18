@@ -11,7 +11,7 @@ import {
 @Component({
   selector: "app-bot-message",
   template: `
-    <div class="flex items-end mb-4 space-x-2">
+    <div class="flex items-end mb-4 space-x-2 focus:outline-none" contentEditable (input)="onContentEditableInput($event)">
       <div
         class=" px-4 py-2 text-white bg-primary-600 dark:bg-primary-500 rounded-lg max-w-[90%]"
       >

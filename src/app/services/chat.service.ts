@@ -347,4 +347,9 @@ export class ChatService {
         console.error(error);
       });
   }
+
+  editMessage(message_idx: number, newMessage: string) {
+    this.currentChatSubject.value.messages[message_idx].text = newMessage;
+    this.storageService.setItem("chats", this.chats);
+  }
 }
