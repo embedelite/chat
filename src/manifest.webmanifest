@@ -1,8 +1,8 @@
 {
   "name": "embedelite-native",
   "short_name": "embedelite-native",
-  "theme_color": "#1976d2",
-  "background_color": "#fafafa",
+  "theme_color": "#0A101F",
+  "background_color": "#0A101F",
   "display": "standalone",
   "scope": "./",
   "start_url": "./",
