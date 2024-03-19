@@ -16,7 +16,6 @@ export class KeyboardShortcutService {
   }
 
   private handleKeyDown(event: KeyboardEvent): void {
-    console.log("event", event);
     const shortcutKey = this.parseEvent(event);
     if (this.shortcuts.has(shortcutKey)) {
       this.ngZone.run(() => {
