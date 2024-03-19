@@ -1,4 +1,4 @@
-import { Component } from "@angular/core";
+import { Component, OnDestroy, OnInit } from "@angular/core";
 import { Chat, ChatService } from "./services/chat.service";
 import { KeyboardShortcutService } from "./services/keyboardshortcut.service";
 
@@ -56,7 +56,7 @@ import { KeyboardShortcutService } from "./services/keyboardshortcut.service";
     `,
   ],
 })
-export class ChatSidebarComponent {
+export class ChatSidebarComponent implements OnInit, OnDestroy {
   chats: Chat[] = [];
   currentChat: Chat = {
     id: "",
@@ -74,15 +74,31 @@ export class ChatSidebarComponent {
     private chatService: ChatService,
     private keyboardShortcutService: KeyboardShortcutService
   ) {
-    keyboardShortcutService.addShortcut({ key: "KeyT", ctrlKey: true }, () =>
-      this.createNewChat()
-    );
     chatService.getChats().subscribe((chats) => {
       this.chats = chats;
       this.chatGroups = this.groupChatsByDate(this.chats);
     });
     chatService.currentChat.subscribe((chat) => {
       this.currentChat = chat;
+    });
+  }
+
+  ngOnInit(): void {
+    this.keyboardShortcutService.registerShortcut(
+      { key: "t", ctrlKey: true },
+      () => this.createNewChat()
+    );
+
+    this.keyboardShortcutService.registerShortcut(
+      { key: "w", ctrlKey: true },
+      () => this.deleteCurrentChat()
+    );
+  }
+
+  ngOnDestroy(): void {
+    this.keyboardShortcutService.unregisterShortcut({
+      key: "KeyT",
+      ctrlKey: true,
     });
   }
 
