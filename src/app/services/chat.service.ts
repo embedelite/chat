@@ -3,6 +3,7 @@ import { BehaviorSubject, Observable, of } from "rxjs";
 import { StorageService } from "./storage.service";
 
 export interface Message {
+  id: string;
   from: "user" | "bot";
   text: string;
   links?: Array<{ title: string; url: string }>;
@@ -37,15 +38,15 @@ export class ChatService {
       title: "Hello AI",
       date: new Date(),
       messages: [
-        { from: "user", text: "Hello, AI!" },
-        { from: "bot", text: "Hello, user!" },
+        { id: "1", from: "user", text: "Hello, AI!" },
+        { id: "2", from: "bot", text: "Hello, user!" },
       ],
     },
   ];
   private currentChatSubject = new BehaviorSubject<Chat>(this.chats[0]);
   currentChat = this.currentChatSubject.asObservable();
 
-  private chatsVisibility = new BehaviorSubject(true);  // set initial state to 'false'
+  private chatsVisibility = new BehaviorSubject(true); // set initial state to 'false'
   currentVisibility = this.chatsVisibility.asObservable();
 
   constructor(private storageService: StorageService) {
@@ -57,7 +58,7 @@ export class ChatService {
     }
   }
 
-  toggleChatsVisibility(){
+  toggleChatsVisibility() {
     this.chatsVisibility.next(!this.chatsVisibility.value);
   }
 
@@ -99,8 +100,9 @@ export class ChatService {
 
   addChat(title: string): Chat {
     const defaultModel =
-      this.storageService.getItem<"gpt-3.5-turbo" | "gpt-4" | "gpt-4-turbo-preview">("default_model") ??
-      "gpt-4";
+      this.storageService.getItem<
+        "gpt-3.5-turbo" | "gpt-4" | "gpt-4-turbo-preview"
+      >("default_model") ?? "gpt-4";
 
     let newChat: Chat = {
       id: this.generateId(), // Implement a method for generating unique id
@@ -158,6 +160,7 @@ export class ChatService {
     }
 
     const userMessage: Message = {
+      id: this.generateId(),
       from: "user",
       text: message,
     };
@@ -218,6 +221,7 @@ export class ChatService {
 
         response.json().then((data) => {
           let botMessage: Message = {
+            id: this.generateId(),
             from: "bot",
             text: data.response,
           };
@@ -298,6 +302,7 @@ export class ChatService {
                 if (choices && choices[0] && choices[0].delta) {
                   if (isNewMessage) {
                     newMessage = {
+                      id: this.generateId(),
                       from:
                         choices[0].delta.role === "assistant" ? "bot" : "user",
                       text: choices[0].delta.content,
@@ -325,6 +330,75 @@ export class ChatService {
       .catch((error) => {
         console.error(error);
       });
+  }
+
+  updateMessage(chatId: string, updatedMessage: Message) {
+    // Find the chat based on chatId
+    const chatIndex = this.chats.findIndex((chat) => chat.id === chatId);
+
+    if (chatIndex < 0) {
+      console.error(`No chat found with id: ${chatId}`);
+      return;
+    }
+
+    // Within the found chat, find the message index using updatedMessage.id
+    const messageIndex = this.chats[chatIndex].messages.findIndex(
+      (msg) => msg.id === updatedMessage.id
+    );
+
+    if (messageIndex < 0) {
+      console.error(`No message found with id: ${updatedMessage.id}`);
+      return;
+    }
+
+    // Replace the old message with the updated message
+    this.chats[chatIndex].messages[messageIndex] = updatedMessage;
+    this.storageService.setItem("chats", this.chats);
+
+    this.refreshChatAfterEdit(chatId, updatedMessage.id).catch((err) =>
+      console.error("Failed to refresh chat:", err)
+    );
+  }
+
+  async refreshChatAfterEdit(
+    chatId: string,
+    updatedMessageId: string
+  ): Promise<void> {
+    const chatIndex = this.chats.findIndex((chat) => chat.id === chatId);
+    if (chatIndex < 0) {
+      console.error(`No chat found with id: ${chatId}`);
+      return;
+    }
+
+    const messageIndex = this.chats[chatIndex].messages.findIndex(
+      (msg) => msg.id === updatedMessageId
+    );
+
+    this.chats[chatIndex].messages.splice(messageIndex + 1);
+
+    let history = this.chats[chatIndex].messages.map((msg) => ({
+      role: msg.from === "user" ? "user" : "assistant",
+      content: msg.text,
+    }));
+
+    const mode = this.chats[chatIndex].mode; // 'oai' or 'ee'
+    const model = this.chats[chatIndex].model;
+    const productId = this.chats[chatIndex].product_id;
+
+    const lastMessage = history[history.length - 1].content;
+
+    // Fetch new sequence of responses based on the updated history
+    if (mode === "oai" && lastMessage) {
+      let oai_api_key = this.storageService.getItem<string>("oai_api_key");
+      this.sendMessageOAI(chatIndex, oai_api_key, model, lastMessage, history);
+    } else if (mode === "ee" && productId && lastMessage) {
+      this.sendMessageEE(
+        chatIndex,
+        this.storageService.getItem<string>("ee_api_key"),
+        productId,
+        lastMessage
+      );
+    }
   }
 
   updateProducts(ee_api_key: string) {
