@@ -15,7 +15,7 @@ export interface Chat {
   mode: "ee" | "oai";
   deactivated: boolean;
   product_id: string | null;
-  model: "gpt-3.5-turbo" | "gpt-4" | "gpt-4-turbo-preview";
+  model: "gpt-3.5-turbo" | "gpt-4" | "gpt-4-turbo-preview" | "gpt-4o";
   title: string;
   messages: Message[];
   date: Date;
@@ -69,7 +69,7 @@ export class ChatService {
   updateChatConfig(
     chatId: string,
     mode: "ee" | "oai",
-    model: "gpt-3.5-turbo" | "gpt-4" | "gpt-4-turbo-preview",
+    model: "gpt-3.5-turbo" | "gpt-4" | "gpt-4-turbo-preview" | "gpt-4o",
     productId: string | null
   ): void {
     const chatIndex = this.chats.findIndex((chat) => chat.id === chatId);

@@ -76,6 +76,7 @@ import { ThemeService } from "./services/theme.service";
                 <option [value]="'gpt-4-turbo-preview'">
                   gpt-4-turbo-preview
                 </option>
+                <option [value]="'gpt-4o'">gpt-4o</option>
               </select>
             </div>
             <!-- Dark Mode Control -->
@@ -153,7 +154,7 @@ export class ConfigComponent implements OnInit {
       this.storageService.getItem<string>("oai_api_key") || "";
     const defaultModel =
       this.storageService.getItem<
-        "gpt-3.5-turbo" | "gpt-4" | "gpt-4-turbo-preview"
+        "gpt-3.5-turbo" | "gpt-4" | "gpt-4-turbo-preview" | "gpt-4o"
       >("default_model") || "";
     const isDarkMode = this.detectDarkMode();
 
