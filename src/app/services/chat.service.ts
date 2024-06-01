@@ -246,7 +246,6 @@ export class ChatService {
     message: string,
     history: any[]
   ) {
-    console.log("sendMessageOAI2 called");  // Debug log
     const openai = new OpenAI({ apiKey: oai_api_key, dangerouslyAllowBrowser: true, maxRetries: 5});
     openai.chat.completions.create({
       model: model,
@@ -270,16 +269,12 @@ export class ChatService {
 	if (chunk.choices[0].finish_reason === "stop") {
 	  receivedString += "\n";
 	}
-	console.log(chunk);
-
-	console.log("while2");
 	const newLineIndex = receivedString.indexOf("\n");
 	const line = receivedString.slice(0, newLineIndex);
 	receivedString = receivedString.slice(newLineIndex + 1);
 
 	if (chunk.choices && chunk.choices[0] && chunk.choices[0].delta) {
 	  if (isNewMessage) {
-	    console.log("adding new message");
 	    this.chats[chatIndex].messages.push(newMessage);
 	    isNewMessage = false;
 	  } else {
@@ -315,7 +310,6 @@ export class ChatService {
       return;
     }
 
-    // Replace the old message with the updated message
     this.chats[chatIndex].messages[messageIndex] = updatedMessage;
     this.storageService.setItem("chats", this.chats);
 
