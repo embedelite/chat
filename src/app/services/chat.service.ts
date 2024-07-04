@@ -1,6 +1,7 @@
 import { Injectable } from "@angular/core";
 import { BehaviorSubject, Observable, of } from "rxjs";
 import { StorageService } from "./storage.service";
+import { OpenAI } from "openai";
 
 export interface Message {
   id: string;
@@ -182,7 +183,10 @@ export class ChatService {
 
     if (mode === "oai") {
       let oai_api_key = this.storageService.getItem<string>("oai_api_key");
-      this.sendMessageOAI(chatIndex, oai_api_key, model, message, history);
+      this.sendMessageOAI(chatIndex, oai_api_key, model, message, history)
+      .catch((err) => {
+	  console.error("Failed to send message to OAI:", err);
+      });
     } else {
       let ee_api_key = this.storageService.getItem<string>("ee_api_key");
       if (productId === null) {
@@ -235,101 +239,56 @@ export class ChatService {
       });
   }
 
-  sendMessageOAI(
+  async sendMessageOAI(
     chatIndex: number,
     oai_api_key: any,
     model: string,
     message: string,
     history: any[]
   ) {
-    const headers = {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${oai_api_key}`,
-    };
-
-    const body = {
+    const openai = new OpenAI({ apiKey: oai_api_key, dangerouslyAllowBrowser: true, maxRetries: 5});
+    openai.chat.completions.create({
       model: model,
       messages: [...history, { role: "user", content: message }],
       stream: true,
-    };
+    }).then(async (stream) => {
+      const decoder = new TextDecoder("utf-8");
 
-    fetch(this.OPENAI_API_URL, {
-      method: "POST",
-      headers: headers,
-      body: JSON.stringify(body),
-    })
-      .then((response) => {
-        if (!response.body) {
-          throw new Error("No ReadableStream available");
-        }
+      let receivedString = "";
+      let isNewMessage = true;
+      let newMessage: Message;
+      newMessage = {
+	id: this.generateId(),
+	from: "bot",
+	text: "",
+	complete: false,
+      };
 
-        const reader = response.body.getReader();
-        const decoder = new TextDecoder("utf-8");
+      for await (const chunk of stream) {
+	receivedString += chunk.choices[0].delta.content;
+	if (chunk.choices[0].finish_reason === "stop") {
+	  receivedString += "\n";
+	}
+	const newLineIndex = receivedString.indexOf("\n");
+	const line = receivedString.slice(0, newLineIndex);
+	receivedString = receivedString.slice(newLineIndex + 1);
 
-        let receivedString = "";
-        let isNewMessage = true;
-        let newMessage: Message;
+	if (chunk.choices && chunk.choices[0] && chunk.choices[0].delta) {
+	  if (isNewMessage) {
+	    this.chats[chatIndex].messages.push(newMessage);
+	    isNewMessage = false;
+	  } else {
+	    let delta = chunk.choices[0].delta.content;
+	    if (delta && delta !== "") {
+	      newMessage.text += delta;
+	      newMessage.complete = chunk.choices[0].finish_reason === "stop";
+	    }
+	  }
 
-        const push = async () => {
-          while (true) {
-            const { done, value } = await reader.read();
-            if (done) {
-              break;
-            }
-
-            const chunk = decoder.decode(value);
-            receivedString += chunk;
-
-            while (receivedString.includes("\n")) {
-              const newLineIndex = receivedString.indexOf("\n");
-              const line = receivedString.slice(0, newLineIndex);
-              receivedString = receivedString.slice(newLineIndex + 1);
-
-              const data = line.replace(/^data: /, "").trim();
-
-              if (data !== "" && data !== "[DONE]") {
-                let parsed;
-                try {
-                  parsed = JSON.parse(data);
-                  //console.log("Parsed line", parsed);
-                } catch (e) {
-                  console.error("Error parsing line", e);
-                }
-
-                if (!parsed) continue; // Skip this iteration if parsedLine is undefined
-                const { choices } = parsed;
-
-                if (choices && choices[0] && choices[0].delta) {
-                  if (isNewMessage) {
-                    newMessage = {
-                      id: this.generateId(),
-                      from:
-                        choices[0].delta.role === "assistant" ? "bot" : "user",
-                      text: choices[0].delta.content,
-                      complete: choices[0].finish_reason === "stop",
-                    };
-                    this.chats[chatIndex].messages.push(newMessage);
-                    isNewMessage = false;
-                  } else {
-                    let delta = choices[0].delta.content;
-                    if (delta && delta !== "") {
-                      newMessage.text += delta;
-                      newMessage.complete = choices[0].finish_reason === "stop";
-                    }
-                  }
-
-                  this.storageService.setItem("chats", this.chats);
-                }
-              }
-            }
-          }
-        };
-
-        push();
-      })
-      .catch((error) => {
-        console.error(error);
-      });
+	  this.storageService.setItem("chats", this.chats);
+	}
+      }
+    });
   }
 
   updateMessage(chatId: string, updatedMessage: Message) {
@@ -351,7 +310,6 @@ export class ChatService {
       return;
     }
 
-    // Replace the old message with the updated message
     this.chats[chatIndex].messages[messageIndex] = updatedMessage;
     this.storageService.setItem("chats", this.chats);
 
@@ -390,7 +348,7 @@ export class ChatService {
     // Fetch new sequence of responses based on the updated history
     if (mode === "oai" && lastMessage) {
       let oai_api_key = this.storageService.getItem<string>("oai_api_key");
-      this.sendMessageOAI(chatIndex, oai_api_key, model, lastMessage, history);
+      await this.sendMessageOAI(chatIndex, oai_api_key, model, lastMessage, history);
     } else if (mode === "ee" && productId && lastMessage) {
       this.sendMessageEE(
         chatIndex,
