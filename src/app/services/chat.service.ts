@@ -1,424 +1,441 @@
 import { Injectable } from "@angular/core";
 import { BehaviorSubject, Observable, of } from "rxjs";
 import { StorageService } from "./storage.service";
+import { IndexedDBService } from "./indexeddb.service";
 
 export interface Message {
-  id: string;
-  from: "user" | "bot";
-  text: string;
-  links?: Array<{ title: string; url: string }>;
-  complete?: boolean;
+    id: string;
+    from: "user" | "bot";
+    text: string;
+    links?: Array<{ title: string; url: string }>;
+    complete?: boolean;
 }
 
 export interface Chat {
-  id: string;
-  mode: "ee" | "oai";
-  deactivated: boolean;
-  product_id: string | null;
-  model: "gpt-3.5-turbo" | "gpt-4" | "gpt-4-turbo-preview" | "gpt-4o";
-  title: string;
-  messages: Message[];
-  date: Date;
+    id: string;
+    mode: "ee" | "oai";
+    deactivated: boolean;
+    product_id: string | null;
+    model: "gpt-3.5-turbo" | "gpt-4" | "gpt-4-turbo-preview" | "gpt-4o";
+    title: string;
+    messages: Message[];
+    date: Date;
 }
 
 @Injectable({ providedIn: "root" })
 export class ChatService {
-  private readonly OPENAI_API_URL =
-    "https://api.openai.com/v1/chat/completions";
-  //private readonly EE_API_URL = "https://api.embedelite.com";
-  private readonly EE_API_URL = "https://api.dev.embedelite.com";
+    private readonly OPENAI_API_URL = "https://api.openai.com/v1/chat/completions";
+    //private readonly EE_API_URL = "https://api.embedelite.com";
+    private readonly EE_API_URL = "https://api.dev.embedelite.com";
 
-  private chats: Chat[] = [
-    {
-      id: "1",
-      mode: "oai",
-      deactivated: false,
-      product_id: null,
-      model: "gpt-3.5-turbo",
-      title: "Hello AI",
-      date: new Date(),
-      messages: [
-        { id: "1", from: "user", text: "Hello, AI!" },
-        { id: "2", from: "bot", text: "Hello, user!" },
-      ],
-    },
-  ];
-  private currentChatSubject = new BehaviorSubject<Chat>(this.chats[0]);
-  currentChat = this.currentChatSubject.asObservable();
-
-  private chatsVisibility = new BehaviorSubject(true); // set initial state to 'false'
-  currentVisibility = this.chatsVisibility.asObservable();
-
-  constructor(private storageService: StorageService) {
-    // Try to load chats from local storage during service initialization
-    const storedChats = this.storageService.getItem<Chat[]>("chats");
-    if (storedChats) {
-      this.chats = storedChats;
-      this.currentChatSubject.next(this.chats[0]);
-    }
-  }
-
-  toggleChatsVisibility() {
-    this.chatsVisibility.next(!this.chatsVisibility.value);
-  }
-
-  getChats(): Observable<Chat[]> {
-    return of(this.chats);
-  }
-
-  updateChatConfig(
-    chatId: string,
-    mode: "ee" | "oai",
-    model: "gpt-3.5-turbo" | "gpt-4" | "gpt-4-turbo-preview" | "gpt-4o",
-    productId: string | null
-  ): void {
-    const chatIndex = this.chats.findIndex((chat) => chat.id === chatId);
-    if (chatIndex < 0) {
-      console.error(`No chat found with id: ${chatId}`);
-      return;
-    }
-
-    this.chats[chatIndex].mode = mode;
-    this.chats[chatIndex].model = model;
-    this.chats[chatIndex].product_id = productId;
-    this.storageService.setItem("chats", this.chats);
-  }
-
-  switchChat(chat: Chat) {
-    this.currentChatSubject.next(chat);
-  }
-
-  setChatTitle(chatId: string, title: string): void {
-    const chatIndex = this.chats.findIndex((chat) => chat.id === chatId);
-    if (chatIndex < 0) {
-      console.error(`No chat found with id: ${chatId}`);
-      return;
-    }
-    this.chats[chatIndex].title = title;
-    this.storageService.setItem("chats", this.chats);
-  }
-
-  addChat(title: string): Chat {
-    const defaultModel =
-      this.storageService.getItem<
-        "gpt-3.5-turbo" | "gpt-4" | "gpt-4-turbo-preview"
-      >("default_model") ?? "gpt-4";
-
-    let newChat: Chat = {
-      id: this.generateId(), // Implement a method for generating unique id
-      mode: "oai",
-      deactivated: false,
-      product_id: null,
-      model: defaultModel,
-      title: title,
-      date: new Date(),
-      messages: [],
-    };
-    this.chats.unshift(newChat);
-    this.storageService.setItem("chats", this.chats);
-
-    return newChat;
-  }
-
-  deleteChat(chatId: string): void {
-    const index = this.chats.findIndex((c) => c.id === chatId);
-
-    if (index !== -1) {
-      this.chats.splice(index, 1);
-
-      // Update the BehaviorSubject with currentChat data
-      if (
-        this.currentChatSubject.getValue().id === chatId &&
-        this.chats.length
-      ) {
-        this.currentChatSubject.next(this.chats[0]);
-      }
-
-      // Update the storage
-      this.storageService.setItem("chats", this.chats);
-    }
-  }
-
-  // Implementation for generating unique id
-  private generateId(): string {
-    const timestamp = ((new Date().getTime() / 1000) | 0).toString(16);
-    const randomValue = crypto.getRandomValues(new Uint8Array(4)).join("");
-    return `${timestamp}-${randomValue}`;
-  }
-
-  sendMessage(
-    chatId: string,
-    message: string,
-    mode: "ee" | "oai",
-    model: "gpt-3.5-turbo" | "gpt-4" | "gpt-4-turbo-preview",
-    productId: string | null
-  ): void {
-    const chatIndex = this.chats.findIndex((chat) => chat.id === chatId);
-    if (chatIndex < 0) {
-      console.error(`No chat found with id: ${chatId}`);
-      return;
-    }
-
-    const userMessage: Message = {
-      id: this.generateId(),
-      from: "user",
-      text: message,
-    };
-    this.chats[chatIndex].messages.push(userMessage);
-
-    if (this.chats[chatIndex].messages[0].from === "user") {
-      const firstMessage = this.chats[chatIndex].messages[0].text;
-      const title =
-        firstMessage.length > 16
-          ? `${firstMessage.slice(0, 16)}...`
-          : firstMessage;
-      this.setChatTitle(chatId, title);
-    }
-
-    let history = this.chats[chatIndex].messages.map((msg) => ({
-      role: msg.from === "user" ? "user" : "assistant",
-      content: msg.text,
-    }));
-
-    if (mode === "oai") {
-      let oai_api_key = this.storageService.getItem<string>("oai_api_key");
-      this.sendMessageOAI(chatIndex, oai_api_key, model, message, history);
-    } else {
-      let ee_api_key = this.storageService.getItem<string>("ee_api_key");
-      if (productId === null) {
-        console.log("No product id found");
-        return;
-      }
-      this.sendMessageEE(chatIndex, ee_api_key, productId, message);
-    }
-  }
-
-  sendMessageEE(
-    chatIndex: number,
-    ee_api_key: any,
-    productId: string,
-    message: string
-  ) {
-    const headers = {
-      "Content-Type": "application/json",
-      "API-Key": ee_api_key,
+    private chats: Chat[] = [];
+    private defaultChat: Chat = {
+        id: "1",
+        mode: "oai",
+        deactivated: false,
+        product_id: null,
+        model: "gpt-3.5-turbo",
+        title: "Hello AI",
+        date: new Date(),
+        messages: [
+            { id: "1", from: "user", text: "Hello, AI!" },
+            { id: "2", from: "bot", text: "Hello, user!" },
+        ],
     };
 
-    const body = {
-      product_id: productId,
-      query: message,
-    };
+    private currentChatSubject = new BehaviorSubject<Chat>(this.defaultChat);
+    currentChat = this.currentChatSubject.asObservable();
 
-    fetch(this.EE_API_URL + "/query", {
-      method: "POST",
-      headers: headers,
-      body: JSON.stringify(body),
-    })
-      .then((response) => {
-        if (!response.body) {
-          throw new Error("No ReadableStream available");
-        }
+    private chatsVisibility = new BehaviorSubject(true); // set initial state to true
+    currentVisibility = this.chatsVisibility.asObservable();
 
-        response.json().then((data) => {
-          let botMessage: Message = {
-            id: this.generateId(),
-            from: "bot",
-            text: data.response,
-          };
-          this.chats[chatIndex].messages.push(botMessage);
-
-          this.storageService.setItem("chats", this.chats);
+    constructor(private storageService: StorageService, private indexedDBService: IndexedDBService) {
+        // Try to load chats from IndexedDB during service initialization
+        this.indexedDBService.getAllChatItems<Chat>().then((storedChats) => {
+            if (storedChats && storedChats.length > 0) {
+                this.chats = storedChats;
+                this.currentChatSubject.next(this.chats[0]);
+            } else {
+                // If no chats in indexedDB, load initial state
+                this.chats.push({
+                    id: "1",
+                    mode: "oai",
+                    deactivated: false,
+                    product_id: null,
+                    model: "gpt-3.5-turbo",
+                    title: "Hello AI",
+                    date: new Date(),
+                    messages: [
+                        { id: "1", from: "user", text: "Hello, AI!" },
+                        { id: "2", from: "bot", text: "Hello, user!" },
+                    ],
+                });
+                this.currentChatSubject.next(this.chats[0]);
+            }
         });
-      })
-      .catch((error) => {
-        console.error(error);
-      });
-  }
+    }
 
-  sendMessageOAI(
-    chatIndex: number,
-    oai_api_key: any,
-    model: string,
-    message: string,
-    history: any[]
-  ) {
-    const headers = {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${oai_api_key}`,
-    };
+    toggleChatsVisibility() {
+        this.chatsVisibility.next(!this.chatsVisibility.value);
+    }
 
-    const body = {
-      model: model,
-      messages: [...history, { role: "user", content: message }],
-      stream: true,
-    };
+    getChats(): Observable<Chat[]> {
+        return of(this.chats);
+    }
 
-    fetch(this.OPENAI_API_URL, {
-      method: "POST",
-      headers: headers,
-      body: JSON.stringify(body),
-    })
-      .then((response) => {
-        if (!response.body) {
-          throw new Error("No ReadableStream available");
+    updateChatConfig(
+        chatId: string,
+        mode: "ee" | "oai",
+        model: "gpt-3.5-turbo" | "gpt-4" | "gpt-4-turbo-preview" | "gpt-4o",
+        productId: string | null
+    ): void {
+        const chatIndex = this.chats.findIndex((chat) => chat.id === chatId);
+        if (chatIndex < 0) {
+            console.error(`No chat found with id: ${chatId}`);
+            return;
         }
 
-        const reader = response.body.getReader();
-        const decoder = new TextDecoder("utf-8");
+        this.chats[chatIndex].mode = mode;
+        this.chats[chatIndex].model = model;
+        this.chats[chatIndex].product_id = productId;
+        this.indexedDBService.setChatItem(this.chats[chatIndex].id, this.chats[chatIndex]);
+    }
 
-        let receivedString = "";
-        let isNewMessage = true;
-        let newMessage: Message;
+    switchChat(chat: Chat) {
+        this.currentChatSubject.next(chat);
+    }
 
-        const push = async () => {
-          while (true) {
-            const { done, value } = await reader.read();
-            if (done) {
-              break;
+    setChatTitle(chatId: string, title: string): void {
+        const chatIndex = this.chats.findIndex((chat) => chat.id === chatId);
+        if (chatIndex < 0) {
+            console.error(`No chat found with id: ${chatId}`);
+            return;
+        }
+        this.chats[chatIndex].title = title;
+        this.indexedDBService.setChatItem(this.chats[chatIndex].id, this.chats[chatIndex]);
+    }
+
+    addChat(title: string): Chat {
+        const defaultModel =
+            this.storageService.getItem<
+                "gpt-3.5-turbo" | "gpt-4" | "gpt-4-turbo-preview"
+            >("default_model") ?? "gpt-4";
+
+        let newChat: Chat = {
+            id: this.generateId(), // Implement a method for generating unique id
+            mode: "oai",
+            deactivated: false,
+            product_id: null,
+            model: defaultModel,
+            title: title,
+            date: new Date(),
+            messages: [],
+        };
+        this.chats.unshift(newChat);
+        this.indexedDBService.setChatItem(newChat.id, newChat).then(() => {
+            this.currentChatSubject.next(newChat);
+            return newChat;
+        }
+        );
+
+        deleteChat(chatId: string): void {
+            const index = this.chats.findIndex((c) => c.id === chatId);
+
+            if(index !== -1) {
+            this.chats.splice(index, 1);
+
+            // Update the BehaviorSubject with currentChat data
+            if (
+                this.currentChatSubject.getValue()?.id === chatId &&
+                this.chats.length
+            ) {
+                this.currentChatSubject.next(this.chats[0]);
             }
 
-            const chunk = decoder.decode(value);
-            receivedString += chunk;
+            // Update the storage
+            this.indexedDBService.removeChatItem(chatId);
+        }
+    }
 
-            while (receivedString.includes("\n")) {
-              const newLineIndex = receivedString.indexOf("\n");
-              const line = receivedString.slice(0, newLineIndex);
-              receivedString = receivedString.slice(newLineIndex + 1);
+    private generateId(): string {
+        const timestamp = ((new Date().getTime() / 1000) | 0).toString(16);
+        const randomValue = crypto.getRandomValues(new Uint8Array(4)).join("");
+        return `${timestamp}-${randomValue}`;
+    }
 
-              const data = line.replace(/^data: /, "").trim();
+    sendMessage(
+        chatId: string,
+        message: string,
+        mode: "ee" | "oai",
+        model: "gpt-3.5-turbo" | "gpt-4" | "gpt-4-turbo-preview",
+        productId: string | null
+    ): void {
+        const chatIndex = this.chats.findIndex((chat) => chat.id === chatId);
+        if (chatIndex < 0) {
+            console.error(`No chat found with id: ${chatId}`);
+            return;
+        }
 
-              if (data !== "" && data !== "[DONE]") {
-                let parsed;
-                try {
-                  parsed = JSON.parse(data);
-                  //console.log("Parsed line", parsed);
-                } catch (e) {
-                  console.error("Error parsing line", e);
-                }
+        const userMessage: Message = {
+            id: this.generateId(),
+            from: "user",
+            text: message,
+        };
+        this.chats[chatIndex].messages.push(userMessage);
 
-                if (!parsed) continue; // Skip this iteration if parsedLine is undefined
-                const { choices } = parsed;
+        if (this.chats[chatIndex].messages[0].from === "user") {
+            const firstMessage = this.chats[chatIndex].messages[0].text;
+            const title =
+                firstMessage.length > 16
+                    ? `${firstMessage.slice(0, 16)}...`
+                    : firstMessage;
+            this.setChatTitle(chatId, title);
+        }
 
-                if (choices && choices[0] && choices[0].delta) {
-                  if (isNewMessage) {
-                    newMessage = {
-                      id: this.generateId(),
-                      from:
-                        choices[0].delta.role === "assistant" ? "bot" : "user",
-                      text: choices[0].delta.content,
-                      complete: choices[0].finish_reason === "stop",
-                    };
-                    this.chats[chatIndex].messages.push(newMessage);
-                    isNewMessage = false;
-                  } else {
-                    let delta = choices[0].delta.content;
-                    if (delta && delta !== "") {
-                      newMessage.text += delta;
-                      newMessage.complete = choices[0].finish_reason === "stop";
-                    }
-                  }
+        let history = this.chats[chatIndex].messages.map((msg) => ({
+            role: msg.from === "user" ? "user" : "assistant",
+            content: msg.text,
+        }));
 
-                  this.storageService.setItem("chats", this.chats);
-                }
-              }
+        if (mode === "oai") {
+            let oai_api_key = this.storageService.getItem<string>("oai_api_key");
+            this.sendMessageOAI(chatIndex, oai_api_key, model, message, history);
+        } else {
+            let ee_api_key = this.storageService.getItem<string>("ee_api_key");
+            if (productId === null) {
+                console.log("No product id found");
+                return;
             }
-          }
+            this.sendMessageEE(chatIndex, ee_api_key, productId, message);
+        }
+    }
+
+    private sendMessageEE(
+        chatIndex: number,
+        ee_api_key: any,
+        productId: string,
+        message: string
+    ) {
+        const headers = {
+            "Content-Type": "application/json",
+            "API-Key": ee_api_key,
         };
 
-        push();
-      })
-      .catch((error) => {
-        console.error(error);
-      });
-  }
+        const body = {
+            product_id: productId,
+            query: message,
+        };
 
-  updateMessage(chatId: string, updatedMessage: Message) {
-    // Find the chat based on chatId
-    const chatIndex = this.chats.findIndex((chat) => chat.id === chatId);
+        fetch(this.EE_API_URL + "/query", {
+            method: "POST",
+            headers: headers,
+            body: JSON.stringify(body),
+        })
+            .then((response) => {
+                if (!response.body) {
+                    throw new Error("No ReadableStream available");
+                }
 
-    if (chatIndex < 0) {
-      console.error(`No chat found with id: ${chatId}`);
-      return;
+                response.json().then((data) => {
+                    let botMessage: Message = {
+                        id: this.generateId(),
+                        from: "bot",
+                        text: data.response,
+                    };
+                    this.chats[chatIndex].messages.push(botMessage);
+
+                    this.indexedDBService.setChatItem(this.chats[chatIndex].id, this.chats[chatIndex]);
+                });
+            })
+            .catch((error) => {
+                console.error(error);
+            });
     }
 
-    // Within the found chat, find the message index using updatedMessage.id
-    const messageIndex = this.chats[chatIndex].messages.findIndex(
-      (msg) => msg.id === updatedMessage.id
-    );
+    private sendMessageOAI(
+        chatIndex: number,
+        oai_api_key: any,
+        model: string,
+        message: string,
+        history: any[]
+    ) {
+        const headers = {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${oai_api_key}`,
+        };
 
-    if (messageIndex < 0) {
-      console.error(`No message found with id: ${updatedMessage.id}`);
-      return;
+        const body = {
+            model: model,
+            messages: [...history, { role: "user", content: message }],
+            stream: true,
+        };
+
+        fetch(this.OPENAI_API_URL, {
+            method: "POST",
+            headers: headers,
+            body: JSON.stringify(body),
+        })
+            .then((response) => {
+                if (!response.body) {
+                    throw new Error("No ReadableStream available");
+                }
+
+                const reader = response.body.getReader();
+                const decoder = new TextDecoder("utf-8");
+
+                let receivedString = "";
+                let isNewMessage = true;
+                let newMessage: Message;
+
+                const push = async () => {
+                    while (true) {
+                        const { done, value } = await reader.read();
+                        if (done) {
+                            break;
+                        }
+
+                        const chunk = decoder.decode(value);
+                        receivedString += chunk;
+
+                        while (receivedString.includes("\n")) {
+                            const newLineIndex = receivedString.indexOf("\n");
+                            const line = receivedString.slice(0, newLineIndex);
+                            receivedString = receivedString.slice(newLineIndex + 1);
+
+                            const data = line.replace(/^data: /, "").trim();
+
+                            if (data !== "" && data !== "[DONE]") {
+                                let parsed;
+                                try {
+                                    parsed = JSON.parse(data);
+                                    //console.log("Parsed line", parsed);
+                                } catch (e) {
+                                    console.error("Error parsing line", e);
+                                }
+
+                                if (!parsed) continue; // Skip this iteration if parsedLine is undefined
+                                const { choices } = parsed;
+
+                                if (choices && choices[0] && choices[0].delta) {
+                                    if (isNewMessage) {
+                                        newMessage = {
+                                            id: this.generateId(),
+                                            from:
+                                                choices[0].delta.role === "assistant" ? "bot" : "user",
+                                            text: choices[0].delta.content,
+                                            complete: choices[0].finish_reason === "stop",
+                                        };
+                                        this.chats[chatIndex].messages.push(newMessage);
+                                        isNewMessage = false;
+                                    } else {
+                                        let delta = choices[0].delta.content;
+                                        if (delta && delta !== "") {
+                                            newMessage.text += delta;
+                                            newMessage.complete = choices[0].finish_reason === "stop";
+                                        }
+                                    }
+
+                                    this.indexedDBService.setChatItem(this.chats[chatIndex].id, this.chats[chatIndex]);
+                                }
+                            }
+                        }
+                    }
+                };
+
+                push();
+            })
+            .catch((error) => {
+                console.error(error);
+            });
     }
 
-    // Replace the old message with the updated message
-    this.chats[chatIndex].messages[messageIndex] = updatedMessage;
-    this.storageService.setItem("chats", this.chats);
+    updateMessage(chatId: string, updatedMessage: Message) {
+        // Find the chat based on chatId
+        const chatIndex = this.chats.findIndex((chat) => chat.id === chatId);
 
-    this.refreshChatAfterEdit(chatId, updatedMessage.id).catch((err) =>
-      console.error("Failed to refresh chat:", err)
-    );
-  }
+        if (chatIndex < 0) {
+            console.error(`No chat found with id: ${chatId}`);
+            return;
+        }
 
-  async refreshChatAfterEdit(
-    chatId: string,
-    updatedMessageId: string
-  ): Promise<void> {
-    const chatIndex = this.chats.findIndex((chat) => chat.id === chatId);
-    if (chatIndex < 0) {
-      console.error(`No chat found with id: ${chatId}`);
-      return;
+        // Within the found chat, find the message index using updatedMessage.id
+        const messageIndex = this.chats[chatIndex].messages.findIndex(
+            (msg) => msg.id === updatedMessage.id
+        );
+
+        if (messageIndex < 0) {
+            console.error(`No message found with id: ${updatedMessage.id}`);
+            return;
+        }
+
+        // Replace the old message with the updated message
+        this.chats[chatIndex].messages[messageIndex] = updatedMessage;
+        this.indexedDBService.setChatItem(this.chats[chatIndex].id, this.chats[chatIndex]);
+
+        this.refreshChatAfterEdit(chatId, updatedMessage.id).catch((err) =>
+            console.error("Failed to refresh chat:", err)
+        );
     }
 
-    const messageIndex = this.chats[chatIndex].messages.findIndex(
-      (msg) => msg.id === updatedMessageId
-    );
+    async refreshChatAfterEdit(
+        chatId: string,
+        updatedMessageId: string
+    ): Promise<void> {
+        const chatIndex = this.chats.findIndex((chat) => chat.id === chatId);
+        if (chatIndex < 0) {
+            console.error(`No chat found with id: ${chatId}`);
+            return;
+        }
 
-    this.chats[chatIndex].messages.splice(messageIndex + 1);
+        const messageIndex = this.chats[chatIndex].messages.findIndex(
+            (msg) => msg.id === updatedMessageId
+        );
 
-    let history = this.chats[chatIndex].messages.map((msg) => ({
-      role: msg.from === "user" ? "user" : "assistant",
-      content: msg.text,
-    }));
+        this.chats[chatIndex].messages.splice(messageIndex + 1);
 
-    const mode = this.chats[chatIndex].mode; // 'oai' or 'ee'
-    const model = this.chats[chatIndex].model;
-    const productId = this.chats[chatIndex].product_id;
+        let history = this.chats[chatIndex].messages.map((msg) => ({
+            role: msg.from === "user" ? "user" : "assistant",
+            content: msg.text,
+        }));
 
-    const lastMessage = history[history.length - 1].content;
+        const mode = this.chats[chatIndex].mode; // 'oai' or 'ee'
+        const model = this.chats[chatIndex].model;
+        const productId = this.chats[chatIndex].product_id;
 
-    // Fetch new sequence of responses based on the updated history
-    if (mode === "oai" && lastMessage) {
-      let oai_api_key = this.storageService.getItem<string>("oai_api_key");
-      this.sendMessageOAI(chatIndex, oai_api_key, model, lastMessage, history);
-    } else if (mode === "ee" && productId && lastMessage) {
-      this.sendMessageEE(
-        chatIndex,
-        this.storageService.getItem<string>("ee_api_key"),
-        productId,
-        lastMessage
-      );
+        const lastMessage = history[history.length - 1].content;
+
+        // Fetch new sequence of responses based on the updated history
+        if (mode === "oai" && lastMessage) {
+            let oai_api_key = this.storageService.getItem<string>("oai_api_key");
+            this.sendMessageOAI(chatIndex, oai_api_key, model, lastMessage, history);
+        } else if (mode === "ee" && productId && lastMessage) {
+            this.sendMessageEE(
+                chatIndex,
+                this.storageService.getItem<string>("ee_api_key"),
+                productId,
+                lastMessage
+            );
+        }
     }
-  }
 
-  updateProducts(ee_api_key: string) {
-    const headers = {
-      "Content-Type": "application/json",
-      "API-Key": ee_api_key,
-    };
+    updateProducts(ee_api_key: string) {
+        const headers = {
+            "Content-Type": "application/json",
+            "API-Key": ee_api_key,
+        };
 
-    // make a http request get to the api http
-    let url = this.EE_API_URL + "/products";
-    fetch(url, {
-      headers: headers,
-      method: "GET",
-      mode: "no-cors",
-    })
-      .then((response) => {
-        console.log(response);
-      })
-      .catch((error) => {
-        console.error(error);
-      });
-  }
+        // make a http request get to the api http
+        let url = this.EE_API_URL + "/products";
+        fetch(url, {
+            headers: headers,
+            method: "GET",
+            mode: "no-cors",
+        })
+            .then((response) => {
+                console.log(response);
+            })
+            .catch((error) => {
+                console.error(error);
+            });
+    }
 }
