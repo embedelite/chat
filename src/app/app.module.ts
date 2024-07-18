@@ -18,37 +18,39 @@ import { AppRoutingModule } from "./app-routing.module";
 import { EditorOverviewComponent } from "./editor/editor-overview.component";
 import { HttpClientModule } from "@angular/common/http";
 import { ServiceWorkerModule } from '@angular/service-worker';
+import { MarkdownModule } from "ngx-markdown";
 
 @NgModule({
-  declarations: [
-    AppComponent,
-    BotMessageComponent,
-    ChatComponent,
-    ChatInputComponent,
-    ChatAreaComponent,
-    UserMessageComponent,
-    ChatSidebarComponent,
-    DocViewerComponent,
-    ConfigComponent,
-    EditorComponent,
-    EditorOverviewComponent,
-    SafePipe,
-  ],
-  imports: [
-    AppRoutingModule,
-    BrowserModule,
-    HttpClientModule,
-    FormsModule,
-    ReactiveFormsModule,
-    PdfViewerModule,
-    ServiceWorkerModule.register('ngsw-worker.js', {
-      enabled: !isDevMode(),
-      // Register the ServiceWorker as soon as the application is stable
-      // or after 30 seconds (whichever comes first).
-      registrationStrategy: 'registerWhenStable:30000'
-    }),
-  ],
-  providers: [],
-  bootstrap: [AppComponent],
+    declarations: [
+        AppComponent,
+        BotMessageComponent,
+        ChatComponent,
+        ChatInputComponent,
+        ChatAreaComponent,
+        UserMessageComponent,
+        ChatSidebarComponent,
+        DocViewerComponent,
+        ConfigComponent,
+        EditorComponent,
+        EditorOverviewComponent,
+        SafePipe,
+    ],
+    imports: [
+        AppRoutingModule,
+        BrowserModule,
+        HttpClientModule,
+        FormsModule,
+        ReactiveFormsModule,
+        PdfViewerModule,
+        MarkdownModule.forRoot(),
+        ServiceWorkerModule.register('ngsw-worker.js', {
+            enabled: !isDevMode(),
+            // Register the ServiceWorker as soon as the application is stable
+            // or after 30 seconds (whichever comes first).
+            registrationStrategy: 'registerWhenStable:30000'
+        }),
+    ],
+    providers: [],
+    bootstrap: [AppComponent],
 })
-export class AppModule {}
+export class AppModule { }
