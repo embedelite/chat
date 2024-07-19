@@ -26,6 +26,7 @@ import { StorageService } from "./services/storage.service";
             [message]="message.text"
             [links]="message.links"
             [layout]="layout"
+	    [type]="message.type"
             (openViewer)="openViewer.emit($event)"
           ></app-bot-message>
         </ng-container>

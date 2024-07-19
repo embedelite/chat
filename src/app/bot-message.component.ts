@@ -13,6 +13,7 @@ import {
   template: `
     <div class="flex items-end mb-4 space-x-2">
       <div
+	*ngIf="type === 'text'"
         class=" px-4 py-2 text-white bg-primary-600 dark:bg-primary-500 rounded-lg max-w-[90%]"
       >
         <ng-container
@@ -39,6 +40,16 @@ import {
           </ng-container>
         </ng-container>
       </div>
+	<div
+	  *ngIf="type === 'image'"
+	  class="bg-primary-600 dark:bg-primary-500 rounded-lg max-w-[30%]"
+	>	
+	  <img
+	    src="{{message}}"
+	    alt="Bot Image"
+	    class="rounded-lg max-w-2"
+	  />
+	</div>
     </div>
   `,
   styles: [
@@ -51,6 +62,7 @@ import {
 })
 export class BotMessageComponent implements OnInit, OnChanges {
   @Input() message: string;
+  @Input() type: string;
   messageCopy: string;
   @Input() layout: "chat-bubbles" | "centered" = "chat-bubbles";
   @Input() links?: Array<{ title: string; url: string }>;
@@ -60,6 +72,7 @@ export class BotMessageComponent implements OnInit, OnChanges {
     this.message = "";
     this.messageCopy = "";
     this.links = [];
+    this.type = "text";
   }
 
   ngOnInit() {

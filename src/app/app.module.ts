@@ -1,9 +1,11 @@
 import { NgModule, isDevMode } from "@angular/core";
 import { BrowserModule } from "@angular/platform-browser";
+import { CommonModule } from '@angular/common'; // Import CommonModule
 
 import { AppComponent } from "./app.component";
 import { ChatInputComponent } from "./chat-input.component";
 import { BotMessageComponent } from "./bot-message.component";
+import { DropDownComponent } from './drop-down.component';
 import { ChatAreaComponent } from "./chat-area.component";
 import { UserMessageComponent } from "./user-message.component";
 import { ConfigComponent } from "./config.component";
@@ -17,6 +19,7 @@ import { ChatComponent } from "./chat.component";
 import { AppRoutingModule } from "./app-routing.module";
 import { EditorOverviewComponent } from "./editor/editor-overview.component";
 import { HttpClientModule } from "@angular/common/http";
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { ServiceWorkerModule } from '@angular/service-worker';
 
 @NgModule({
@@ -33,12 +36,15 @@ import { ServiceWorkerModule } from '@angular/service-worker';
     EditorComponent,
     EditorOverviewComponent,
     SafePipe,
+    DropDownComponent,
   ],
   imports: [
     AppRoutingModule,
     BrowserModule,
+    CommonModule,
     HttpClientModule,
     FormsModule,
+    BrowserAnimationsModule,
     ReactiveFormsModule,
     PdfViewerModule,
     ServiceWorkerModule.register('ngsw-worker.js', {
