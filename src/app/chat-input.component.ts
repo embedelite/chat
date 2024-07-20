@@ -1,16 +1,17 @@
 import {
-  Component,
-  ElementRef,
-  EventEmitter,
-  Output,
-  Input,
-  ViewChild,
+    Component,
+    ElementRef,
+    EventEmitter,
+    Output,
+    Input,
+    ViewChild,
 } from "@angular/core";
 import { Product, ProductService } from "./services/product.service";
+import { Model } from "./services/chat.service";
 
 @Component({
-  selector: "app-chat-input",
-  template: `
+    selector: "app-chat-input",
+    template: `
     <div
       class="flex items-center p-2 bg-gray-200 dark:bg-gray-700 rounded-br-lg"
     >
@@ -165,6 +166,12 @@ import { Product, ProductService } from "./services/product.service";
               <option value="gpt-4o" [selected]="model === 'gpt-4o'">
                 gpt-4o
               </option>
+              <option
+                value="claude-3-5-sonnet-20240620"
+                [selected]="model === 'claude-3-5-sonnet-20240620'"
+                >
+                claude-3-5-sonnet-20240620
+                </option>
             </select>
             <div
               class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-300"
@@ -187,8 +194,8 @@ import { Product, ProductService } from "./services/product.service";
       </div>
     </div>
   `,
-  styles: [
-    `
+    styles: [
+        `
       textarea {
         transition: height 0.2s;
         overflow-y: auto;
@@ -205,115 +212,114 @@ import { Product, ProductService } from "./services/product.service";
         z-index: 10;
       }
     `,
-  ],
+    ],
 })
 export class ChatInputComponent {
-  @Input() mode: "ee" | "oai" = "ee";
-  @Input() model: "gpt-3.5-turbo" | "gpt-4" | "gpt-4-turbo-preview" | "gpt-4o" =
-    "gpt-4-turbo-preview";
-  @Input() product_id: string | null = null;
-  @Input() deactivated: boolean = false;
-  @Output() openViewer = new EventEmitter<string>();
-  @Output() newMessage = new EventEmitter<any>();
-  @Output() updateChatConfig = new EventEmitter<any>();
-  @ViewChild("textarea") textArea!: ElementRef;
-  message: string;
-  showChatConfig: boolean = false;
-  showExtraProduct: boolean = false;
+    @Input() mode: "ee" | "oai" = "ee";
+    @Input() model: Model = "gpt-3.5-turbo";
+    @Input() product_id: string | null = null;
+    @Input() deactivated: boolean = false;
+    @Output() openViewer = new EventEmitter<string>();
+    @Output() newMessage = new EventEmitter<any>();
+    @Output() updateChatConfig = new EventEmitter<any>();
+    @ViewChild("textarea") textArea!: ElementRef;
+    message: string;
+    showChatConfig: boolean = false;
+    showExtraProduct: boolean = false;
 
-  products: Product[] = [];
+    products: Product[] = [];
 
-  constructor(private productService: ProductService) {
-    this.message = "";
-    // if product id is not fr, de, or es then show extra product
-    this.updateExtraProduct();
-    this.fetchProducts();
-  }
-
-  ngOnChanges() {
-    this.updateExtraProduct();
-  }
-
-  async fetchProducts() {
-    this.products = await this.productService.listProducts();
-  }
-
-  updateExtraProduct() {
-    // check product id is null
-    if (
-      this.product_id &&
-      !["vat-rules-fr", "vat-rules-de", "vat-rules-es"].includes(
-        this.product_id
-      )
-    ) {
-      this.showExtraProduct = true;
-    } else {
-      this.showExtraProduct = false;
+    constructor(private productService: ProductService) {
+        this.message = "";
+        // if product id is not fr, de, or es then show extra product
+        this.updateExtraProduct();
+        this.fetchProducts();
     }
-  }
 
-  toggleChatConfig() {
-    this.showChatConfig = !this.showChatConfig;
-  }
+    ngOnChanges() {
+        this.updateExtraProduct();
+    }
 
-  sendMessage() {
-    if (this.deactivated) return;
-    if (!this.message.trim()) return;
-    let msg_info = {
-      message: this.message.trim(),
-      mode: this.mode,
-      model: this.model,
-      product_id: this.product_id,
-    };
-    this.newMessage.emit(msg_info);
-    this.message = "";
-    setTimeout(() => this.adjustTextarea(null), 0); // Adjust textarea after message is sent
-  }
+    async fetchProducts() {
+        this.products = await this.productService.listProducts();
+    }
 
-  adjustTextarea(event: any) {
-    setTimeout(() => {
-      const textarea: any = event
-        ? event.target
-        : document.querySelector("textarea");
-      if (textarea.value === "") {
-        // Reset textarea size if there's no content
-        textarea.style.height = "auto";
-      } else if (textarea.scrollHeight < 300) {
-        // Increase height if scrollHeight is under 150.
-        textarea.style.height = `${textarea.scrollHeight}px`;
-      } else if (textarea.clientHeight < 300) {
-        // If content is larger but textarea's visible height is less, set it to 150
-        textarea.style.height = `300px`;
-      }
-    }, 0);
-  }
+    updateExtraProduct() {
+        // check product id is null
+        if (
+            this.product_id &&
+            !["vat-rules-fr", "vat-rules-de", "vat-rules-es"].includes(
+                this.product_id
+            )
+        ) {
+            this.showExtraProduct = true;
+        } else {
+            this.showExtraProduct = false;
+        }
+    }
 
-  selectModelOption(model: any) {
-    if (this.deactivated) return;
-    this.model = model.value;
-    this.updateChatConfigTrigger();
-  }
+    toggleChatConfig() {
+        this.showChatConfig = !this.showChatConfig;
+    }
 
-  selectProductOption(product_id: any) {
-    if (this.deactivated) return;
-    this.product_id = product_id.value;
-    this.updateChatConfigTrigger();
-  }
+    sendMessage() {
+        if (this.deactivated) return;
+        if (!this.message.trim()) return;
+        let msg_info = {
+            message: this.message.trim(),
+            mode: this.mode,
+            model: this.model,
+            product_id: this.product_id,
+        };
+        this.newMessage.emit(msg_info);
+        this.message = "";
+        setTimeout(() => this.adjustTextarea(null), 0); // Adjust textarea after message is sent
+    }
 
-  selectModeOption(mode: any) {
-    if (this.deactivated) return;
-    this.mode = mode.value;
-    this.updateChatConfigTrigger();
-  }
+    adjustTextarea(event: any) {
+        setTimeout(() => {
+            const textarea: any = event
+                ? event.target
+                : document.querySelector("textarea");
+            if (textarea.value === "") {
+                // Reset textarea size if there's no content
+                textarea.style.height = "auto";
+            } else if (textarea.scrollHeight < 300) {
+                // Increase height if scrollHeight is under 150.
+                textarea.style.height = `${textarea.scrollHeight}px`;
+            } else if (textarea.clientHeight < 300) {
+                // If content is larger but textarea's visible height is less, set it to 150
+                textarea.style.height = `300px`;
+            }
+        }, 0);
+    }
 
-  updateChatConfigTrigger() {
-    if (this.deactivated) return;
-    let config = {
-      mode: this.mode,
-      model: this.model,
-      product_id: this.product_id,
-    };
-    console.log(config);
-    this.updateChatConfig.emit(config);
-  }
+    selectModelOption(model: any) {
+        if (this.deactivated) return;
+        this.model = model.value;
+        this.updateChatConfigTrigger();
+    }
+
+    selectProductOption(product_id: any) {
+        if (this.deactivated) return;
+        this.product_id = product_id.value;
+        this.updateChatConfigTrigger();
+    }
+
+    selectModeOption(mode: any) {
+        if (this.deactivated) return;
+        this.mode = mode.value;
+        this.updateChatConfigTrigger();
+    }
+
+    updateChatConfigTrigger() {
+        if (this.deactivated) return;
+        let config = {
+            mode: this.mode,
+            model: this.model,
+            product_id: this.product_id,
+        };
+        console.log(config);
+        this.updateChatConfig.emit(config);
+    }
 }

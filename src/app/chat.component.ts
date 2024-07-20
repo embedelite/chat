@@ -2,8 +2,8 @@ import { Component, OnInit } from "@angular/core";
 import { Chat, ChatService, Message } from "./services/chat.service";
 
 @Component({
-  selector: "app-chat",
-  template: `
+    selector: "app-chat",
+    template: `
     <div class="flex h-full flex-col bg-white dark:bg-gray-800 shadow-md">
       <div class="flex overflow-hidden h-screen">
         <app-chat-sidebar
@@ -40,8 +40,8 @@ import { Chat, ChatService, Message } from "./services/chat.service";
       </div>
     </div>
   `,
-  styles: [
-    `
+    styles: [
+        `
       :host {
         height: 100%;
         display: flex;
@@ -73,76 +73,76 @@ import { Chat, ChatService, Message } from "./services/chat.service";
         }
       }
     `,
-  ],
+    ],
 })
 export class ChatComponent implements OnInit {
-  currentChat: Chat = {
-    id: "",
-    mode: "oai",
-    deactivated: false,
-    product_id: null,
-    model: "gpt-3.5-turbo",
-    title: "",
-    date: new Date(),
-    messages: [],
-  };
+    currentChat: Chat = {
+        id: "",
+        mode: "oai",
+        deactivated: false,
+        product_id: null,
+        model: "gpt-3.5-turbo",
+        title: "",
+        date: new Date(),
+        messages: [],
+    };
 
-  isViewerVisible = false;
-  showConfig = false;
-  docUrl = "";
-  currentVisibility = true;
+    isViewerVisible = false;
+    showConfig = false;
+    docUrl = "";
+    currentVisibility = true;
 
-  constructor(private chatService: ChatService) {
-    this.chatService.currentChat.subscribe((chat) => (this.currentChat = chat));
-    this.currentVisibility = true;
-  }
-
-  ngOnInit() {
-    this.chatService.currentVisibility.subscribe(
-      (state) => (this.currentVisibility = state)
-    );
-  }
-
-  updateShowConfig(newShowConfigValue: boolean) {
-    this.showConfig = newShowConfigValue;
-  }
-
-  openViewer(url: string) {
-    this.docUrl = url;
-    this.isViewerVisible = true;
-  }
-
-  closeViewer() {
-    this.isViewerVisible = false;
-  }
-
-  updateChatConfig(config: any) {
-    this.chatService.updateChatConfig(
-      this.currentChat.id,
-      config.mode,
-      config.model,
-      config.product_id
-    );
-  }
-
-  updateMessages(msgInfo: any) {
-    this.chatService.sendMessage(
-      this.currentChat.id,
-      msgInfo.message,
-      msgInfo.mode,
-      msgInfo.model,
-      msgInfo.product_id
-    );
-  }
-
-  closeSidebar() {
-    // Check if we are on a mobile device by window width
-    if (window.innerWidth <= 767) {
-      this.chatService.toggleChatsVisibility();
+    constructor(private chatService: ChatService) {
+        this.chatService.currentChat.subscribe((chat) => (this.currentChat = chat));
+        this.currentVisibility = true;
     }
-  }
 
-  handleMessageEdit(updatedMessage: Message): void {
-    this.chatService.updateMessage(this.currentChat.id, updatedMessage);
-  }
+    ngOnInit() {
+        this.chatService.currentVisibility.subscribe(
+            (state) => (this.currentVisibility = state)
+        );
+    }
+
+    updateShowConfig(newShowConfigValue: boolean) {
+        this.showConfig = newShowConfigValue;
+    }
+
+    openViewer(url: string) {
+        this.docUrl = url;
+        this.isViewerVisible = true;
+    }
+
+    closeViewer() {
+        this.isViewerVisible = false;
+    }
+
+    updateChatConfig(config: any) {
+        this.chatService.updateChatConfig(
+            this.currentChat.id,
+            config.mode,
+            config.model,
+            config.product_id
+        );
+    }
+
+    updateMessages(msgInfo: any) {
+        this.chatService.sendMessage(
+            this.currentChat.id,
+            msgInfo.message,
+            msgInfo.mode,
+            msgInfo.model,
+            msgInfo.product_id
+        );
+    }
+
+    closeSidebar() {
+        // Check if we are on a mobile device by window width
+        if (window.innerWidth <= 767) {
+            this.chatService.toggleChatsVisibility();
+        }
+    }
+
+    handleMessageEdit(updatedMessage: Message): void {
+        this.chatService.updateMessage(this.currentChat.id, updatedMessage);
+    }
 }

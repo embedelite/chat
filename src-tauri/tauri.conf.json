@@ -19,6 +19,11 @@
       },
       "window": {
         "startDragging": true
+      },
+       "http": {
+        "all": true, 
+        "request": true,
+        "scope": ["https://api.openai.com/*", "https://api.anthropic.com/*"]
       }
     },
     "bundle": {

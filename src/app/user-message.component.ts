@@ -1,16 +1,16 @@
 import {
-  Component,
-  ElementRef,
-  EventEmitter,
-  Input,
-  Output,
-  ViewChild,
+    Component,
+    ElementRef,
+    EventEmitter,
+    Input,
+    Output,
+    ViewChild,
 } from "@angular/core";
 import { Message } from "./services/chat.service";
 
 @Component({
-  selector: "app-user-message",
-  template: `
+    selector: "app-user-message",
+    template: `
     <div class="flex justify-end mb-4">
       <div *ngIf="!isEditing; else editingTemplate" class="w-full max-w-[90%]">
         <div class="bg-primary-100 dark:bg-primary-700 rounded-lg px-4 py-2">
@@ -55,38 +55,38 @@ import { Message } from "./services/chat.service";
       </div>
     </ng-template>
   `,
-  styles: [],
+    styles: [],
 })
 export class UserMessageComponent {
-  @Input() message!: Message;
-  @Input() layout: "chat-bubbles" | "centered" = "chat-bubbles";
-  @Output() messageEdited = new EventEmitter<Message>();
-  @ViewChild("myTextarea") myTextarea!: ElementRef;
+    @Input() message!: Message;
+    @Input() layout: "chat-bubbles" | "centered" = "chat-bubbles";
+    @Output() messageEdited = new EventEmitter<Message>();
+    @ViewChild("myTextarea") myTextarea!: ElementRef;
 
-  isEditing: boolean = false;
-  editableMessage: string = "";
+    isEditing: boolean = false;
+    editableMessage: string = "";
 
-  constructor() {}
+    constructor() { }
 
-  activateEdit() {
-    this.editableMessage = this.message.text;
-    this.isEditing = true;
-    setTimeout(() => this.autoResizeTextarea());
-  }
+    activateEdit() {
+        this.editableMessage = this.message.text;
+        this.isEditing = true;
+        setTimeout(() => this.autoResizeTextarea());
+    }
 
-  saveEdit() {
-    this.messageEdited.emit({ ...this.message, text: this.editableMessage });
-    this.isEditing = false;
-  }
+    saveEdit() {
+        this.messageEdited.emit({ ...this.message, text: this.editableMessage });
+        this.isEditing = false;
+    }
 
-  cancelEdit() {
-    this.editableMessage = "";
-    this.isEditing = false;
-  }
+    cancelEdit() {
+        this.editableMessage = "";
+        this.isEditing = false;
+    }
 
-  autoResizeTextarea(): void {
-    const textarea: HTMLTextAreaElement = this.myTextarea.nativeElement;
-    textarea.style.height = "auto";
-    textarea.style.height = `${textarea.scrollHeight}px`;
-  }
+    autoResizeTextarea(): void {
+        const textarea: HTMLTextAreaElement = this.myTextarea.nativeElement;
+        textarea.style.height = "auto";
+        textarea.style.height = `${textarea.scrollHeight}px`;
+    }
 }

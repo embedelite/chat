@@ -31,6 +31,9 @@ dependencies:
   '@angular/service-worker':
     specifier: ^17.1.2
     version: 17.3.12(@angular/common@17.3.12)(@angular/core@17.3.12)
+  '@anthropic-ai/sdk':
+    specifier: ^0.24.3
+    version: 0.24.3
   '@azure/storage-blob':
     specifier: ^12.16.0
     version: 12.23.0
@@ -43,9 +46,6 @@ dependencies:
   '@tailwindcss/typography':
     specifier: 0.5.9
     version: 0.5.9(tailwindcss@3.4.6)
-  '@tauri-apps/api':
-    specifier: ^1.6.0
-    version: 1.6.0
   marked:
     specifier: ^12.0.2
     version: 12.0.2
@@ -81,6 +81,9 @@ devDependencies:
   '@angular/compiler-cli':
     specifier: ^17.1.2
     version: 17.3.12(@angular/compiler@17.3.12)(typescript@5.4.3)
+  '@tauri-apps/api':
+    specifier: ^1.6.0
+    version: 1.6.0
   '@tauri-apps/cli':
     specifier: ^1.6.0
     version: 1.6.0
@@ -534,6 +537,21 @@ packages:
       '@angular/common': 17.3.12(@angular/core@17.3.12)(rxjs@7.8.1)
       '@angular/core': 17.3.12(rxjs@7.8.1)(zone.js@0.14.8)
       tslib: 2.6.3
+
+  /@anthropic-ai/sdk@0.24.3:
+    resolution: {integrity: sha512-916wJXO6T6k8R6BAAcLhLPv/pnLGy7YSEBZXZ1XTFbLcTZE8oTy3oDW9WJf9KKZwMvVcePIfoTSvzXHRcGxkQQ==}
+    dependencies:
+      '@types/node': 18.19.41
+      '@types/node-fetch': 2.6.11
+      abort-controller: 3.0.0
+      agentkeepalive: 4.5.0
+      form-data-encoder: 1.7.2
+      formdata-node: 4.4.1
+      node-fetch: 2.7.0
+      web-streams-polyfill: 3.3.3
+    transitivePeerDependencies:
+      - encoding
+    dev: false
 
   /@azure/abort-controller@1.1.0:
     resolution: {integrity: sha512-TrRLIoSQVzfAJX9H1JeFjzAoDGcoK1IYX1UImfceTZpsyYfWr09Ss1aHW1y5TrrR3iq6RZLBwJ3E24uwPhwahw==}
@@ -2878,7 +2896,7 @@ packages:
   /@tauri-apps/api@1.6.0:
     resolution: {integrity: sha512-rqI++FWClU5I2UBp4HXFvl+sBWkdigBkxnpJDQUWttNyG7IZP4FwQGhTNL5EOw0vI8i6eSAJ5frLqO7n7jbJdg==}
     engines: {node: '>= 14.6.0', npm: '>= 6.6.0', yarn: '>= 1.19.1'}
-    dev: false
+    dev: true
 
   /@tauri-apps/cli-darwin-arm64@1.6.0:
     resolution: {integrity: sha512-SNRwUD9nqGxY47mbY1CGTt/jqyQOU7Ps7Mx/mpgahL0FVUDiCEY/5L9QfEPPhEgccgcelEVn7i6aQHIkHyUtCA==}
@@ -3133,7 +3151,7 @@ packages:
   /@types/node-fetch@2.6.11:
     resolution: {integrity: sha512-24xFj9R5+rfQJLRyM56qh+wnVSYhyXC2tkoBndtY0U+vubqNsYXGjufB2nn8Q6gt0LrARwL6UBtMCSVCwl4B1g==}
     dependencies:
-      '@types/node': 18.19.41
+      '@types/node': 20.14.11
       form-data: 4.0.0
     dev: false
 
@@ -3153,7 +3171,6 @@ packages:
     resolution: {integrity: sha512-kprQpL8MMeszbz6ojB5/tU8PLN4kesnN8Gjzw349rDlNgsSzg90lAVj3llK99Dh7JON+t9AuscPPFW6mPbTnSA==}
     dependencies:
       undici-types: 5.26.5
-    dev: true
 
   /@types/qs@6.9.15:
     resolution: {integrity: sha512-uXHQKES6DQKKCLh441Xv/dwxOq1TVS3JPUMlEqoEglvlhR6Mxnlew/Xq/LRVHpLyk7iK3zODe1qYHIMltO7XGg==}
