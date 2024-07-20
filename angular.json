@@ -25,10 +25,8 @@
               "src/assets",
               "src/manifest.webmanifest"
             ],
-            "styles": ["src/styles.css", "node_modules/prismjs/themes/prism-okaidia.css"],
-            "scripts": ["node_modules/prismjs/prism.js",  
-                "node_modules/prismjs/components/prism-csharp.min.js",
-                "node_modules/prismjs/components/prism-css.min.js"],
+            "styles": ["src/styles.css"],
+            "scripts": [],
             "serviceWorker": true,
             "ngswConfigPath": "ngsw-config.json"
           },
