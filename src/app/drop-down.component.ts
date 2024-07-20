@@ -65,6 +65,8 @@ export class DropDownComponent {
   @Input() selectedModel!: string;
   isOpen = false;
   menuItems: string[] = [];
+  @Output() menuItemClick: EventEmitter<string> = new EventEmitter<string>();
+
 
   get selectedItem(): string {
     return this.selectedModel;
