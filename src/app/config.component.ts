@@ -26,22 +26,6 @@ import { ThemeService } from "./services/theme.service";
             Global Configuration
           </h3>
           <form class="space-y-6" action="#" [formGroup]="configForm">
-            <!-- EmbedElite API KEY Control -->
-            <div>
-              <label
-                for="ee_api_key"
-                class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
-              >
-                EmbedElite API KEY
-              </label>
-              <input
-                formControlName="ee_api_key"
-                id="ee_api_key"
-                placeholder="sk_..."
-                class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white"
-                required
-              />
-            </div>
             <!-- OpenAI API KEY Control -->
             <div>
               <label
@@ -116,17 +100,6 @@ import { ThemeService } from "./services/theme.service";
                   Save
                 </button>
               </div>
-            </div>
-            <!-- Link to obtain EmbedElite Key -->
-            <div class="text-sm font-medium text-gray-500 dark:text-gray-300">
-              Not registered?
-              <a
-                href="https://www.embedelite.com/"
-                target="_blank"
-                class="text-blue-700 hover:underline dark:text-blue-500"
-              >
-                Get EmbedElite Key
-              </a>
             </div>
           </form>
         </div>
