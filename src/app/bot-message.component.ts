@@ -14,6 +14,7 @@ import { Clipboard } from '@angular/cdk/clipboard';
     template: `
     <div class="flex items-end mb-4 space-x-2">
       <div
+	*ngIf="type === 'text'"
         class="px-4 py-2 text-white bg-primary-600 dark:bg-primary-500 rounded-lg max-w-[90%] overflow-hidden"
       >
         <ng-container *ngFor="let block of parsedBlocks">
@@ -44,6 +45,16 @@ import { Clipboard } from '@angular/cdk/clipboard';
           </ng-container>
         </ng-container>
       </div>
+	<div
+	  *ngIf="type === 'image'"
+	  class="bg-primary-600 dark:bg-primary-500 rounded-lg max-w-[30%]"
+	>	
+	  <img
+	    src="{{message}}"
+	    alt="Bot Image"
+	    class="rounded-lg max-w-2"
+	  />
+	</div>
     </div>
   `,
     styles: [
@@ -73,17 +84,20 @@ import { Clipboard } from '@angular/cdk/clipboard';
     ],
 })
 export class BotMessageComponent implements OnInit, OnChanges {
-    @Input() message: string;
-    @Input() layout: "chat-bubbles" | "centered" = "chat-bubbles";
-    @Input() links?: Array<{ title: string; url: string }>;
-    @Output() openViewer = new EventEmitter<string>();
+  @Input() message: string;
+  @Input() type: string;
+  messageCopy: string;
+  @Input() layout: "chat-bubbles" | "centered" = "chat-bubbles";
+  @Input() links?: Array<{ title: string; url: string }>;
+  @Output() openViewer = new EventEmitter<string>();
+  parsedBlocks: Array<{ content: string; isCode: boolean; language?: string }> = [];
 
-    parsedBlocks: Array<{ content: string; isCode: boolean; language?: string }> = [];
-
-    constructor(private clipboard: Clipboard) {
-        this.message = "";
-        this.links = [];
-    }
+  constructor(private clipboard: Clipboard) {
+    this.message = "";
+    this.messageCopy = "";
+    this.links = [];
+    this.type = "text";
+  }
 
     ngOnInit() {
         this.parseMessage();
