@@ -57,6 +57,7 @@ import { ThemeService } from "./services/theme.service";
               >
                 <option [value]="'gpt-3.5-turbo'">gpt-3.5-turbo</option>
                 <option [value]="'gpt-4'">gpt-4</option>
+                <option [value]="'gpt-4o-mini'">gpt-4o-mini</option>
                 <option [value]="'gpt-4-turbo-preview'">
                   gpt-4-turbo-preview
                 </option>
@@ -127,7 +128,7 @@ export class ConfigComponent implements OnInit {
       this.storageService.getItem<string>("oai_api_key") || "";
     const defaultModel =
       this.storageService.getItem<
-        "gpt-3.5-turbo" | "gpt-4" | "gpt-4-turbo-preview" | "gpt-4o"
+        "gpt-3.5-turbo" | "gpt-4" | "gpt-4-turbo-preview" | "gpt-4o" | "gpt-4o-mini"
       >("default_model") || "";
     const isDarkMode = this.detectDarkMode();
 

@@ -17,7 +17,7 @@ export interface Chat {
   mode: "ee" | "oai";
   deactivated: boolean;
   product_id: string | null;
-  model: "gpt-3.5-turbo" | "gpt-4" | "gpt-4-turbo-preview" | "gpt-4o";
+  model: "gpt-3.5-turbo" | "gpt-4" | "gpt-4-turbo-preview" | "gpt-4o" | "gpt-4o-mini" | "dalle3";
   title: string;
   messages: Message[];
   date: Date;
@@ -71,7 +71,7 @@ export class ChatService {
   updateChatConfig(
     chatId: string,
     mode: "ee" | "oai",
-    model: "gpt-3.5-turbo" | "gpt-4" | "gpt-4-turbo-preview" | "gpt-4o",
+    model: "gpt-3.5-turbo" | "gpt-4" | "gpt-4-turbo-preview" | "gpt-4o" | "gpt-4o-mini",
     productId: string | null
   ): void {
     const chatIndex = this.chats.findIndex((chat) => chat.id === chatId);
@@ -103,7 +103,7 @@ export class ChatService {
   addChat(title: string): Chat {
     const defaultModel =
       this.storageService.getItem<
-        "gpt-3.5-turbo" | "gpt-4" | "gpt-4-turbo-preview"
+        "gpt-3.5-turbo" | "gpt-4" | "gpt-4-turbo-preview" | "gpt-4o" | "gpt-4o-mini"
       >("default_model") ?? "gpt-4";
 
     let newChat: Chat = {
@@ -152,7 +152,7 @@ export class ChatService {
     chatId: string,
     message: string,
     mode: "ee" | "oai",
-    model: "gpt-3.5-turbo" | "gpt-4" | "gpt-4-turbo-preview" | "gpt-4o" | "dalle3",
+    model: "gpt-3.5-turbo" | "gpt-4" | "gpt-4-turbo-preview" | "gpt-4o" | "dalle3" | "gpt-4o-mini",
     productId: string | null
   ): void {
     const chatIndex = this.chats.findIndex((chat) => chat.id === chatId);
