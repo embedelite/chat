@@ -6,7 +6,7 @@ import {
   Output,
   ViewChild,
 } from "@angular/core";
-import { Chat } from "./services/chat.service";
+import { Chat, Message } from "./services/chat.service";
 import { StorageService } from "./services/storage.service";
 
 @Component({
@@ -16,8 +16,9 @@ import { StorageService } from "./services/storage.service";
       <div *ngFor="let message of chat?.messages">
         <ng-container *ngIf="message.from === 'user'">
           <app-user-message
-            [message]="message.text"
+            [message]="message"
             [layout]="layout"
+            (messageEdited)="handleMessageEdit($event)"
           ></app-user-message>
         </ng-container>
         <ng-container *ngIf="message.from === 'bot'">
@@ -25,6 +26,7 @@ import { StorageService } from "./services/storage.service";
             [message]="message.text"
             [links]="message.links"
             [layout]="layout"
+	    [type]="message.type"
             (openViewer)="openViewer.emit($event)"
           ></app-bot-message>
         </ng-container>
@@ -37,6 +39,7 @@ export class ChatAreaComponent {
   @Input() chat: Chat;
   @Input() layout: "chat-bubbles" | "centered" = "chat-bubbles";
   @Output() openViewer = new EventEmitter<string>();
+  @Output() messageEdited = new EventEmitter<Message>();
   @ViewChild("msgcontainer") chatArea!: ElementRef;
 
   //@ViewChild("chatArea") private chatArea!: ElementRef;
@@ -77,5 +80,9 @@ export class ChatAreaComponent {
       this.chatArea.nativeElement.parentElement.scrollTop =
         this.chatArea.nativeElement.parentElement.scrollHeight;
     }
+  }
+
+  handleMessageEdit(updatedMessage: Message): void {
+    this.messageEdited.emit(updatedMessage);
   }
 }

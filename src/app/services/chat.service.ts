@@ -1,9 +1,12 @@
 import { Injectable } from "@angular/core";
 import { BehaviorSubject, Observable, of } from "rxjs";
 import { StorageService } from "./storage.service";
+import { OpenAI } from "openai";
 
 export interface Message {
+  id: string;
   from: "user" | "bot";
+  type: "text" | "image";
   text: string;
   links?: Array<{ title: string; url: string }>;
   complete?: boolean;
@@ -14,7 +17,7 @@ export interface Chat {
   mode: "ee" | "oai";
   deactivated: boolean;
   product_id: string | null;
-  model: "gpt-3.5-turbo" | "gpt-4" | "gpt-4-turbo-preview";
+  model: "gpt-3.5-turbo" | "gpt-4" | "gpt-4-turbo-preview" | "gpt-4o" | "gpt-4o-mini" | "dalle3";
   title: string;
   messages: Message[];
   date: Date;
@@ -37,15 +40,15 @@ export class ChatService {
       title: "Hello AI",
       date: new Date(),
       messages: [
-        { from: "user", text: "Hello, AI!" },
-        { from: "bot", text: "Hello, user!" },
+        { id: "1", from: "user", text: "Hello, AI!", type: "text"},
+        { id: "2", from: "bot", text: "Hello, user!", type: "text" },
       ],
     },
   ];
   private currentChatSubject = new BehaviorSubject<Chat>(this.chats[0]);
   currentChat = this.currentChatSubject.asObservable();
 
-  private chatsVisibility = new BehaviorSubject(true);  // set initial state to 'false'
+  private chatsVisibility = new BehaviorSubject(true); // set initial state to 'false'
   currentVisibility = this.chatsVisibility.asObservable();
 
   constructor(private storageService: StorageService) {
@@ -57,7 +60,7 @@ export class ChatService {
     }
   }
 
-  toggleChatsVisibility(){
+  toggleChatsVisibility() {
     this.chatsVisibility.next(!this.chatsVisibility.value);
   }
 
@@ -68,7 +71,7 @@ export class ChatService {
   updateChatConfig(
     chatId: string,
     mode: "ee" | "oai",
-    model: "gpt-3.5-turbo" | "gpt-4" | "gpt-4-turbo-preview",
+    model: "gpt-3.5-turbo" | "gpt-4" | "gpt-4-turbo-preview" | "gpt-4o" | "gpt-4o-mini",
     productId: string | null
   ): void {
     const chatIndex = this.chats.findIndex((chat) => chat.id === chatId);
@@ -99,8 +102,9 @@ export class ChatService {
 
   addChat(title: string): Chat {
     const defaultModel =
-      this.storageService.getItem<"gpt-3.5-turbo" | "gpt-4" | "gpt-4-turbo-preview">("default_model") ??
-      "gpt-4";
+      this.storageService.getItem<
+        "gpt-3.5-turbo" | "gpt-4" | "gpt-4-turbo-preview" | "gpt-4o" | "gpt-4o-mini"
+      >("default_model") ?? "gpt-4";
 
     let newChat: Chat = {
       id: this.generateId(), // Implement a method for generating unique id
@@ -148,7 +152,7 @@ export class ChatService {
     chatId: string,
     message: string,
     mode: "ee" | "oai",
-    model: "gpt-3.5-turbo" | "gpt-4" | "gpt-4-turbo-preview",
+    model: "gpt-3.5-turbo" | "gpt-4" | "gpt-4-turbo-preview" | "gpt-4o" | "dalle3" | "gpt-4o-mini",
     productId: string | null
   ): void {
     const chatIndex = this.chats.findIndex((chat) => chat.id === chatId);
@@ -158,8 +162,10 @@ export class ChatService {
     }
 
     const userMessage: Message = {
+      id: this.generateId(),
       from: "user",
       text: message,
+      type: "text",
     };
     this.chats[chatIndex].messages.push(userMessage);
 
@@ -178,8 +184,16 @@ export class ChatService {
     }));
 
     if (mode === "oai") {
-      let oai_api_key = this.storageService.getItem<string>("oai_api_key");
-      this.sendMessageOAI(chatIndex, oai_api_key, model, message, history);
+      if (model === "dalle3") {
+	let oai_api_key = this.storageService.getItem<string>("oai_api_key");
+	this.sendMessageDalle(message, chatIndex, oai_api_key)
+      }else{
+	let oai_api_key = this.storageService.getItem<string>("oai_api_key");
+	this.sendMessageOAI(chatIndex, oai_api_key, model, message, history)
+	.catch((err) => {
+	    console.error("Failed to send message to OAI:", err);
+	});
+      }
     } else {
       let ee_api_key = this.storageService.getItem<string>("ee_api_key");
       if (productId === null) {
@@ -218,8 +232,10 @@ export class ChatService {
 
         response.json().then((data) => {
           let botMessage: Message = {
+            id: this.generateId(),
             from: "bot",
             text: data.response,
+	    type: "text",
           };
           this.chats[chatIndex].messages.push(botMessage);
 
@@ -231,100 +247,149 @@ export class ChatService {
       });
   }
 
-  sendMessageOAI(
+  async sendMessageDalle(
+    message: string,
+      chatIndex: number,
+      oai_api_key: any
+    ) {
+      const openai = new OpenAI({ apiKey: oai_api_key, dangerouslyAllowBrowser: true, maxRetries: 5});
+      openai.images.generate({
+	model: "dall-e-3",
+	prompt: message,
+	n: 1,
+	size: "1024x1024",
+      }).then(async (response) => {
+	console.log(response.data[0].url);
+	let botMessage: Message = {
+	  id: this.generateId(),
+	  from: "bot",
+	  text: response.data[0].url || "No image found",
+	  type: "image",
+	};
+	this.chats[chatIndex].messages.push(botMessage);
+	this.storageService.setItem("chats", this.chats);
+      });
+  }
+
+  async sendMessageOAI(
     chatIndex: number,
     oai_api_key: any,
     model: string,
     message: string,
     history: any[]
   ) {
-    const headers = {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${oai_api_key}`,
-    };
-
-    const body = {
+    const openai = new OpenAI({ apiKey: oai_api_key, dangerouslyAllowBrowser: true, maxRetries: 5});
+    openai.chat.completions.create({
       model: model,
       messages: [...history, { role: "user", content: message }],
       stream: true,
-    };
+    }).then(async (stream) => {
+      const decoder = new TextDecoder("utf-8");
 
-    fetch(this.OPENAI_API_URL, {
-      method: "POST",
-      headers: headers,
-      body: JSON.stringify(body),
-    })
-      .then((response) => {
-        if (!response.body) {
-          throw new Error("No ReadableStream available");
-        }
+      let receivedString = "";
+      let isNewMessage = true;
+      let newMessage: Message;
+      newMessage = {
+	id: this.generateId(),
+	from: "bot",
+	text: "",
+	complete: false,
+	type: "text",
+      };
 
-        const reader = response.body.getReader();
-        const decoder = new TextDecoder("utf-8");
+      for await (const chunk of stream) {
+	receivedString += chunk.choices[0].delta.content;
+	if (chunk.choices[0].finish_reason === "stop") {
+	  receivedString += "\n";
+	}
+	const newLineIndex = receivedString.indexOf("\n");
+	const line = receivedString.slice(0, newLineIndex);
+	receivedString = receivedString.slice(newLineIndex + 1);
 
-        let receivedString = "";
-        let isNewMessage = true;
-        let newMessage: Message;
+	if (chunk.choices && chunk.choices[0] && chunk.choices[0].delta) {
+	  if (isNewMessage) {
+	    this.chats[chatIndex].messages.push(newMessage);
+	    isNewMessage = false;
+	  } else {
+	    let delta = chunk.choices[0].delta.content;
+	    if (delta && delta !== "") {
+	      newMessage.text += delta;
+	      newMessage.complete = chunk.choices[0].finish_reason === "stop";
+	    }
+	  }
 
-        const push = async () => {
-          while (true) {
-            const { done, value } = await reader.read();
-            if (done) {
-              break;
-            }
+	  this.storageService.setItem("chats", this.chats);
+	}
+      }
+    });
+  }
 
-            const chunk = decoder.decode(value);
-            receivedString += chunk;
+  updateMessage(chatId: string, updatedMessage: Message) {
+    // Find the chat based on chatId
+    const chatIndex = this.chats.findIndex((chat) => chat.id === chatId);
 
-            while (receivedString.includes("\n")) {
-              const newLineIndex = receivedString.indexOf("\n");
-              const line = receivedString.slice(0, newLineIndex);
-              receivedString = receivedString.slice(newLineIndex + 1);
+    if (chatIndex < 0) {
+      console.error(`No chat found with id: ${chatId}`);
+      return;
+    }
 
-              const data = line.replace(/^data: /, "").trim();
+    // Within the found chat, find the message index using updatedMessage.id
+    const messageIndex = this.chats[chatIndex].messages.findIndex(
+      (msg) => msg.id === updatedMessage.id
+    );
 
-              if (data !== "" && data !== "[DONE]") {
-                let parsed;
-                try {
-                  parsed = JSON.parse(data);
-                  //console.log("Parsed line", parsed);
-                } catch (e) {
-                  console.error("Error parsing line", e);
-                }
+    if (messageIndex < 0) {
+      console.error(`No message found with id: ${updatedMessage.id}`);
+      return;
+    }
 
-                if (!parsed) continue; // Skip this iteration if parsedLine is undefined
-                const { choices } = parsed;
+    this.chats[chatIndex].messages[messageIndex] = updatedMessage;
+    this.storageService.setItem("chats", this.chats);
 
-                if (choices && choices[0] && choices[0].delta) {
-                  if (isNewMessage) {
-                    newMessage = {
-                      from:
-                        choices[0].delta.role === "assistant" ? "bot" : "user",
-                      text: choices[0].delta.content,
-                      complete: choices[0].finish_reason === "stop",
-                    };
-                    this.chats[chatIndex].messages.push(newMessage);
-                    isNewMessage = false;
-                  } else {
-                    let delta = choices[0].delta.content;
-                    if (delta && delta !== "") {
-                      newMessage.text += delta;
-                      newMessage.complete = choices[0].finish_reason === "stop";
-                    }
-                  }
+    this.refreshChatAfterEdit(chatId, updatedMessage.id).catch((err) =>
+      console.error("Failed to refresh chat:", err)
+    );
+  }
 
-                  this.storageService.setItem("chats", this.chats);
-                }
-              }
-            }
-          }
-        };
+  async refreshChatAfterEdit(
+    chatId: string,
+    updatedMessageId: string
+  ): Promise<void> {
+    const chatIndex = this.chats.findIndex((chat) => chat.id === chatId);
+    if (chatIndex < 0) {
+      console.error(`No chat found with id: ${chatId}`);
+      return;
+    }
 
-        push();
-      })
-      .catch((error) => {
-        console.error(error);
-      });
+    const messageIndex = this.chats[chatIndex].messages.findIndex(
+      (msg) => msg.id === updatedMessageId
+    );
+
+    this.chats[chatIndex].messages.splice(messageIndex + 1);
+
+    let history = this.chats[chatIndex].messages.map((msg) => ({
+      role: msg.from === "user" ? "user" : "assistant",
+      content: msg.text,
+    }));
+
+    const mode = this.chats[chatIndex].mode; // 'oai' or 'ee'
+    const model = this.chats[chatIndex].model;
+    const productId = this.chats[chatIndex].product_id;
+
+    const lastMessage = history[history.length - 1].content;
+
+    // Fetch new sequence of responses based on the updated history
+    if (mode === "oai" && lastMessage) {
+      let oai_api_key = this.storageService.getItem<string>("oai_api_key");
+      await this.sendMessageOAI(chatIndex, oai_api_key, model, lastMessage, history);
+    } else if (mode === "ee" && productId && lastMessage) {
+      this.sendMessageEE(
+        chatIndex,
+        this.storageService.getItem<string>("ee_api_key"),
+        productId,
+        lastMessage
+      );
+    }
   }
 
   updateProducts(ee_api_key: string) {

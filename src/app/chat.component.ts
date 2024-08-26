@@ -1,5 +1,5 @@
 import { Component, OnInit } from "@angular/core";
-import { Chat, ChatService } from "./services/chat.service";
+import { Chat, ChatService, Message } from "./services/chat.service";
 
 @Component({
   selector: "app-chat",
@@ -7,7 +7,7 @@ import { Chat, ChatService } from "./services/chat.service";
     <div class="flex h-full flex-col bg-white dark:bg-gray-800 shadow-md">
       <div class="flex overflow-hidden h-screen">
         <app-chat-sidebar
-          *ngIf="currentVisibility"
+          [hidden]="!currentVisibility"
           [ngClass]="{ show: currentVisibility }"
           class="overflow-y-auto h-full w-64 flex-shrink-0 sidebar-mobile-overlay"
         ></app-chat-sidebar>
@@ -19,6 +19,7 @@ import { Chat, ChatService } from "./services/chat.service";
               [chat]="currentChat"
               [layout]="'centered'"
               (openViewer)="openViewer($event)"
+              (messageEdited)="handleMessageEdit($event)"
             ></app-chat-area>
             <app-chat-input
               class="flex-shrink-0"
@@ -80,7 +81,7 @@ export class ChatComponent implements OnInit {
     mode: "oai",
     deactivated: false,
     product_id: null,
-    model: "gpt-3.5-turbo",
+    model: "gpt-4o-mini",
     title: "",
     date: new Date(),
     messages: [],
@@ -139,5 +140,9 @@ export class ChatComponent implements OnInit {
     if (window.innerWidth <= 767) {
       this.chatService.toggleChatsVisibility();
     }
+  }
+
+  handleMessageEdit(updatedMessage: Message): void {
+    this.chatService.updateMessage(this.currentChat.id, updatedMessage);
   }
 }
