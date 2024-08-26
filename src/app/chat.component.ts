@@ -81,7 +81,7 @@ export class ChatComponent implements OnInit {
     mode: "oai",
     deactivated: false,
     product_id: null,
-    model: "gpt-3.5-turbo",
+    model: "gpt-4o-mini",
     title: "",
     date: new Date(),
     messages: [],

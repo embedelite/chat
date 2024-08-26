@@ -10,11 +10,13 @@ import { trigger, state, style, transition, animate } from '@angular/animations'
       <button (click)="toggleMenu()" 
         class="mr-0 mb-0 text-white bg-primary-500 hover:bg-primary-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-l-lg text-sm px-5 py-2.5 text-center inline-flex items-center dark:bg-primary-600 dark:hover:bg-primary-500 dark:focus:ring-primary-800"
         style="height: 44px;">
-        <i class="fas" [ngClass]="{'fa-angle-up': isOpen, 'fa-angle-down': !isOpen}"></i>
+        <i class="fas" [ngClass]="{'fa-angle-down': isOpen, 'fa-angle-up': !isOpen}"></i>
       </button>
     </div>
 
-    <div *ngIf="isOpen" class="absolute right-0 bottom-full mb-2 w-56 origin-bottom-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none" @menuAnimations>
+
+    <div *ngIf="isOpen" class="absolute right-0 bottom-full z-10 mt-2 w-56 origin-bottom-right divide-y divide-gray-100 rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none" role="menu" aria-orientation="vertical" aria-labelledby="menu-button" tabindex="-1">
+
       <div class="py-1">
         <a href="#" (click)="onMenuItemClick('gpt-3.5-turbo', $event)" class="block px-4 py-2 text-sm"
            [ngClass]="classNames({ 'bg-gray-100 text-gray-900': selectedItem === 'gpt-3.5-turbo', 'text-gray-700': selectedItem !== 'gpt-3.5-turbo' })">
@@ -24,15 +26,21 @@ import { trigger, state, style, transition, animate } from '@angular/animations'
            [ngClass]="classNames({ 'bg-gray-100 text-gray-900': selectedItem === 'gpt-4o', 'text-gray-700': selectedItem !== 'gpt-4o' })">
           GPT-4o
         </a>
+        <a href="#" (click)="onMenuItemClick('gpt-4o-mini', $event)" class="block px-4 py-2 text-sm"
+           [ngClass]="classNames({ 'bg-gray-100 text-gray-900': selectedItem === 'gpt-4o-mini', 'text-gray-700': selectedItem !== 'gpt-4o-mini' })">
+          GPT-4o-mini
+        </a>
         <a href="#" (click)="onMenuItemClick('Claude-3', $event)" class="block px-4 py-2 text-sm"
            [ngClass]="classNames({ 'bg-gray-100 text-gray-900': selectedItem === 'Claude-3', 'text-gray-700': selectedItem !== 'Claude-3' })">
           Claude-3
         </a>
-        <a href="#" (click)="onMenuItemClick('StableDiffusion 3', $event)" class="block px-4 py-2 text-sm"
+      </div>
+      <div className="py-1">
+        <a href="#" class="block px-4 py-2 text-sm cursor-not-allowed text-gray-400"
            [ngClass]="classNames({ 'bg-gray-100 text-gray-900': selectedItem === 'StableDiffusion 3', 'text-gray-700': selectedItem !== 'StableDiffusion 3' })">
           StableDiffusion 3
         </a>
-        <a href="#" (click)="onMenuItemClick('Midjourney', $event)" class="block px-4 py-2 text-sm"
+        <a href="#" class="block px-4 py-2 text-sm cursor-not-allowed text-gray-400"
            [ngClass]="classNames({ 'bg-gray-100 text-gray-900': selectedItem === 'Midjourney', 'text-gray-700': selectedItem !== 'Midjourney' })">
           Midjourney
         </a>
@@ -72,7 +80,9 @@ export class DropDownComponent {
     return this.selectedModel;
   }
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) {
+    console.log('model selected: ', this.selectedModel);
+  }
 
   toggleMenu() {
     this.isOpen = !this.isOpen;
@@ -87,6 +97,10 @@ export class DropDownComponent {
       .filter(([_, value]) => value)
       .map(([key, _]) => key)
       .join(' ');
+  }
+
+  public changeModel(model: string): void {
+    this.selectedModel = model;
   }
 
   onMenuItemClick(item: string, event: Event) {

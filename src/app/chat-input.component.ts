@@ -7,6 +7,8 @@ import {
   ViewChild,
 } from "@angular/core";
 import { Product, ProductService } from "./services/product.service";
+import { Chat, ChatService, Message } from "./services/chat.service";
+import { DropDownComponent } from "./drop-down.component";
 
 @Component({
   selector: "app-chat-input",
@@ -28,7 +30,9 @@ import { Product, ProductService } from "./services/product.service";
       ></textarea>
       <!-- The send button -->
       <div class="inline-flex rounded-md shadow-sm" role="group">
-        <app-drop-down (menuItemClick)="handleMenuItemClick($event)"
+        <app-drop-down 
+	  #appdropdown
+	  (menuItemClick)="handleMenuItemClick($event)"
           selectedModel="this.model"
         ></app-drop-down>
         <button
@@ -62,7 +66,7 @@ import { Product, ProductService } from "./services/product.service";
 })
 export class ChatInputComponent {
   @Input() mode: "ee" | "oai" = "ee";
-  @Input() model: "gpt-3.5-turbo" | "gpt-4" | "gpt-4-turbo-preview" | "gpt-4o" =
+  @Input() model: "gpt-3.5-turbo" | "gpt-4" | "gpt-4-turbo-preview" | "gpt-4o" | "gpt-4o-mini" | "dalle3" =
     "gpt-4o";
   @Input() product_id: string | null = null;
   @Input() deactivated: boolean = false;
@@ -70,13 +74,33 @@ export class ChatInputComponent {
   @Output() newMessage = new EventEmitter<any>();
   @Output() updateChatConfig = new EventEmitter<any>();
   @ViewChild("textarea") textArea!: ElementRef;
+  @ViewChild(DropDownComponent) dropDown!: DropDownComponent;
   message: string;
   showChatConfig: boolean = false;
   showExtraProduct: boolean = false;
+  currentChat: Chat = {
+    id: "",
+    mode: "oai",
+    deactivated: false,
+    product_id: null,
+    model: "gpt-3.5-turbo",
+    title: "",
+    date: new Date(),
+    messages: [],
+  };
 
   products: Product[] = [];
 
-  constructor(private productService: ProductService) {
+  constructor(private productService: ProductService, private chatService: ChatService) {
+    this.chatService.currentChat.subscribe((chat) => {
+      this.currentChat = chat;
+      console.log(this.currentChat);
+      this.mode = chat.mode;
+      this.model = chat.model;
+      this.dropDown.changeModel(this.model);
+      
+      // update the drop down with the current model
+    });
     this.message = "";
     // if product id is not fr, de, or es then show extra product
     this.updateExtraProduct();
