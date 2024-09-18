@@ -32,12 +32,6 @@ import { NavigationEnd, Router } from "@angular/router";
           class="px-4 py-2 rounded text-gray-900 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-800"
           >Chat</a
         >
-        <a
-          routerLink="/editor"
-          routerLinkActive="text-black bg-gray-300 dark:bg-gray-800"
-          class="px-4 py-2 rounded text-gray-900 dark:text-gray-200 hover:bg-gray-300 dark:hover:bg-gray-800"
-          >Solutions</a
-        >
       </div>
       <div class="flex items-center space-x-4">
         <a
