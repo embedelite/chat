@@ -1,11 +1,11 @@
 [package]
-name = "embedelite-native"
-version = "0.2.0"
-description = "EmbedElite Chat"
+name = "enterprise-chat"
+version = "0.3.0"
+description = "A AI chat application for enterprises."
 authors = ["you"]
 license = ""
 repository = ""
-edition = "2021"
+edition = "2024"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 

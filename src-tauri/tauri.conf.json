@@ -7,8 +7,8 @@
     "withGlobalTauri": false
   },
   "package": {
-    "productName": "embedelite-native",
-    "version": "0.2.0"
+    "productName": "enterprise-chat",
+    "version": "0.3.0"
   },
   "tauri": {
     "allowlist": {
