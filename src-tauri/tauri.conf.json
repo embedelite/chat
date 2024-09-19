@@ -7,8 +7,8 @@
     "withGlobalTauri": false
   },
   "package": {
-    "productName": "embedelite-native",
-    "version": "0.2.0"
+    "productName": "enterprise-chat",
+    "version": "0.3.0"
   },
   "tauri": {
     "allowlist": {
@@ -20,6 +20,14 @@
       "window": {
         "startDragging": true
       }
+    },
+    "updater": {
+      "active": true,
+      "endpoints": [
+        "https://api.github.com/repos/embedelite/chat/releases/latest"
+      ],
+      "dialog": true,
+      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDg4MkQzOUQ4RjM1M0I3OUYKUldTZnQxUHoyRGt0aUhRVjFQQlZrK1BmbGRxNFZwdjNXYnhnSTlOdi9LT2lpUkxYK3dxcnpFd04K"
     },
     "bundle": {
       "active": true,
