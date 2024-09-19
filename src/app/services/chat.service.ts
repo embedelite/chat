@@ -2,6 +2,7 @@ import { Injectable } from "@angular/core";
 import { BehaviorSubject, Observable, of } from "rxjs";
 import { StorageService } from "./storage.service";
 import { OpenAI } from "openai";
+import { A } from "@tauri-apps/api/cli-373e13ed";
 
 export interface Message {
   id: string;
@@ -15,12 +16,32 @@ export interface Message {
 export interface Chat {
   id: string;
   mode: "ee" | "oai";
+  folder_id: number | null;
+  system_prompt: string;
   deactivated: boolean;
   product_id: string | null;
-  model: "gpt-3.5-turbo" | "gpt-4" | "gpt-4-turbo-preview" | "gpt-4o" | "gpt-4o-mini" | "dalle3";
+  model: availableModels;
   title: string;
   messages: Message[];
   date: Date;
+}
+
+//export type availableModels = "gpt-3.5-turbo" | "gpt-4" | "gpt-4-turbo-preview" | "gpt-4o" | "gpt-4o-mini" | "dalle3";
+export const AVAILABLE_MODELS = {
+  GPT_4O_MINI: "gpt-4o-mini",
+  GPT_4: "gpt-4",
+  GPT_4_TURBO_PREVIEW: "gpt-4-turbo-preview",
+  GPT_4O: "gpt-4o",
+  DALLE3: "dalle3"
+} as const;
+
+export type availableModels = typeof AVAILABLE_MODELS[keyof typeof AVAILABLE_MODELS];
+
+export interface Folder {
+  id: number;
+  title: string;
+  system_prompt: string;
+  default_model: availableModels;
 }
 
 @Injectable({ providedIn: "root" })
@@ -30,13 +51,25 @@ export class ChatService {
   //private readonly EE_API_URL = "https://api.embedelite.com";
   private readonly EE_API_URL = "https://api.dev.embedelite.com";
 
+  // Folder
+  private folders: Folder[] = [
+    {
+      id: 1,
+      title: "Unnamed",
+      system_prompt: "",
+      default_model: AVAILABLE_MODELS.GPT_4O_MINI,
+    },
+  ];
+
   private chats: Chat[] = [
     {
       id: "1",
       mode: "oai",
       deactivated: false,
+      folder_id: 1,
+      system_prompt: "",
       product_id: null,
-      model: "gpt-3.5-turbo",
+      model: AVAILABLE_MODELS.GPT_4O_MINI,
       title: "Hello AI",
       date: new Date(),
       messages: [
@@ -68,10 +101,26 @@ export class ChatService {
     return of(this.chats);
   }
 
+  getFolderById(folderId: number): Folder | undefined {
+    return this.folders.find((folder) => folder.id === folderId);
+  }
+
+  addFolder(title: string, system_prompt: string, default_model: availableModels): number {
+    const lastFolderId = this.folders.length > 0 ? this.folders[this.folders.length - 1].id : 0;
+    const newFolder: Folder = {
+      id: lastFolderId + 1,
+      title: title,
+      system_prompt: system_prompt,
+      default_model: default_model,
+    };
+    this.folders.push(newFolder);
+    return newFolder.id;
+  }
+
   updateChatConfig(
     chatId: string,
     mode: "ee" | "oai",
-    model: "gpt-3.5-turbo" | "gpt-4" | "gpt-4-turbo-preview" | "gpt-4o" | "gpt-4o-mini",
+    model: availableModels,
     productId: string | null
   ): void {
     const chatIndex = this.chats.findIndex((chat) => chat.id === chatId);
@@ -100,17 +149,17 @@ export class ChatService {
     this.storageService.setItem("chats", this.chats);
   }
 
-  addChat(title: string): Chat {
+  addChat(title: string, folder_id: number | null = null): Chat {
     const defaultModel =
-      this.storageService.getItem<
-        "gpt-3.5-turbo" | "gpt-4" | "gpt-4-turbo-preview" | "gpt-4o" | "gpt-4o-mini"
-      >("default_model") ?? "gpt-4";
+      this.storageService.getItem<availableModels>("default_model") ?? AVAILABLE_MODELS.GPT_4O_MINI;
 
     let newChat: Chat = {
       id: this.generateId(), // Implement a method for generating unique id
       mode: "oai",
       deactivated: false,
       product_id: null,
+      folder_id: folder_id,
+      system_prompt: "",
       model: defaultModel,
       title: title,
       date: new Date(),
@@ -152,7 +201,7 @@ export class ChatService {
     chatId: string,
     message: string,
     mode: "ee" | "oai",
-    model: "gpt-3.5-turbo" | "gpt-4" | "gpt-4-turbo-preview" | "gpt-4o" | "dalle3" | "gpt-4o-mini",
+    model: availableModels,
     productId: string | null
   ): void {
     const chatIndex = this.chats.findIndex((chat) => chat.id === chatId);

@@ -4,7 +4,10 @@ const colors = require("tailwindcss/colors");
 const plugin = require("tailwindcss/plugin");
 
 module.exports = {
-  content: ["./src/**/*.{html,ts}"],
+  content: [
+    "./src/**/*.{html,ts}",
+    "./node_modules/flowbite/**/*.js",
+  ],
   darkMode: "class",
   theme: {
     extend: {
@@ -58,6 +61,7 @@ module.exports = {
     require("@tailwindcss/typography"),
     require("@tailwindcss/line-clamp"),
     require("@tailwindcss/aspect-ratio"),
+    require('flowbite/plugin'),
     //Additional utilities
     plugin(function ({ addUtilities }) {
       addUtilities({

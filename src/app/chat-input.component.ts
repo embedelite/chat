@@ -7,8 +7,9 @@ import {
   ViewChild,
 } from "@angular/core";
 import { Product, ProductService } from "./services/product.service";
-import { Chat, ChatService, Message } from "./services/chat.service";
+import { AVAILABLE_MODELS, availableModels, Chat, ChatService, Message } from "./services/chat.service";
 import { DropDownComponent } from "./drop-down.component";
+import { A } from "@tauri-apps/api/path-c062430b";
 
 @Component({
   selector: "app-chat-input",
@@ -66,8 +67,7 @@ import { DropDownComponent } from "./drop-down.component";
 })
 export class ChatInputComponent {
   @Input() mode: "ee" | "oai" = "ee";
-  @Input() model: "gpt-3.5-turbo" | "gpt-4" | "gpt-4-turbo-preview" | "gpt-4o" | "gpt-4o-mini" | "dalle3" =
-    "gpt-4o";
+  @Input() model: availableModels = AVAILABLE_MODELS.GPT_4O_MINI;
   @Input() product_id: string | null = null;
   @Input() deactivated: boolean = false;
   @Output() openViewer = new EventEmitter<string>();
@@ -83,7 +83,9 @@ export class ChatInputComponent {
     mode: "oai",
     deactivated: false,
     product_id: null,
-    model: "gpt-3.5-turbo",
+    folder_id: null,
+    system_prompt: "",
+    model: AVAILABLE_MODELS.GPT_4O_MINI,
     title: "",
     date: new Date(),
     messages: [],

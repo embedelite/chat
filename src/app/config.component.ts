@@ -1,6 +1,6 @@
 import { Component, EventEmitter, OnInit, Output } from "@angular/core";
 import { StorageService } from "./services/storage.service";
-import { ChatService } from "./services/chat.service";
+import { ChatService, availableModels } from "./services/chat.service";
 import { Router } from "@angular/router";
 import { FormBuilder, FormGroup, Validators } from "@angular/forms";
 import { ThemeService } from "./services/theme.service";
@@ -55,7 +55,6 @@ import { ThemeService } from "./services/theme.service";
                 id="default_model"
                 class="appearance-none px-3 py-2 h-10 text-sm leading-5 font-sans w-full border border-muted-300 bg-white text-muted-600 placeholder-muted-300 focus-visible:border-muted-300 focus-visible:shadow-lg dark:placeholder-muted-600 dark:bg-muted-700 dark:text-muted-200 dark:border-muted-600 dark:focus-visible:border-muted-600 focus-visible:ring-0 outline-transparent focus-visible:outline-2 focus-visible:outline-dashed focus-visible:outline-muted-300 dark:focus-visible:outline-muted-600 focus-visible:outline-offset-2 transition-all duration-300"
               >
-                <option [value]="'gpt-3.5-turbo'">gpt-3.5-turbo</option>
                 <option [value]="'gpt-4'">gpt-4</option>
                 <option [value]="'gpt-4o-mini'">gpt-4o-mini</option>
                 <option [value]="'gpt-4-turbo-preview'">
@@ -127,11 +126,8 @@ export class ConfigComponent implements OnInit {
     const oai_api_key =
       this.storageService.getItem<string>("oai_api_key") || "";
     const defaultModel =
-      this.storageService.getItem<
-        "gpt-3.5-turbo" | "gpt-4" | "gpt-4-turbo-preview" | "gpt-4o" | "gpt-4o-mini"
-      >("default_model") || "";
+      this.storageService.getItem<availableModels>("default_model") || "";
     const isDarkMode = this.detectDarkMode();
-
     this.configForm = this.fb.group({
       ee_api_key: [ee_api_key, Validators.required],
       oai_api_key: [oai_api_key, Validators.required],

@@ -18,10 +18,6 @@ import { trigger, state, style, transition, animate } from '@angular/animations'
     <div *ngIf="isOpen" class="absolute right-0 bottom-full z-10 mt-2 w-56 origin-bottom-right divide-y divide-gray-100 rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none" role="menu" aria-orientation="vertical" aria-labelledby="menu-button" tabindex="-1">
 
       <div class="py-1">
-        <a href="#" (click)="onMenuItemClick('gpt-3.5-turbo', $event)" class="block px-4 py-2 text-sm"
-           [ngClass]="classNames({ 'bg-gray-100 text-gray-900': selectedItem === 'gpt-3.5-turbo', 'text-gray-700': selectedItem !== 'gpt-3.5-turbo' })">
-          GPT-3.5-Turbo
-        </a>
         <a href="#" (click)="onMenuItemClick('gpt-4o', $event)" class="block px-4 py-2 text-sm"
            [ngClass]="classNames({ 'bg-gray-100 text-gray-900': selectedItem === 'gpt-4o', 'text-gray-700': selectedItem !== 'gpt-4o' })">
           GPT-4o

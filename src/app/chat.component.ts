@@ -1,5 +1,5 @@
 import { Component, OnInit } from "@angular/core";
-import { Chat, ChatService, Message } from "./services/chat.service";
+import { Chat, ChatService, Message, AVAILABLE_MODELS } from "./services/chat.service";
 
 @Component({
   selector: "app-chat",
@@ -81,7 +81,9 @@ export class ChatComponent implements OnInit {
     mode: "oai",
     deactivated: false,
     product_id: null,
-    model: "gpt-4o-mini",
+    folder_id: null,
+    system_prompt: "",
+    model: AVAILABLE_MODELS.GPT_4O_MINI,
     title: "",
     date: new Date(),
     messages: [],

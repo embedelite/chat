@@ -6,7 +6,7 @@ import {
   Output,
   ViewChild,
 } from "@angular/core";
-import { Chat, Message } from "./services/chat.service";
+import { AVAILABLE_MODELS, Chat, Message } from "./services/chat.service";
 import { StorageService } from "./services/storage.service";
 
 @Component({
@@ -49,8 +49,10 @@ export class ChatAreaComponent {
       title: "",
       mode: "oai",
       deactivated: false,
+      folder_id: null,
+      system_prompt: "",
       product_id: null,
-      model: "gpt-3.5-turbo",
+      model: AVAILABLE_MODELS.GPT_4O_MINI,
       date: new Date(),
       messages: [],
     };

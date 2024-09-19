@@ -4,6 +4,8 @@ import { CommonModule } from '@angular/common'; // Import CommonModule
 
 import { AppComponent } from "./app.component";
 import { ChatInputComponent } from "./chat-input.component";
+import { FolderSettingsComponent } from "./folder-settings.component";
+import { AccordionComponent } from "./accordion.component";
 import { BotMessageComponent } from "./bot-message.component";
 import { DropDownComponent } from './drop-down.component';
 import { ChatAreaComponent } from "./chat-area.component";
@@ -22,11 +24,14 @@ import { HttpClientModule } from "@angular/common/http";
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { ServiceWorkerModule } from '@angular/service-worker';
 import { MarkdownModule } from "ngx-markdown";
+import { F } from "@tauri-apps/api/path-c062430b";
 
 @NgModule({
   declarations: [
     AppComponent,
     BotMessageComponent,
+    AccordionComponent,
+    FolderSettingsComponent,
     ChatComponent,
     ChatInputComponent,
     ChatAreaComponent,
