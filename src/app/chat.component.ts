@@ -14,7 +14,6 @@ import { Chat, ChatService, Message } from "./services/chat.service";
         <ng-container>
           <div class="flex flex-col flex-grow">
             <app-chat-area
-              (click)="closeSidebar()"
               class="overflow-y-auto p-4 bg-white dark:bg-gray-800 flex-grow"
               [chat]="currentChat"
               [layout]="'centered'"
@@ -99,7 +98,7 @@ export class ChatComponent implements OnInit {
 
   ngOnInit() {
     this.chatService.currentVisibility.subscribe(
-      (state) => (this.currentVisibility = state)
+      (state) => (this.currentVisibility = state),
     );
   }
 
@@ -121,7 +120,7 @@ export class ChatComponent implements OnInit {
       this.currentChat.id,
       config.mode,
       config.model,
-      config.product_id
+      config.product_id,
     );
   }
 
@@ -131,15 +130,8 @@ export class ChatComponent implements OnInit {
       msgInfo.message,
       msgInfo.mode,
       msgInfo.model,
-      msgInfo.product_id
+      msgInfo.product_id,
     );
-  }
-
-  closeSidebar() {
-    // Check if we are on a mobile device by window width
-    if (window.innerWidth <= 767) {
-      this.chatService.toggleChatsVisibility();
-    }
   }
 
   handleMessageEdit(updatedMessage: Message): void {

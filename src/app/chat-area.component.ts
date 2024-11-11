@@ -26,7 +26,7 @@ import { StorageService } from "./services/storage.service";
             [message]="message.text"
             [links]="message.links"
             [layout]="layout"
-	    [type]="message.type"
+            [type]="message.type"
             (openViewer)="openViewer.emit($event)"
           ></app-bot-message>
         </ng-container>
@@ -42,7 +42,6 @@ export class ChatAreaComponent {
   @Output() messageEdited = new EventEmitter<Message>();
   @ViewChild("msgcontainer") chatArea!: ElementRef;
 
-  //@ViewChild("chatArea") private chatArea!: ElementRef;
   constructor(private storageService: StorageService) {
     this.chat = {
       id: "",
@@ -50,7 +49,7 @@ export class ChatAreaComponent {
       mode: "oai",
       deactivated: false,
       product_id: null,
-      model: "gpt-3.5-turbo",
+      model: "gpt-4o",
       date: new Date(),
       messages: [],
     };
