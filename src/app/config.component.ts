@@ -174,14 +174,17 @@ export class ConfigComponent implements OnInit {
         | "gpt-4-turbo-preview"
         | "gpt-4o"
         | "gpt-4o-mini"
-      >("default_model") || "";
-    const isDarkMode = this.detectDarkMode();
+      >("default_model") || "gpt-4o";
+
+    if (!this.storageService.getItem("default_model")) {
+      this.storageService.setItem("default_model", "gpt-4o");
+    }
 
     this.configForm = this.fb.group({
       ee_api_key: [ee_api_key, Validators.required],
       oai_api_key: [oai_api_key, Validators.required],
       defaultModel: [defaultModel],
-      isDarkMode: [isDarkMode],
+      isDarkMode: [this.detectDarkMode()],
     });
   }
 

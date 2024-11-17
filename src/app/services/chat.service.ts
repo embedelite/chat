@@ -135,7 +135,7 @@ export class ChatService {
         | "gpt-4-turbo-preview"
         | "gpt-4o"
         | "gpt-4o-mini"
-      >("default_model") ?? "gpt-4";
+      >("default_model") ?? "gpt-4o";
 
     let newChat: Chat = {
       id: this.generateId(),
@@ -149,6 +149,7 @@ export class ChatService {
     };
     this.chats.unshift(newChat);
     this.storageService.setItem("chats", this.chats);
+
     return newChat;
   }
 
