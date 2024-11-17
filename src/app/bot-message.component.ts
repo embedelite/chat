@@ -77,7 +77,7 @@ import { ChatService } from "./services/chat.service";
             <i class="fas fa-times"></i>
           </button>
         </div>
-        <img src="{{ message }}" alt="Bot Image" class="rounded-lg max-w-2" />
+        <img src="{{ message }}" alt="Bot Image" class="rounded-lg" />
       </div>
     </div>
   `,
