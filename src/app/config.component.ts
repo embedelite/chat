@@ -79,10 +79,10 @@ import { ThemeService } from "./services/theme.service";
               </label>
             </div>
             <!-- Buttons -->
+            <!-- Previous template content... -->
             <div class="flex justify-between">
               <div>
                 <button
-                  *ngIf="configForm.dirty"
                   type="button"
                   class="w-40 text-white bg-red-500 hover:bg-red-800 focus:ring-4 focus:outline-none focus:ring-red-300 font-medium rounded-lg text-sm px-10 py-3 mt-4 text-center dark:bg-red-600 dark:hover:bg-red-700 dark:focus:ring-red-800"
                   (click)="closeConfig()"
@@ -94,11 +94,29 @@ import { ThemeService } from "./services/theme.service";
               <div>
                 <button
                   type="button"
-                  class="w-40 primary-btn px-10 py-3 mt-4"
+                  [ngClass]="{
+                    'opacity-50 cursor-not-allowed':
+                      !configForm.dirty && !showSaveAnimation,
+                    'cursor-default': showSaveAnimation,
+                  }"
+                  class="w-40 primary-btn px-10 py-3 mt-4 relative overflow-hidden transition-all duration-200"
                   (click)="saveConfig()"
-                  [disabled]="!configForm.dirty"
+                  [disabled]="!configForm.dirty || showSaveAnimation"
                 >
-                  Save
+                  <span
+                    class="inline-flex items-center transition-all duration-200"
+                    [ngClass]="{ 'opacity-0': showSaveAnimation }"
+                  >
+                    Save
+                  </span>
+                  <span
+                    *ngIf="showSaveAnimation"
+                    class="absolute inset-0 flex items-center justify-center"
+                  >
+                    <i
+                      class="fas fa-check text-white transform scale-125 animate-success"
+                    ></i>
+                  </span>
                 </button>
               </div>
             </div>
@@ -107,10 +125,33 @@ import { ThemeService } from "./services/theme.service";
       </div>
     </div>
   `,
-  styles: [],
+
+  styles: [
+    `
+      @keyframes success-animation {
+        0% {
+          transform: scale(0);
+          opacity: 0;
+        }
+        50% {
+          transform: scale(1.5);
+          opacity: 0.7;
+        }
+        100% {
+          transform: scale(1);
+          opacity: 1;
+        }
+      }
+
+      .animate-success {
+        animation: success-animation 0.5s ease-out forwards;
+      }
+    `,
+  ],
 })
 export class ConfigComponent implements OnInit {
   @Output() showConfig = new EventEmitter<boolean>();
+  showSaveAnimation = false;
 
   configForm: FormGroup = new FormGroup({});
 
@@ -119,7 +160,7 @@ export class ConfigComponent implements OnInit {
     private storageService: StorageService,
     private themeService: ThemeService,
     private fb: FormBuilder,
-    private router: Router
+    private router: Router,
   ) {}
 
   ngOnInit() {
@@ -128,7 +169,11 @@ export class ConfigComponent implements OnInit {
       this.storageService.getItem<string>("oai_api_key") || "";
     const defaultModel =
       this.storageService.getItem<
-        "gpt-3.5-turbo" | "gpt-4" | "gpt-4-turbo-preview" | "gpt-4o" | "gpt-4o-mini"
+        | "gpt-3.5-turbo"
+        | "gpt-4"
+        | "gpt-4-turbo-preview"
+        | "gpt-4o"
+        | "gpt-4o-mini"
       >("default_model") || "";
     const isDarkMode = this.detectDarkMode();
 
@@ -151,21 +196,25 @@ export class ConfigComponent implements OnInit {
   }
 
   saveConfig() {
+    this.showSaveAnimation = true;
     this.storageService.setItem(
       "oai_api_key",
-      this.configForm.get("oai_api_key")?.value
+      this.configForm.get("oai_api_key")?.value,
     );
     this.storageService.setItem(
       "ee_api_key",
-      this.configForm.get("ee_api_key")?.value
+      this.configForm.get("ee_api_key")?.value,
     );
     this.storageService.setItem(
       "default_model",
-      this.configForm.get("defaultModel")?.value
+      this.configForm.get("defaultModel")?.value,
     );
     this.toggleDarkMode();
     this.chatService.updateProducts(this.configForm.get("ee_api_key")?.value);
-    this.showConfig.emit(false);
+
+    setTimeout(() => {
+      this.showSaveAnimation = false;
+    }, 800); // Match this with animation duration
   }
 
   closeConfig() {
