@@ -30,10 +30,10 @@ import { DropDownComponent } from "./drop-down.component";
       ></textarea>
       <!-- The send button -->
       <div class="inline-flex rounded-md shadow-sm" role="group">
-        <app-drop-down 
-	  #appdropdown
-	  (menuItemClick)="handleMenuItemClick($event)"
-          selectedModel="this.model"
+        <app-drop-down
+          #appdropdown
+          [selectedModel]="model"
+          (menuItemClick)="handleMenuItemClick($event)"
         ></app-drop-down>
         <button
           class="flex items-center justify-center w-12 h-11 rounded-r-lg bg-primary-500 hover:bg-primary-600 focus:outline-none focus:ring-2 focus:ring-primary-700 focus:ring-offset-2"
@@ -66,8 +66,13 @@ import { DropDownComponent } from "./drop-down.component";
 })
 export class ChatInputComponent {
   @Input() mode: "ee" | "oai" = "ee";
-  @Input() model: "gpt-3.5-turbo" | "gpt-4" | "gpt-4-turbo-preview" | "gpt-4o" | "gpt-4o-mini" | "dalle3" =
-    "gpt-4o";
+  @Input() model:
+    | "gpt-3.5-turbo"
+    | "gpt-4"
+    | "gpt-4-turbo-preview"
+    | "gpt-4o"
+    | "gpt-4o-mini"
+    | "dalle3" = "gpt-4o";
   @Input() product_id: string | null = null;
   @Input() deactivated: boolean = false;
   @Output() openViewer = new EventEmitter<string>();
@@ -91,14 +96,16 @@ export class ChatInputComponent {
 
   products: Product[] = [];
 
-  constructor(private productService: ProductService, private chatService: ChatService) {
+  constructor(
+    private productService: ProductService,
+    private chatService: ChatService,
+  ) {
     this.chatService.currentChat.subscribe((chat) => {
       this.currentChat = chat;
       console.log(this.currentChat);
       this.mode = chat.mode;
       this.model = chat.model;
-      this.dropDown.changeModel(this.model);
-      
+
       // update the drop down with the current model
     });
     this.message = "";
@@ -126,7 +133,7 @@ export class ChatInputComponent {
     if (
       this.product_id &&
       !["vat-rules-fr", "vat-rules-de", "vat-rules-es"].includes(
-        this.product_id
+        this.product_id,
       )
     ) {
       this.showExtraProduct = true;
