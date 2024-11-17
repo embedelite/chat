@@ -8,6 +8,7 @@ import {
   OnInit,
 } from "@angular/core";
 import { Clipboard } from "@angular/cdk/clipboard";
+import { ChatService } from "./services/chat.service";
 
 @Component({
   selector: "app-bot-message",
@@ -15,8 +16,23 @@ import { Clipboard } from "@angular/cdk/clipboard";
     <div class="flex items-end mb-4 space-x-2">
       <div
         *ngIf="type === 'text'"
-        class="px-4 py-2 text-white bg-primary-600 dark:bg-primary-500 rounded-lg w-fit max-w-[min(90%,800px)]"
+        class="relative px-4 py-2 text-white bg-primary-600 dark:bg-primary-500 rounded-lg w-fit max-w-[min(90%,800px)]"
       >
+        <div
+          *ngIf="isLoading$ | async"
+          class="absolute -top-3 -right-3 flex items-center space-x-2 bg-primary-700 dark:bg-primary-600 rounded-full px-2 py-1"
+        >
+          <!-- Spinner -->
+          <i class="fas fa-spinner fa-spin text-sm"></i>
+          <!-- Cancel Button -->
+          <button
+            (click)="cancelResponse()"
+            class="hover:text-gray-300 transition-colors duration-200"
+            title="Cancel response"
+          >
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
         <ng-container *ngFor="let block of parsedBlocks">
           <markdown
             [data]="block.content"
@@ -45,8 +61,22 @@ import { Clipboard } from "@angular/cdk/clipboard";
       </div>
       <div
         *ngIf="type === 'image'"
-        class="bg-primary-600 dark:bg-primary-500 rounded-lg max-w-[30%]"
+        class="relative bg-primary-600 dark:bg-primary-500 rounded-lg max-w-[30%]"
       >
+        <!-- Loading Controls for Image -->
+        <div
+          *ngIf="isLoading$ | async"
+          class="absolute -top-3 -right-3 flex items-center space-x-2 bg-primary-700 dark:bg-primary-600 rounded-full px-2 py-1"
+        >
+          <i class="fas fa-spinner fa-spin text-sm"></i>
+          <button
+            (click)="cancelResponse()"
+            class="hover:text-gray-300 transition-colors duration-200"
+            title="Cancel response"
+          >
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
         <img src="{{ message }}" alt="Bot Image" class="rounded-lg max-w-2" />
       </div>
     </div>
@@ -90,8 +120,12 @@ export class BotMessageComponent implements OnInit, OnChanges {
   @Output() openViewer = new EventEmitter<string>();
   parsedBlocks: Array<{ content: string; isCode: boolean; language?: string }> =
     [];
+  isLoading$ = this.chatService.isLoading$;
 
-  constructor(private clipboard: Clipboard) {
+  constructor(
+    private clipboard: Clipboard,
+    private chatService: ChatService,
+  ) {
     this.message = "";
     this.messageCopy = "";
     this.links = [];
@@ -144,5 +178,9 @@ export class BotMessageComponent implements OnInit, OnChanges {
   copyCode(code: string) {
     this.clipboard.copy(code);
     // Optionally, you can add a toast notification here to indicate successful copy
+  }
+
+  cancelResponse() {
+    this.chatService.cancelCurrentResponse();
   }
 }
