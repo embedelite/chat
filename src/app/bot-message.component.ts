@@ -58,7 +58,7 @@ import { Clipboard } from "@angular/cdk/clipboard";
         line-height: 1.25rem;
         overflow-wrap: break-word;
         word-wrap: break-word;
-        word-break: break-all;
+        word-break: normal;
       }
       ::ng-deep .markdown-content p {
         margin-bottom: 0.5rem;
